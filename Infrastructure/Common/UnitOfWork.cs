@@ -8,6 +8,8 @@ namespace Infrastructure.Common
     {
         private readonly IApplicationDbContext _context;
         private ITableRepository _tableRepository;
+        private ICategoryRepository _categoryRepository;
+        private IFoodRepository _foodRepository;
 
         public UnitOfWork(IApplicationDbContext context)
         {
@@ -24,6 +26,29 @@ namespace Infrastructure.Common
                 return _tableRepository;
             }
         }
+        public IFoodRepository FoodRepository
+        {
+            get
+            {
+                if (_foodRepository is null)
+                {
+                    _foodRepository = new FoodRepository(_context);
+                }
+                return _foodRepository;
+            }
+        }
+        public ICategoryRepository CategoryRepository
+        {
+            get
+            {
+                if (_categoryRepository is null)
+                {
+                    _categoryRepository = new CategoryRepository(_context);
+                }
+                return _categoryRepository;
+            }
+        }
+
         public async Task CompleteAsync(CancellationToken cancellationToken) => await _context.SaveChangesAsync(cancellationToken);
         public void Dispose() => _context.Dispose();
     }

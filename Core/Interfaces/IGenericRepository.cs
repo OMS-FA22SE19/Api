@@ -9,7 +9,7 @@ namespace Core.Interfaces
         Task<bool> DeleteAsync(TEntity entityToDelete);
         Task<bool> DeleteAsync(object id);
         Task<PaginatedList<TEntity>> GetPaginatedListAsync(
-            Expression<Func<TEntity, bool>> filter = null,
+            List<Expression<Func<TEntity, bool>>> filter = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             string includeProperties = "",
             int pageIndex = 1,

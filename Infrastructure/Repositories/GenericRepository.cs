@@ -18,7 +18,7 @@ namespace Infrastructure.Repositories
         }
 
         public virtual async Task<PaginatedList<TEntity>> GetPaginatedListAsync(
-            Expression<Func<TEntity, bool>> filter = null,
+            List<Expression<Func<TEntity, bool>>> filters = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             string includeProperties = "",
             int pageIndex = 1,
@@ -27,9 +27,12 @@ namespace Infrastructure.Repositories
             IQueryable<TEntity> query = _dbSet;
 
 
-            if (filter != null)
+            if (filters is not null && filters.Any())
             {
-                query = query.Where(filter);
+                foreach (var filter in filters)
+                {
+                    query = query.Where(filter);
+                }
             }
 
             foreach (var includeProperty in includeProperties.Split
