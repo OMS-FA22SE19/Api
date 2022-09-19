@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Infrastructure.Persistence
 {
-    public class ApplicationDbContextInitialiser
+    public sealed class ApplicationDbContextInitialiser
     {
         private readonly ILogger<ApplicationDbContextInitialiser> _logger;
         private readonly ApplicationDbContext _context;

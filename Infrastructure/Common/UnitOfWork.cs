@@ -1,15 +1,12 @@
-﻿using Core.Common.Interfaces;
-using Core.Interfaces;
-using Infrastructure.Repositories;
-
-namespace Infrastructure.Common
+﻿namespace Infrastructure.Common
 {
-    public class UnitOfWork : IUnitOfWork, IDisposable
+    public sealed class UnitOfWork : IUnitOfWork, IDisposable
     {
         private readonly IApplicationDbContext _context;
         private ITableRepository _tableRepository;
         private ICategoryRepository _categoryRepository;
         private IFoodRepository _foodRepository;
+        private IFoodCategoryRepository _foodCategoryRepository;
 
         public UnitOfWork(IApplicationDbContext context)
         {
@@ -46,6 +43,17 @@ namespace Infrastructure.Common
                     _categoryRepository = new CategoryRepository(_context);
                 }
                 return _categoryRepository;
+            }
+        }
+        public IFoodCategoryRepository FoodCategoryRepository
+        {
+            get
+            {
+                if (_foodCategoryRepository is null)
+                {
+                    _foodCategoryRepository = new FoodCategoryRepository(_context);
+                }
+                return _foodCategoryRepository;
             }
         }
 

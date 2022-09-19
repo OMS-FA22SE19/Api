@@ -4,7 +4,7 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public class TableRepository : GenericRepository<Table>, ITableRepository
+    public sealed class TableRepository : GenericRepository<Table>, ITableRepository
     {
         public TableRepository(IApplicationDbContext context) : base(context)
         {

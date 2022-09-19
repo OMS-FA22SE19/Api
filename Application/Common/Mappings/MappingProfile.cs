@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Application.Common.Mappings
 {
-    public class MappingProfile : Profile
+    public sealed class MappingProfile : Profile
     {
         public MappingProfile()
         {

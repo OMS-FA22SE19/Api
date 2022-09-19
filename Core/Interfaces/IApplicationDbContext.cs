@@ -8,9 +8,9 @@ namespace Core.Common.Interfaces
     {
         DbSet<Category> Categories { get; }
         DbSet<Food> Foods { get; }
-        //DbSet<FoodCategory> FoodCategories { get; }
+        DbSet<FoodCategory> FoodCategories { get; }
         DbSet<Menu> Menus { get; }
-        //DbSet<MenuFood> MenuFoods { get; }
+        DbSet<MenuFood> MenuFoods { get; }
         DbSet<Order> Orders { get; }
         DbSet<OrderDetail> OrderDetails { get; }
         DbSet<Reservation> Reservations { get; }

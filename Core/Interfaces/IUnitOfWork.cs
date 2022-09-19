@@ -3,8 +3,9 @@
     public interface IUnitOfWork
     {
         ITableRepository TableRepository { get; }
-        public IFoodRepository FoodRepository { get; }
-        public ICategoryRepository CategoryRepository { get; }
+        IFoodRepository FoodRepository { get; }
+        ICategoryRepository CategoryRepository { get; }
+        IFoodCategoryRepository FoodCategoryRepository { get; }
         Task CompleteAsync(CancellationToken cancellationToken);
     }
 }

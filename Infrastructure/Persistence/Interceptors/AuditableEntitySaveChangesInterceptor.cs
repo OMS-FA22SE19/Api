@@ -53,8 +53,11 @@ namespace Infrastructure.Persistence.Interceptors
 
                 if (entry.State == EntityState.Deleted)
                 {
-                    entry.State = EntityState.Modified;
-                    entry.Entity.IsDeleted = true;
+                    if (!entry.Entity.IsDeleted)
+                    {
+                        entry.State = EntityState.Modified;
+                        entry.Entity.IsDeleted = true;
+                    }
                 }
             }
         }
