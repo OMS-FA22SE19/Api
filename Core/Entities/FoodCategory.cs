@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Core.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace Core.Entities
 {
-    public sealed class FoodCategory
+    public sealed class FoodCategory : Entity
     {
         [Required]
         public int FoodId { get; set; }

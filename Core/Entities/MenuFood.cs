@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Core.Common;
+using System.ComponentModel.DataAnnotations;
 
 namespace Core.Entities
 {
-    public sealed class MenuFood
+    public sealed class MenuFood : Entity
     {
         [Key]
         public int Id { get; set; }

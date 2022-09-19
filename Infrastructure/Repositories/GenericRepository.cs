@@ -2,13 +2,12 @@
 using Core.Common;
 using Core.Common.Interfaces;
 using Core.Interfaces;
-using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories
 {
-    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseEntity
+    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : Entity
     {
         internal IApplicationDbContext _context;
         internal DbSet<TEntity> _dbSet;
@@ -18,7 +17,7 @@ namespace Infrastructure.Repositories
         }
 
         public virtual async Task<PaginatedList<TEntity>> GetPaginatedListAsync(
-            Expression<Func<TEntity, bool>> filter = null,
+            List<Expression<Func<TEntity, bool>>> filters = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             string includeProperties = "",
             int pageIndex = 1,
@@ -27,9 +26,12 @@ namespace Infrastructure.Repositories
             IQueryable<TEntity> query = _dbSet;
 
 
-            if (filter != null)
+            if (filters is not null && filters.Any())
             {
-                query = query.Where(filter);
+                foreach (var filter in filters)
+                {
+                    query = query.Where(filter);
+                }
             }
 
             foreach (var includeProperty in includeProperties.Split
@@ -48,8 +50,16 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public virtual async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> expression)
-            => await _dbSet.FirstOrDefaultAsync(expression);
+        public virtual async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> expression, string includeProperties = "")
+        {
+            IQueryable<TEntity> query = _dbSet;
+            foreach (var includeProperty in includeProperties.Split
+                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                query = query.Include(includeProperty);
+            }
+            return await query.FirstOrDefaultAsync(expression);
+        }
 
         public virtual async Task<TEntity> InsertAsync(TEntity entity)
         {
@@ -57,31 +67,34 @@ namespace Infrastructure.Repositories
             return await Task.FromResult(entity);
         }
 
-        public virtual async Task<bool> DeleteAsync(object id)
+        public virtual async Task<bool> DeleteAsync(Expression<Func<TEntity, bool>> expression)
         {
-            TEntity entityToDelete = await _dbSet.FindAsync(id);
-            if (entityToDelete != null)
+            var entitiesToDelete = await _dbSet.Where(expression).ToListAsync();
+            if (entitiesToDelete != null)
             {
-                await DeleteAsync(entityToDelete);
+                await DeleteAsync(entitiesToDelete);
             }
             return await Task.FromResult(true);
         }
 
-        public virtual async Task<bool> DeleteAsync(TEntity entityToDelete)
+        public virtual async Task<bool> DeleteAsync(IList<TEntity> entitiesToDelete)
         {
-            if (_context.Entry(entityToDelete).State == EntityState.Detached)
+            foreach (TEntity entity in entitiesToDelete)
             {
-                _dbSet.Attach(entityToDelete);
+                if (_context.Entry(entity).State == EntityState.Detached)
+                {
+                    _dbSet.Attach(entity);
+                }
             }
-            _dbSet.Remove(entityToDelete);
+            _dbSet.RemoveRange(entitiesToDelete);
             return await Task.FromResult(true);
         }
 
-        public virtual Task UpdateAsync(TEntity entityToUpdate)
+        public virtual async Task<TEntity> UpdateAsync(TEntity entityToUpdate)
         {
             _dbSet.Attach(entityToUpdate);
             _context.Entry(entityToUpdate).State = EntityState.Modified;
-            return Task.FromResult(entityToUpdate);
+            return await Task.FromResult(entityToUpdate);
         }
     }
 }
