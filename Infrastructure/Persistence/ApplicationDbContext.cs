@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Infrastructure.Persistence
 {
-    public class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, IApplicationDbContext, IDisposable
+    public sealed class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, IApplicationDbContext, IDisposable
     {
         private readonly IMediator _mediator;
         private readonly AuditableEntitySaveChangesInterceptor _auditableEntitySaveChangesInterceptor;
@@ -29,9 +29,9 @@ namespace Infrastructure.Persistence
 
         public DbSet<Category> Categories => Set<Category>();
         public DbSet<Food> Foods => Set<Food>();
-        //public DbSet<FoodCategory> FoodCategories => Set<FoodCategory>();
+        public DbSet<FoodCategory> FoodCategories => Set<FoodCategory>();
         public DbSet<Menu> Menus => Set<Menu>();
-        //public DbSet<MenuFood> MenuFoods => Set<MenuFood>();
+        public DbSet<MenuFood> MenuFoods => Set<MenuFood>();
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
         public DbSet<Reservation> Reservations => Set<Reservation>();

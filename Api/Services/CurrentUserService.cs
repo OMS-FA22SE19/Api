@@ -3,7 +3,7 @@ using System.Security.Claims;
 
 namespace Api.Services
 {
-    public class CurrentUserService : ICurrentUserService
+    public sealed class CurrentUserService : ICurrentUserService
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
