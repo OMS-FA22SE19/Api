@@ -10,13 +10,13 @@ using System.Linq.Expressions;
 
 namespace Application.Foods.Queries
 {
-    public class GetFoodWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<FoodDto>>>
+    public sealed class GetFoodWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<FoodDto>>>
     {
         public new FoodProperty? OrderBy { get; init; }
         public bool? Available { get; init; }
     }
 
-    public class GetFoodWithPaginationQueryHandler : IRequestHandler<GetFoodWithPaginationQuery, Response<PaginatedList<FoodDto>>>
+    public sealed class GetFoodWithPaginationQueryHandler : IRequestHandler<GetFoodWithPaginationQuery, Response<PaginatedList<FoodDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
