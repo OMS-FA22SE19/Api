@@ -1,4 +1,5 @@
-﻿using Application.Foods.Commands;
+﻿using Application.Categories.Response;
+using Application.Foods.Commands;
 using Application.Foods.Queries;
 using Application.Foods.Response;
 using Application.Models;
@@ -110,7 +111,11 @@ namespace Api.Controllers.V1
                 }
                 if (id != command.Id)
                 {
-                    return BadRequest();
+                    var response = new Response<CategoryDto>("The Id do not match")
+                    {
+                        StatusCode = HttpStatusCode.BadRequest
+                    };
+                    return StatusCode((int)response.StatusCode, response);
                 }
 
                 var result = await Mediator.Send(command);
