@@ -8,6 +8,8 @@ using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
+using Core.Enums;
+using Application.Reservations.Response;
 
 namespace Application.Reservations.Commands
 {
@@ -15,22 +17,18 @@ namespace Application.Reservations.Commands
     {
         [Required]
         [StringLength(1000, MinimumLength = 5)]
-        public string Name { get; set; }
+        public string UserId { get; set; }
         [Required]
-        [StringLength(4000, MinimumLength = 5)]
-        public string Description { get; set; }
+        public int TableId { get; set; }
         [Required]
-        [StringLength(2000, MinimumLength = 5)]
-        public string Ingredient { get; set; }
-        public bool Available { get; set; } = true;
-        [StringLength(2048, MinimumLength = 5)]
-        public string PictureUrl { get; set; }
+        public DateTime Date { get; set; }
+        [Required]
+        public ReservationStatus Status { get; set; }
+        public bool IsPriorFoodOrder { get; set; }
 
-        public IList<CategoryDto>? Categories { get; set; }
         public void Mapping(Profile profile)
         {
-            profile.CreateMap<CreateReservationCommand, Reservation>()
-                .ForSourceMember(dto => dto.Categories, opt => opt.DoNotValidate());
+            profile.CreateMap<CreateReservationCommand, Reservation>();
         }
     }
 
@@ -47,7 +45,19 @@ namespace Application.Reservations.Commands
 
         public async Task<Response<ReservationDto>> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
         {
-            return null;
+            var entity = _mapper.Map<Reservation>(request);
+
+            var result = await _unitOfWork.ReservationRepository.InsertAsync(entity);
+            await _unitOfWork.CompleteAsync(cancellationToken);
+            if (result is null)
+            {
+                return new Response<ReservationDto>("error");
+            }
+            var mappedResult = _mapper.Map<ReservationDto>(result);
+            return new Response<ReservationDto>(mappedResult)
+            {
+                StatusCode = System.Net.HttpStatusCode.Created
+            };
         }
     }
 }
