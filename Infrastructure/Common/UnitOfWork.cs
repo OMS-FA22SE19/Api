@@ -1,4 +1,8 @@
-﻿namespace Infrastructure.Common
+﻿using Core.Common.Interfaces;
+using Core.Interfaces;
+using Infrastructure.Repositories;
+
+namespace Infrastructure.Common
 {
     public sealed class UnitOfWork : IUnitOfWork, IDisposable
     {
