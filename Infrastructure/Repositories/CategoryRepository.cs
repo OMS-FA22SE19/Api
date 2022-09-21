@@ -4,7 +4,7 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public class CategoryRepository : GenericRepository<Category>, ICategoryRepository
+    public sealed class CategoryRepository : GenericRepository<Category>, ICategoryRepository
     {
         public CategoryRepository(IApplicationDbContext context) : base(context)
         {

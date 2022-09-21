@@ -4,7 +4,7 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public class FoodRepository : GenericRepository<Food>, IFoodRepository
+    public sealed class FoodRepository : GenericRepository<Food>, IFoodRepository
     {
         public FoodRepository(IApplicationDbContext context) : base(context)
         {
