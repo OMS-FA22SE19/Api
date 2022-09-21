@@ -18,8 +18,6 @@ namespace Application.Tables.Commands
         [Required]
         public int NumOfSeats { get; set; }
         [Required]
-        public TableStatus Status { get; set; }
-        [Required]
         public TableType Type { get; set; }
 
         public void Mapping(Profile profile)
@@ -42,7 +40,7 @@ namespace Application.Tables.Commands
         public async Task<Response<TableDto>> Handle(CreateTableCommand request, CancellationToken cancellationToken)
         {
             var entity = _mapper.Map<Table>(request);
-            
+            entity.Status = TableStatus.Available;
             var result = await _unitOfWork.TableRepository.InsertAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
