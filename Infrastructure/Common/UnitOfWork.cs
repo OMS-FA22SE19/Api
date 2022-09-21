@@ -8,6 +8,7 @@ namespace Infrastructure.Common
     {
         private readonly IApplicationDbContext _context;
         private ITableRepository _tableRepository;
+        private IReservationRepository _reservationRepository;
         private ICategoryRepository _categoryRepository;
         private IFoodRepository _foodRepository;
         private IFoodCategoryRepository _foodCategoryRepository;
@@ -25,6 +26,17 @@ namespace Infrastructure.Common
                     _tableRepository = new TableRepository(_context);
                 }
                 return _tableRepository;
+            }
+        }
+        public IReservationRepository ReservationRepository
+        {
+            get
+            {
+                if (_reservationRepository is null)
+                {
+                    _reservationRepository = new ReservationRepository(_context);
+                }
+                return _reservationRepository;
             }
         }
         public IFoodRepository FoodRepository

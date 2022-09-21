@@ -2,6 +2,7 @@
 using Core.Common.Interfaces;
 using Core.Entities;
 using Core.Interfaces;
+using EntityFrameworkCore.UseRowNumberForPaging;
 using Infrastructure.Common;
 using Infrastructure.Identity;
 using Infrastructure.Persistence;
@@ -23,7 +24,10 @@ namespace Infrastructure
 
             services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
-                        builder => builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName))
+                        builder => {
+                            builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
+                            builder.UseRowNumberForPaging();
+                        })
                     .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
             services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
