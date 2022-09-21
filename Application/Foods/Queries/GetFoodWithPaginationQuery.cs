@@ -52,6 +52,14 @@ namespace Application.Foods.Queries
                     }
                     orderBy = e => e.OrderBy(x => x.Name);
                     break;
+                case (FoodProperty.Description):
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.Description);
+                        break;
+                    }
+                    orderBy = e => e.OrderBy(x => x.Description);
+                    break;
                 case (FoodProperty.Ingredient):
                     if (request.IsDescending)
                     {
