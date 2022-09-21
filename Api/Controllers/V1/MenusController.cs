@@ -1,6 +1,7 @@
-﻿using Application.Categories.Commands;
-using Application.Categories.Queries;
-using Application.Categories.Response;
+﻿using Application.Categories.Response;
+using Application.Menus.Commands;
+using Application.Menus.Queries;
+using Application.Menus.Response;
 using Application.Models;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
@@ -10,13 +11,13 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public sealed class CategoriesController : ApiControllerBase
+    public sealed class MenusController : ApiControllerBase
     {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetCategoryWithPaginationQuery query)
+        public async Task<IActionResult> GetAsync([FromQuery] GetMenuWithPaginationQuery query)
         {
             try
             {
@@ -30,7 +31,28 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<PaginatedList<CategoryDto>>(ex.Message)
+                var response = new Response<PaginatedList<MenuDto>>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        [HttpGet("Available")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAvailableAsync([FromQuery] GetAvailableMenuQuery query)
+        {
+            try
+            {
+                var result = await Mediator.Send(query);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<PaginatedList<MenuDto>>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -52,7 +74,7 @@ namespace Api.Controllers.V1
                     return BadRequest();
                 }
 
-                var query = new GetCategoryWithIdQuery()
+                var query = new GetMenuWithIdQuery()
                 {
                     Id = id
                 };
@@ -62,7 +84,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<CategoryDto>(ex.Message)
+                var response = new Response<MenuDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -74,7 +96,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateCategoryCommand command)
+        public async Task<IActionResult> PostAsync([FromBody] CreateMenuCommand command)
         {
             try
             {
@@ -88,7 +110,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<CategoryDto>(ex.Message)
+                var response = new Response<MenuDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -96,11 +118,11 @@ namespace Api.Controllers.V1
             }
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromBody] UpdateCategoryCommand command)
+        public async Task<IActionResult> PutAsync(int id, [FromBody] UpdateMenuCommand command)
         {
             try
             {
@@ -108,7 +130,6 @@ namespace Api.Controllers.V1
                 {
                     return BadRequest();
                 }
-
                 if (id != command.Id)
                 {
                     var response = new Response<CategoryDto>("The Id do not match")
@@ -127,7 +148,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<CategoryDto>(ex.Message)
+                var response = new Response<MenuDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -143,7 +164,7 @@ namespace Api.Controllers.V1
         {
             try
             {
-                var command = new DeleteCategoryCommand
+                var command = new DeleteMenuCommand
                 {
                     Id = id
                 };
@@ -156,7 +177,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<CategoryDto>(ex.Message)
+                var response = new Response<MenuDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

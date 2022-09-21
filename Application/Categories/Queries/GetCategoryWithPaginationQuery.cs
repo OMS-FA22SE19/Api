@@ -13,7 +13,6 @@ namespace Application.Categories.Queries
     public sealed class GetCategoryWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<CategoryDto>>>
     {
         public new CategoryProperty? OrderBy { get; init; }
-        public bool? Available { get; init; }
     }
 
     public sealed class GetCategoryWithPaginationQueryHandler : IRequestHandler<GetCategoryWithPaginationQuery, Response<PaginatedList<CategoryDto>>>
@@ -35,7 +34,7 @@ namespace Application.Categories.Queries
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
-                filters.Add(e => e.Name.Contains(request.SearchValue) || e.Id.Equals(request.SearchValue));
+                filters.Add(e => e.Name.Contains(request.SearchValue) || request.SearchValue.Equals(e.Id));
             }
 
             switch (request.OrderBy)
