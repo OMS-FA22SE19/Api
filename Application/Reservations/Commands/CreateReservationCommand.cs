@@ -9,7 +9,8 @@ using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
 using Core.Enums;
-using Application.Reservations.Response;
+using Application.Tables.Response;
+using Microsoft.AspNetCore.Identity;
 
 namespace Application.Reservations.Commands
 {
@@ -19,11 +20,11 @@ namespace Application.Reservations.Commands
         [StringLength(1000, MinimumLength = 5)]
         public string UserId { get; set; }
         [Required]
-        public int TableId { get; set; }
-        [Required]
         public DateTime Date { get; set; }
         [Required]
-        public ReservationStatus Status { get; set; }
+        public int NumOfSeats { get; set; }
+        [Required]
+        public TableType tableType { get; set; }
         public bool IsPriorFoodOrder { get; set; }
 
         public void Mapping(Profile profile)
@@ -36,17 +37,40 @@ namespace Application.Reservations.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public CreateReservationCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public CreateReservationCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         public async Task<Response<ReservationDto>> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
         {
             var entity = _mapper.Map<Reservation>(request);
 
+            entity.Status = ReservationStatus.Reserved;
+
+            var TableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.tableType);
+            int TableId;
+            List<int> tableIds = new List<int>();
+            var random = new Random();
+            if (TableList.Count != 0)
+            {
+                foreach (Table table in TableList)
+                {
+                    tableIds.Add(table.Id);
+                }
+                int Index = random.Next(tableIds.Count);
+                TableId = tableIds[Index];
+            }
+            else
+            {
+                return new Response<ReservationDto>("There is no table available");
+            }
+
+            entity.TableId = TableId;
             var result = await _unitOfWork.ReservationRepository.InsertAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
