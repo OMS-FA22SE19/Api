@@ -43,8 +43,6 @@ namespace Application.Reservations.Queries
                 filters.Add(e => e.Status == request.Status);
             }
 
-            orderBy = e => e.OrderByDescending(x => x.Date);
-
             var result = await _unitOfWork.ReservationRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, request.PageIndex, request.PageSize);
             var mappedResult = _mapper.Map<PaginatedList<Reservation>, PaginatedList<ReservationDto>>(result);
             return new Response<PaginatedList<ReservationDto>>(mappedResult);

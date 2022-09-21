@@ -25,5 +25,26 @@ namespace Infrastructure.Repositories
 
             return await query.ToListAsync();
         }
+
+        public async Task<int> GetClosestNumOfSeatTable(int NumOfPeople)
+        {
+            IQueryable<Table> query = _dbSet;
+
+            query = query.Where(t => t.NumOfSeats >= NumOfPeople).OrderBy(t => t.NumOfSeats);
+
+            int NumOfSeats = query.FirstOrDefault().NumOfSeats;
+
+            return NumOfSeats;
+        }
+
+        public async Task<List<Table>> GetTableWithSeatsNumber(int NumOfSeats)
+        {
+            IQueryable<Table> query = _dbSet;
+
+            query = query.Where(t => t.NumOfSeats == NumOfSeats);
+
+            return await query.ToListAsync();
+        }
+
     }
 }

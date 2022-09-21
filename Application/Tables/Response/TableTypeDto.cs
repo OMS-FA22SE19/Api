@@ -6,16 +6,15 @@ using Core.Enums;
 
 namespace Application.Tables.Response
 {
-    public class TableDto : IMapFrom<Table>
+    public class TableTypeDto : IMapFrom<Table>
     {
-        public int Id { get; set; }
         public int NumOfSeats { get; set; }
-        public TableStatus Status { get; set; }
         public TableType Type { get; set; }
+        public int Total { get; set; }
 
         public void Mapping(Profile profile)
         {
-            profile.CreateMap<Table, TableDto>().ReverseMap();
+            profile.CreateMap<Table, TableTypeDto>().ReverseMap();
         }
     }
 }
