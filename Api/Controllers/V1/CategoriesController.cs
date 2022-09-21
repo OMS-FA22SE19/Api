@@ -1,6 +1,6 @@
-﻿using Application.Foods.Commands;
-using Application.Foods.Queries;
-using Application.Foods.Response;
+﻿using Application.Categories.Commands;
+using Application.Categories.Queries;
+using Application.Categories.Response;
 using Application.Models;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
@@ -10,13 +10,13 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public sealed class FoodsController : ApiControllerBase
+    public sealed class CategoriesController : ApiControllerBase
     {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetFoodWithPaginationQuery query)
+        public async Task<IActionResult> GetAsync([FromQuery] GetCategoryWithPaginationQuery query)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<PaginatedList<FoodDto>>(ex.Message)
+                var response = new Response<PaginatedList<CategoryDto>>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -52,7 +52,7 @@ namespace Api.Controllers.V1
                     return BadRequest();
                 }
 
-                var query = new GetFoodWithIdQuery()
+                var query = new GetCategoryWithIdQuery()
                 {
                     Id = id
                 };
@@ -62,7 +62,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<FoodDto>(ex.Message)
+                var response = new Response<CategoryDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -74,7 +74,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateFoodCommand command)
+        public async Task<IActionResult> PostAsync([FromBody] CreateCategoryCommand command)
         {
             try
             {
@@ -88,7 +88,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<FoodDto>(ex.Message)
+                var response = new Response<CategoryDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -96,11 +96,11 @@ namespace Api.Controllers.V1
             }
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("id")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromBody] UpdateFoodCommand command)
+        public async Task<IActionResult> PutAsync(int id, [FromBody] UpdateCategoryCommand command)
         {
             try
             {
@@ -108,6 +108,7 @@ namespace Api.Controllers.V1
                 {
                     return BadRequest();
                 }
+
                 if (id != command.Id)
                 {
                     return BadRequest();
@@ -122,7 +123,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<FoodDto>(ex.Message)
+                var response = new Response<CategoryDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -138,7 +139,7 @@ namespace Api.Controllers.V1
         {
             try
             {
-                var command = new DeleteFoodCommand
+                var command = new DeleteCategoryCommand
                 {
                     Id = id
                 };
@@ -151,7 +152,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<FoodDto>(ex.Message)
+                var response = new Response<CategoryDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

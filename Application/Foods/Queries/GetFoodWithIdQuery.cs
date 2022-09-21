@@ -7,13 +7,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.Foods.Queries
 {
-    public class GetFoodWithIdQuery : IRequest<Response<FoodDto>>
+    public sealed class GetFoodWithIdQuery : IRequest<Response<FoodDto>>
     {
         [Required]
         public int Id { get; init; }
     }
 
-    public class GetFoodWithIdQueryHandler : IRequestHandler<GetFoodWithIdQuery, Response<FoodDto>>
+    public sealed class GetFoodWithIdQueryHandler : IRequestHandler<GetFoodWithIdQuery, Response<FoodDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;

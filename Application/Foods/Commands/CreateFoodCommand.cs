@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.Foods.Commands
 {
-    public class CreateFoodCommand : IMapFrom<Food>, IRequest<Response<FoodDto>>
+    public sealed class CreateFoodCommand : IMapFrom<Food>, IRequest<Response<FoodDto>>
     {
         [Required]
         [StringLength(1000, MinimumLength = 5)]
@@ -34,7 +34,7 @@ namespace Application.Foods.Commands
         }
     }
 
-    public class CreateFoodCommandHandler : IRequestHandler<CreateFoodCommand, Response<FoodDto>>
+    public sealed class CreateFoodCommandHandler : IRequestHandler<CreateFoodCommand, Response<FoodDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
