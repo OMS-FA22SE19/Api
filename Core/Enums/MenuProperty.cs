@@ -1,10 +1,9 @@
 ﻿namespace Core.Enums
 {
-    public enum FoodProperty
+    public enum MenuProperty
     {
         Name,
         Description,
-        Ingredient,
-        Available
+        IsHidden
     }
 }
