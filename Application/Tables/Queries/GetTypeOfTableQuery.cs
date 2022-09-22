@@ -28,6 +28,10 @@ namespace Application.Tables.Queries
         public async Task<Response<List<TableTypeDto>>> Handle(GetTypeOfTableQuery request, CancellationToken cancellationToken)
         {
             var resultSeatNumber = await _unitOfWork.TableRepository.GetClosestNumOfSeatTable(request.NumsOfPeople);
+            if (resultSeatNumber == 0)
+            {
+                return new Response<List<TableTypeDto>>("error");
+            }
 
             var result = await _unitOfWork.TableRepository.GetTableWithSeatsNumber(resultSeatNumber);
 

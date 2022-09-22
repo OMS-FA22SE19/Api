@@ -21,7 +21,7 @@ namespace Infrastructure.Repositories
             IQueryable<Table> query = _dbSet;
 
 
-            query = query.Where(t => t.Type == type && t.NumOfSeats == NumOfSeat);
+            query = query.Where(t => t.Type == type && t.NumOfSeats == NumOfSeat && t.IsDeleted == false);
 
             return await query.ToListAsync();
         }
@@ -29,10 +29,12 @@ namespace Infrastructure.Repositories
         public async Task<int> GetClosestNumOfSeatTable(int NumOfPeople)
         {
             IQueryable<Table> query = _dbSet;
-
-            query = query.Where(t => t.NumOfSeats >= NumOfPeople).OrderBy(t => t.NumOfSeats);
-
-            int NumOfSeats = query.FirstOrDefault().NumOfSeats;
+            int NumOfSeats;
+            query = query.Where(t => t.NumOfSeats >= NumOfPeople && t.IsDeleted == false).OrderBy(t => t.NumOfSeats);
+            if (query.Count() != 0)
+            {
+                NumOfSeats = query.FirstOrDefault().NumOfSeats;
+            } else return 0;
 
             return NumOfSeats;
         }
