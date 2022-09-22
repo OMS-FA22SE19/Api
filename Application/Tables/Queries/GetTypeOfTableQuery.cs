@@ -38,16 +38,20 @@ namespace Application.Tables.Queries
                 var tableType = ListTableType.SingleOrDefault(t => t.Type == table.Type);
                 if (tableType == null)
                 {
+                    List<int> tableIds = new List<int>();
+                    tableIds.Add(table.Id);
                     ListTableType.Add(new TableTypeDto()
                     {
                         Type = table.Type,
                         NumOfSeats = resultSeatNumber,
-                        Total = 1
+                        Total = 1,
+                        TableIds = tableIds
                     });
                 }
                 else
                 {
                     tableType.Total++;
+                    tableType.TableIds.Add(table.Id);
                 }
             }
             return new Response<List<TableTypeDto>>(ListTableType);

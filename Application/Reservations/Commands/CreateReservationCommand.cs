@@ -20,7 +20,9 @@ namespace Application.Reservations.Commands
         [StringLength(1000, MinimumLength = 5)]
         public string UserId { get; set; }
         [Required]
-        public DateTime Date { get; set; }
+        public DateTime StartTime { get; set; }
+        [Required]
+        public DateTime EndTime { get; set; }
         [Required]
         public int NumOfSeats { get; set; }
         [Required]
@@ -55,15 +57,13 @@ namespace Application.Reservations.Commands
             var TableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.tableType);
             int TableId;
             List<int> tableIds = new List<int>();
-            var random = new Random();
             if (TableList.Count != 0)
             {
                 foreach (Table table in TableList)
                 {
                     tableIds.Add(table.Id);
                 }
-                int Index = random.Next(tableIds.Count);
-                TableId = tableIds[Index];
+                TableId = await _unitOfWork.ReservationRepository.GetTableAvailableForReservation(tableIds, request.StartTime, request.EndTime);
             }
             else
             {

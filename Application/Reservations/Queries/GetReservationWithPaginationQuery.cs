@@ -13,7 +13,7 @@ namespace Application.Reservations.Queries
 {
     public class GetReservationWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<ReservationDto>>>
     {
-        public string userId { get; set; }
+        public string? userId { get; set; }
         public ReservationStatus? Status { get; init; }
     }
 

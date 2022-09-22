@@ -11,6 +11,7 @@ namespace Application.Tables.Response
         public int NumOfSeats { get; set; }
         public TableType Type { get; set; }
         public int Total { get; set; }
+        public IList<int> TableIds { get; set; }
 
         public void Mapping(Profile profile)
         {
