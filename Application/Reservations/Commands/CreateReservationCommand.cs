@@ -59,7 +59,7 @@ namespace Application.Reservations.Commands
             List<int> tableIds = TableList.Select(e => e.Id).ToList();
             if (tableIds.Any())
             {
-                TableId = await _unitOfWork.ReservationRepository.GetTableAvailableForReservation(tableIds, request.StartTime, request.EndTime);
+                TableId = await _unitOfWork.TableRepository.GetTableAvailableForReservation(tableIds, request.StartTime, request.EndTime);
                 if (TableId == 0)
                 {
                     return new Response<ReservationDto>("There is no table available");

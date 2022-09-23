@@ -11,9 +11,12 @@ namespace Infrastructure.Repositories
 {
     public sealed class TableRepository : GenericRepository<Table>, ITableRepository
     {
+        private IQueryable<Reservation> _dbSetReservation;
+
         public TableRepository(IApplicationDbContext context) : base(context)
         {
             _dbSet = context.Tables;
+            _dbSetReservation = context.Reservations;
         }
 
         public async Task<List<Table>> GetTableOnNumOfSeatAndType(int NumOfSeat, TableType type)
@@ -31,9 +34,10 @@ namespace Infrastructure.Repositories
             IQueryable<Table> query = _dbSet;
             int NumOfSeats;
             query = query.Where(t => t.NumOfSeats >= NumOfPeople && t.IsDeleted == false).OrderBy(t => t.NumOfSeats);
-            if (query.Count() != 0)
+            if (query.Any())
             {
-                NumOfSeats = query.FirstOrDefault().NumOfSeats;
+                Table? FirstTable = await query.FirstOrDefaultAsync();
+                NumOfSeats = FirstTable.NumOfSeats;
             } else return 0;
 
             return NumOfSeats;
@@ -48,5 +52,21 @@ namespace Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
+        public async Task<int> GetTableAvailableForReservation(List<int> tableIds, DateTime StartTime, DateTime EndTime)
+        {
+            IQueryable<Reservation> query = _dbSetReservation;
+
+            query = query.Where(r => tableIds.Any(tableId => tableId.Equals(r.TableId))
+                 && !((StartTime < r.StartTime && EndTime < r.StartTime) || (StartTime > r.EndTime && EndTime > r.EndTime))
+                 && r.Status != ReservationStatus.Available)
+                .OrderBy(r => r.StartTime);
+
+            List<int> notAvailableTable = query.Select(e => e.TableId).ToList();
+            int AvailableTable = tableIds.Except(notAvailableTable).FirstOrDefault();
+
+            Console.WriteLine(AvailableTable);
+
+            return AvailableTable;
+        }
     }
 }
