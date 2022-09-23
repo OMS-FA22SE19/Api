@@ -78,7 +78,7 @@ namespace Api.Controllers.V1
         {
             try
             {
-                if (!ModelState.IsValid)
+                if (!ModelState.IsValid || id < 0)
                 {
                     return BadRequest();
                 }

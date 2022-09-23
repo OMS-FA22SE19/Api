@@ -104,6 +104,11 @@ namespace Api.Controllers.V1
         {
             try
             {
+                if (id < 0)
+                {
+                    return BadRequest();
+                }
+
                 if (!ModelState.IsValid)
                 {
                     return BadRequest();

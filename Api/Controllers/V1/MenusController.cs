@@ -5,6 +5,7 @@ using Application.Menus.Queries;
 using Application.Menus.Response;
 using Application.Models;
 using Core.Common;
+using Core.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -127,7 +128,7 @@ namespace Api.Controllers.V1
         {
             try
             {
-                if (!ModelState.IsValid)
+                if (!ModelState.IsValid || id < 0)
                 {
                     return BadRequest();
                 }
@@ -165,6 +166,11 @@ namespace Api.Controllers.V1
         {
             try
             {
+                if (id < 0)
+                {
+                    return BadRequest();
+                }
+
                 var command = new DeleteMenuCommand
                 {
                     Id = id
@@ -194,9 +200,13 @@ namespace Api.Controllers.V1
         {
             try
             {
+                if (id < 0 || foodId < 0)
+                {
+                    return BadRequest();
+                }
                 if (price < 0)
                 {
-                    return BadRequest("Price must have positive value");
+                    return BadRequest($"{nameof(MenuFood.Price)} must have positive value");
                 }
                 var command = new AddExistingFoodToMenuCommand()
                 {
@@ -225,6 +235,11 @@ namespace Api.Controllers.V1
         {
             try
             {
+                if (id < 0)
+                {
+                    return BadRequest();
+                }
+
                 if (!ModelState.IsValid)
                 {
                     return BadRequest();
@@ -251,6 +266,11 @@ namespace Api.Controllers.V1
         {
             try
             {
+                if (menuId < 0)
+                {
+                    return BadRequest();
+                }
+
                 if (!ModelState.IsValid)
                 {
                     return BadRequest();
@@ -280,6 +300,10 @@ namespace Api.Controllers.V1
         {
             try
             {
+                if (menuId < 0)
+                {
+                    return BadRequest();
+                }
                 if (!ModelState.IsValid)
                 {
                     return BadRequest();
