@@ -1,5 +1,4 @@
-﻿using Application.Categories.Response;
-using Application.Common.Exceptions;
+﻿using Application.Common.Exceptions;
 using Application.Common.Mappings;
 using Application.Menus.Response;
 using Application.Models;
@@ -22,7 +21,6 @@ namespace Application.Menus.Commands
         public string Description { get; set; }
         public bool IsHidden { get; set; } = true;
 
-        public IList<CategoryDto>? Categories { get; set; }
         public void Mapping(Profile profile)
         {
             profile.CreateMap<UpdateMenuCommand, Menu>();

@@ -24,9 +24,6 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property<double>("Price")
                 .HasColumnType("float");
 
-            builder.Property<int>("Quantity")
-                .HasColumnType("int");
-
             builder.Property(e => e.Status)
                 .HasColumnType("int");
 

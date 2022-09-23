@@ -5,6 +5,7 @@ using Application.Common.Interfaces;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Microsoft.OpenApi.Models;
+using System.Text.Json.Serialization;
 
 var _developmentCors = "developmentCors";
 var builder = WebApplication.CreateBuilder(args);
@@ -30,7 +31,11 @@ builder.Services.AddHealthChecks()
     .AddDbContextCheck<ApplicationDbContext>();
 
 builder.Services.AddControllers(options =>
-    options.Filters.Add<ApiExceptionFilterAttribute>());
+    options.Filters.Add<ApiExceptionFilterAttribute>())
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

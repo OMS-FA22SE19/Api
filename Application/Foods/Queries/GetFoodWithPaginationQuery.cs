@@ -1,4 +1,5 @@
-﻿using Application.Foods.Response;
+﻿using Application.Categories.Response;
+using Application.Foods.Response;
 using Application.Models;
 using AutoMapper;
 using Core.Common;
@@ -31,7 +32,7 @@ namespace Application.Foods.Queries
         {
             List<Expression<Func<Food, bool>>> filters = new();
             Func<IQueryable<Food>, IOrderedQueryable<Food>> orderBy = null;
-            string includeProperties = "";
+            string includeProperties = $"{nameof(Food.FoodCategories)}.{nameof(Category)}";
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
@@ -82,6 +83,20 @@ namespace Application.Foods.Queries
 
             var result = await _unitOfWork.FoodRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, request.PageIndex, request.PageSize);
             var mappedResult = _mapper.Map<PaginatedList<Food>, PaginatedList<FoodDto>>(result);
+            foreach (var item in mappedResult)
+            {
+                if (item.Categories is null)
+                {
+                    item.Categories = new List<CategoryDto>();
+                }
+                foreach (var category in result.First(e => e.Id == item.Id).FoodCategories.Select(e => e.Category))
+                {
+                    if (category is not null)
+                    {
+                        item.Categories.Add(_mapper.Map<CategoryDto>(category));
+                    }
+                }
+            }
             return new Response<PaginatedList<FoodDto>>(mappedResult);
         }
     }

@@ -24,7 +24,8 @@ namespace Infrastructure
 
             services.AddDbContext<ApplicationDbContext>(options =>
                     options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
-                        builder => {
+                        builder =>
+                        {
                             builder.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName);
                             builder.UseRowNumberForPaging();
                         })
@@ -39,6 +40,15 @@ namespace Infrastructure
                 .AddDefaultIdentity<ApplicationUser>()
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequiredLength = 1;
+            });
 
             services.AddIdentityServer()
                 .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();

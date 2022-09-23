@@ -1,12 +1,9 @@
-﻿using Application.Reservations.Response;
-using Application.Models;
+﻿using Application.Models;
+using Application.Reservations.Response;
 using AutoMapper;
 using Core.Common;
-using Core.Entities;
-using Core.Enums;
 using Core.Interfaces;
 using MediatR;
-using System.Linq.Expressions;
 
 namespace Application.Reservations.Queries
 {

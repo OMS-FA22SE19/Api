@@ -7,7 +7,6 @@ namespace Core.Entities
     {
         [MaxLength(300)]
         public override string Id { get; set; }
-        [Required]
         [MaxLength(15)]
         public override string PhoneNumber { get; set; }
         public bool IsDeleted { get; set; }
