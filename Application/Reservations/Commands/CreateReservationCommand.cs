@@ -56,14 +56,14 @@ namespace Application.Reservations.Commands
 
             var TableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.tableType);
             int TableId;
-            List<int> tableIds = new List<int>();
-            if (TableList.Count != 0)
+            List<int> tableIds = TableList.Select(e => e.Id).ToList();
+            if (tableIds.Any())
             {
-                foreach (Table table in TableList)
-                {
-                    tableIds.Add(table.Id);
-                }
                 TableId = await _unitOfWork.ReservationRepository.GetTableAvailableForReservation(tableIds, request.StartTime, request.EndTime);
+                if (TableId == 0)
+                {
+                    return new Response<ReservationDto>("There is no table available");
+                }
             }
             else
             {

@@ -10,10 +10,5 @@ namespace Application.Reservations.Response
     {
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-
-        public void Mapping(Profile profile)
-        {
-            profile.CreateMap<Reservation, BusyTimeDto>().ReverseMap();
-        }
     }
 }

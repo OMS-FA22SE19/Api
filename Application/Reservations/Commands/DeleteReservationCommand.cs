@@ -4,6 +4,9 @@ using AutoMapper;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
+using Application.Common.Exceptions;
+using Core.Entities;
+using Core.Enums;
 
 namespace Application.Reservations.Commands
 {
@@ -26,8 +29,20 @@ namespace Application.Reservations.Commands
 
         public async Task<Response<ReservationDto>> Handle(DeleteReservationCommand request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.ReservationRepository.DeleteAsync(e => e.Id == request.Id);
+            var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.Id);
+            if (entity is null)
+            {
+                throw new NotFoundException(nameof(Reservation), request.Id);
+            }
+            var updatedEntity = _mapper.Map<Reservation>(entity);
+            updatedEntity.Status = ReservationStatus.Available;
+            var result = await _unitOfWork.ReservationRepository.UpdateAsync(updatedEntity);
             await _unitOfWork.CompleteAsync(cancellationToken);
+            if (result is null)
+            {
+                return new Response<ReservationDto>("error");
+            }
+            var mappedResult = _mapper.Map<ReservationDto>(result);
 
             return new Response<ReservationDto>()
             {

@@ -36,19 +36,12 @@ namespace Application.Reservations.Queries
             var result = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.date);
 
             var TableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.tableType);
-            List<int> tableIds = new List<int>();
-            if (TableList.Count != 0)
-            {
-                foreach (Table table in TableList)
-                {
-                    tableIds.Add(table.Id);
-                }
-            
-            }
+            List<int> tableIds = TableList.Select(e => e.Id).ToList();
+
             List<BusyTimeDto> listOfBusyTimes = new List<BusyTimeDto>();
-            if (tableIds != null)
+            if (tableIds.Any())
             {
-                foreach (Reservation reservation in result.ToList())
+                foreach (Reservation reservation in result)
                 {
                     if (!tableIds.Contains(reservation.TableId))
                     {
