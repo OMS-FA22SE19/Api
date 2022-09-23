@@ -23,6 +23,14 @@ namespace Core.Common
             AddRange(items);
         }
 
+        public PaginatedList(int pageNumber, int totalPages, int totalCount, List<T> items)
+        {
+            PageNumber = pageNumber;
+            TotalPages = totalPages;
+            TotalCount = totalCount;
+            AddRange(items);
+        }
+
         public bool HasPreviousPage => PageNumber > 1;
 
         public bool HasNextPage => PageNumber < TotalPages;

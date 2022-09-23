@@ -1,22 +1,22 @@
 ﻿using Application.Models;
-using Application.Tables.Commands;
-using Application.Tables.Queries;
-using Application.Tables.Response;
+using Application.Orders.Commands;
+using Application.Orders.Queries;
+using Application.Orders.Response;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 namespace Api.Controllers.V1
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
-    public class TablesController : ApiControllerBase
+    public sealed class OrdersController : ApiControllerBase
     {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetTableWithPaginationQuery query)
+        public async Task<IActionResult> GetAsync([FromQuery] GetOrderWithPaginationQuery query)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<PaginatedList<TableDto>>(ex.Message)
+                var response = new Response<PaginatedList<OrderDto>>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -43,16 +43,16 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync(int id)
+        public async Task<IActionResult> GetByIdAsync(string id)
         {
             try
             {
-                if (id < 0)
+                if (string.IsNullOrWhiteSpace(id))
                 {
                     return BadRequest();
                 }
 
-                var query = new GetTableWithIdQuery()
+                var query = new GetOrderWithIdQuery()
                 {
                     Id = id
                 };
@@ -62,7 +62,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<TableDto>(ex.Message)
+                var response = new Response<OrderDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -74,7 +74,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateTableCommand command)
+        public async Task<IActionResult> PostAsync([FromBody] CreateOrderCommand command)
         {
             try
             {
@@ -88,7 +88,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<TableDto>(ex.Message)
+                var response = new Response<OrderDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -96,61 +96,28 @@ namespace Api.Controllers.V1
             }
         }
 
-        [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [HttpPost("{id}/Confirm")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromForm] UpdateTableCommand command)
+        public async Task<IActionResult> ConfirmAsync(string id)
         {
             try
             {
-                if (!ModelState.IsValid)
+                if (string.IsNullOrWhiteSpace(id))
                 {
                     return BadRequest();
                 }
-
-                if (id != command.Id)
+                var command = new ConfirmPaymentOrderCommand()
                 {
-                    var response = new Response<TableDto>("The Id do not match")
-                    {
-                        StatusCode = HttpStatusCode.BadRequest
-                    };
-                    return StatusCode((int)response.StatusCode, response);
-                }
-
+                    Id = id
+                };
                 var result = await Mediator.Send(command);
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (Exception ex)
             {
-                var response = new Response<TableDto>(ex.Message)
-                {
-                    StatusCode = HttpStatusCode.InternalServerError
-                };
-                return StatusCode((int)response.StatusCode, response);
-            }
-        }
-
-        // DELETE api/Blogs/5
-        [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                if (id < 0)
-                {
-                    return BadRequest();
-                }
-
-                var result = await Mediator.Send(new DeleteTableCommand { Id = id });
-                return StatusCode((int)result.StatusCode, result);
-            }
-            catch (Exception ex)
-            {
-                var response = new Response<TableDto>(ex.Message)
+                var response = new Response<OrderDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

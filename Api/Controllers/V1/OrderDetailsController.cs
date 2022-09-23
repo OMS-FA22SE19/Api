@@ -1,22 +1,22 @@
 ﻿using Application.Models;
-using Application.Tables.Commands;
-using Application.Tables.Queries;
-using Application.Tables.Response;
+using Application.OrderDetails.Commands;
+using Application.OrderDetails.Queries;
+using Application.OrderDetails.Response;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 namespace Api.Controllers.V1
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/[controller]")]
     [ApiController]
-    public class TablesController : ApiControllerBase
+    public class OrderDetailsController : ApiControllerBase
     {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetTableWithPaginationQuery query)
+        public async Task<IActionResult> GetAsync([FromQuery] GetOrderDetailWithPaginationQuery query)
         {
             try
             {
@@ -30,7 +30,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<PaginatedList<TableDto>>(ex.Message)
+                var response = new Response<PaginatedList<OrderDetailDto>>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -52,7 +52,7 @@ namespace Api.Controllers.V1
                     return BadRequest();
                 }
 
-                var query = new GetTableWithIdQuery()
+                var query = new GetOrderDetailWithIdQuery()
                 {
                     Id = id
                 };
@@ -62,7 +62,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<TableDto>(ex.Message)
+                var response = new Response<OrderDetailDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -70,37 +70,11 @@ namespace Api.Controllers.V1
             }
         }
 
-        [HttpPost]
-        [ProducesResponseType(StatusCodes.Status201Created)]
+        [HttpPut("id")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateTableCommand command)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest();
-                }
-
-                var result = await Mediator.Send(command);
-                return StatusCode((int)result.StatusCode, result);
-            }
-            catch (Exception ex)
-            {
-                var response = new Response<TableDto>(ex.Message)
-                {
-                    StatusCode = HttpStatusCode.InternalServerError
-                };
-                return StatusCode((int)response.StatusCode, response);
-            }
-        }
-
-        [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromForm] UpdateTableCommand command)
+        public async Task<IActionResult> PutAsync(int id, [FromBody] UpdateOrderDetailCommand command)
         {
             try
             {
@@ -111,7 +85,7 @@ namespace Api.Controllers.V1
 
                 if (id != command.Id)
                 {
-                    var response = new Response<TableDto>("The Id do not match")
+                    var response = new Response<OrderDetailDto>("The Id do not match")
                     {
                         StatusCode = HttpStatusCode.BadRequest
                     };
@@ -119,38 +93,15 @@ namespace Api.Controllers.V1
                 }
 
                 var result = await Mediator.Send(command);
-                return StatusCode((int)result.StatusCode, result);
-            }
-            catch (Exception ex)
-            {
-                var response = new Response<TableDto>(ex.Message)
+                if (result.StatusCode == HttpStatusCode.NoContent)
                 {
-                    StatusCode = HttpStatusCode.InternalServerError
-                };
-                return StatusCode((int)response.StatusCode, response);
-            }
-        }
-
-        // DELETE api/Blogs/5
-        [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Delete(int id)
-        {
-            try
-            {
-                if (id < 0)
-                {
-                    return BadRequest();
+                    return NoContent();
                 }
-
-                var result = await Mediator.Send(new DeleteTableCommand { Id = id });
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (Exception ex)
             {
-                var response = new Response<TableDto>(ex.Message)
+                var response = new Response<OrderDetailDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

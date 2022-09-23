@@ -50,6 +50,38 @@ namespace Infrastructure.Repositories
             }
         }
 
+        public virtual async Task<IList<TEntity>> GetAllAsync(
+            List<Expression<Func<TEntity, bool>>> filters = null,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+            string includeProperties = "")
+        {
+            IQueryable<TEntity> query = _dbSet;
+
+
+            if (filters is not null && filters.Any())
+            {
+                foreach (var filter in filters)
+                {
+                    query = query.Where(filter);
+                }
+            }
+
+            foreach (var includeProperty in includeProperties.Split
+                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                query = query.Include(includeProperty);
+            }
+
+            if (orderBy != null)
+            {
+                return await orderBy(query).ToListAsync();
+            }
+            else
+            {
+                return await query.ToListAsync();
+            }
+        }
+
         public virtual async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> expression, string includeProperties = "")
         {
             IQueryable<TEntity> query = _dbSet;

@@ -8,6 +8,9 @@
         ICategoryRepository CategoryRepository { get; }
         IFoodCategoryRepository FoodCategoryRepository { get; }
         IMenuRepository MenuRepository { get; }
+        IMenuFoodRepository MenuFoodRepository { get; }
+        IOrderRepository OrderRepository { get; }
+        public IOrderDetailRepository OrderDetailRepository { get; }
         Task CompleteAsync(CancellationToken cancellationToken);
     }
 }

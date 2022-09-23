@@ -4,6 +4,6 @@ namespace Infrastructure.Services
 {
     public sealed class DateTimeService : IDateTime
     {
-        public DateTime Now => DateTime.UtcNow;
+        public DateTime Now => DateTime.UtcNow.AddHours(7);
     }
 }

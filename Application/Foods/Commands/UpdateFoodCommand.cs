@@ -1,5 +1,4 @@
-﻿using Application.Categories.Response;
-using Application.Common.Exceptions;
+﻿using Application.Common.Exceptions;
 using Application.Common.Mappings;
 using Application.Foods.Response;
 using Application.Models;
@@ -28,7 +27,7 @@ namespace Application.Foods.Commands
         [StringLength(2048, MinimumLength = 5)]
         public string PictureUrl { get; set; }
 
-        public IList<CategoryDto>? Categories { get; set; }
+        public IList<int> Categories { get; set; }
         public void Mapping(Profile profile)
         {
             profile.CreateMap<UpdateFoodCommand, Food>()
@@ -63,17 +62,21 @@ namespace Application.Foods.Commands
 
             if (request.Categories != null && request.Categories.Any())
             {
-                foreach (var category in request.Categories)
+                foreach (var categoryId in request.Categories)
                 {
-                    var inDatabase = await _unitOfWork.CategoryRepository.GetAsync(e => e.Id == category.Id);
+                    var inDatabase = await _unitOfWork.CategoryRepository.GetAsync(e => e.Id == categoryId);
                     if (inDatabase is null)
                     {
-                        throw new NotFoundException(nameof(Category), category.Id);
+                        throw new NotFoundException(nameof(Category), categoryId);
+                    }
+                    if (updatedEntity.FoodCategories is null)
+                    {
+                        updatedEntity.FoodCategories = new List<FoodCategory>();
                     }
                     updatedEntity.FoodCategories.Add(new FoodCategory
                     {
-                        Food = updatedEntity,
-                        Category = inDatabase
+                        FoodId = entity.Id,
+                        CategoryId = inDatabase.Id
                     });
                 }
 

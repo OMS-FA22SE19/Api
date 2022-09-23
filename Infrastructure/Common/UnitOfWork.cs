@@ -13,6 +13,9 @@ namespace Infrastructure.Common
         private IFoodRepository _foodRepository;
         private IFoodCategoryRepository _foodCategoryRepository;
         private IMenuRepository _menuRepository;
+        private IMenuFoodRepository _menuFoodRepository;
+        private IOrderRepository _orderRepository;
+        private IOrderDetailRepository _orderDetailRepository;
 
         public UnitOfWork(IApplicationDbContext context)
         {
@@ -83,6 +86,41 @@ namespace Infrastructure.Common
                     _menuRepository = new MenuRepository(_context);
                 }
                 return _menuRepository;
+            }
+        }
+        public IMenuFoodRepository MenuFoodRepository
+        {
+            get
+            {
+                if (_menuFoodRepository is null)
+                {
+                    _menuFoodRepository = new MenuFoodRepository(_context);
+                }
+                return _menuFoodRepository;
+            }
+        }
+
+        public IOrderRepository OrderRepository
+        {
+            get
+            {
+                if (_orderRepository is null)
+                {
+                    _orderRepository = new OrderRepository(_context);
+                }
+                return _orderRepository;
+            }
+        }
+
+        public IOrderDetailRepository OrderDetailRepository
+        {
+            get
+            {
+                if (_orderDetailRepository is null)
+                {
+                    _orderDetailRepository = new OrderDetailRepository(_context);
+                }
+                return _orderDetailRepository;
             }
         }
 

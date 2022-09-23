@@ -1,8 +1,7 @@
 ﻿using Application.Categories.Response;
-using Application.Common.Exceptions;
 using Application.Common.Mappings;
-using Application.Reservations.Response;
 using Application.Models;
+using Application.Reservations.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;

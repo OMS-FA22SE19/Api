@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace Core.Enums
+﻿namespace Core.Enums
 {
     public enum TableType
     {
