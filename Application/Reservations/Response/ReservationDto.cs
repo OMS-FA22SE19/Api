@@ -10,7 +10,8 @@ namespace Application.Reservations.Response
         public int Id { get; set; }
         public string UserId { get; set; }
         public int TableId { get; set; }
-        public DateTime Date { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
         public Table Table { get; set; }

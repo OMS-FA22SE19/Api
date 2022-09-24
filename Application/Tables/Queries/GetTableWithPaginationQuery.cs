@@ -32,6 +32,7 @@ namespace Application.Tables.Queries
             Func<IQueryable<Table>, IOrderedQueryable<Table>> orderBy = null;
             string includeProperties = "";
 
+            filters.Add(e => e.IsDeleted == false);
             switch (request.OrderBy)
             {
                 case (TableProperty.NumOfSeats):

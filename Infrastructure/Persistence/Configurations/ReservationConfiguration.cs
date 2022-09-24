@@ -14,7 +14,10 @@ namespace Infrastructure.Persistence.Configurations
 
             SqlServerPropertyBuilderExtensions.UseIdentityColumn(builder.Property<int>("Id"), 1L, 1);
 
-            builder.Property<DateTime>("Date")
+            builder.Property<DateTime>("StartTime")
+                .HasColumnType("datetime2");
+
+            builder.Property<DateTime>("EndTime")
                 .HasColumnType("datetime2");
 
             builder.Property<bool>("IsPriorFoodOrder")

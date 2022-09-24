@@ -1,22 +1,24 @@
-﻿using Application.Models;
-using Application.Tables.Commands;
-using Application.Tables.Queries;
-using Application.Tables.Response;
+﻿using Application.Reservations.Commands;
+using Application.Reservations.Queries;
+using Application.Reservations.Response;
+using Application.Models;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using Application.Tables.Commands;
+using Application.Tables.Response;
 
 namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class TablesController : ApiControllerBase
+    public class ReservationsController : ApiControllerBase
     {
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetTableWithPaginationQuery query)
+        public async Task<IActionResult> GetAsync([FromQuery] GetReservationWithPaginationQuery query)
         {
             try
             {
@@ -30,7 +32,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<PaginatedList<TableDto>>(ex.Message)
+                var response = new Response<PaginatedList<ReservationDto>>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -52,7 +54,7 @@ namespace Api.Controllers.V1
                     return BadRequest();
                 }
 
-                var query = new GetTableWithIdQuery()
+                var query = new GetReservationWithIdQuery()
                 {
                     Id = id
                 };
@@ -62,7 +64,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<TableDto>(ex.Message)
+                var response = new Response<ReservationDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -70,31 +72,26 @@ namespace Api.Controllers.V1
             }
         }
 
-        [HttpGet("people/{numOfPeople}")]
+        [HttpGet("BusyDate")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetTableType(int numOfPeople)
+        public async Task<IActionResult> GetBusyTimeWithSetOfTable([FromQuery] GetBusyTimeOfDateQuery query)
         {
             try
             {
-                if (numOfPeople < 0)
+                if (!ModelState.IsValid)
                 {
                     return BadRequest();
                 }
-
-                var query = new GetTypeOfTableQuery()
-                {
-                    NumsOfPeople = numOfPeople
-                };
 
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (Exception ex)
             {
-                var response = new Response<TableDto>(ex.Message)
+                var response = new Response<ReservationDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -106,7 +103,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateTableCommand command)
+        public async Task<IActionResult> PostAsync([FromBody] CreateReservationCommand command)
         {
             try
             {
@@ -120,7 +117,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<TableDto>(ex.Message)
+                var response = new Response<ReservationDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -132,15 +129,10 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromForm] UpdateTableCommand command)
+        public async Task<IActionResult> PutAsync(int id, [FromForm] ChangeReservationStatusCommand command)
         {
             try
             {
-                if (id < 0)
-                {
-                    return BadRequest();
-                }
-
                 if (!ModelState.IsValid)
                 {
                     return BadRequest();
@@ -182,7 +174,7 @@ namespace Api.Controllers.V1
                     return BadRequest();
                 }
 
-                var result = await Mediator.Send(new DeleteTableCommand { Id = id });
+                var result = await Mediator.Send(new DeleteReservationCommand { Id = id });
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (Exception ex)

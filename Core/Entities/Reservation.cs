@@ -10,7 +10,8 @@ namespace Core.Entities
         public string UserId { get; set; }
         [Required]
         public int TableId { get; set; }
-        public DateTime Date { get; set; } = DateTime.UtcNow.AddHours(7);
+        public DateTime StartTime { get; set; } = DateTime.UtcNow;
+        public DateTime EndTime { get; set; } = DateTime.UtcNow.AddHours(1).AddMinutes(30);
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
 

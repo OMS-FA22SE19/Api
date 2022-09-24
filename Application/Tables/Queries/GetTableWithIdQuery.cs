@@ -26,7 +26,7 @@ namespace Application.Tables.Queries
 
         public async Task<Response<TableDto>> Handle(GetTableWithIdQuery request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.TableRepository.GetAsync(e => e.Id == request.Id);
+            var result = await _unitOfWork.TableRepository.GetAsync(e => e.Id == request.Id && e.IsDeleted == false);
             var mappedResult = _mapper.Map<TableDto>(result);
             return new Response<TableDto>(mappedResult);
         }
