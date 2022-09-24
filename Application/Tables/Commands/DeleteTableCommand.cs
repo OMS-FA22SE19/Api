@@ -1,5 +1,5 @@
-﻿using Application.Tables.Response;
-using Application.Models;
+﻿using Application.Models;
+using Application.Tables.Response;
 using AutoMapper;
 using Core.Interfaces;
 using MediatR;

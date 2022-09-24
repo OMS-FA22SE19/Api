@@ -7,7 +7,6 @@ namespace Core.Entities
     {
         public string OrderId { get; set; }
         public int FoodId { get; set; }
-        public int Quantity { get; set; }
         public double Price { get; set; }
         public OrderDetailStatus Status { get; set; }
 

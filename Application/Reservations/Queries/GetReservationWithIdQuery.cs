@@ -1,5 +1,5 @@
-﻿using Application.Reservations.Response;
-using Application.Models;
+﻿using Application.Models;
+using Application.Reservations.Response;
 using AutoMapper;
 using Core.Interfaces;
 using MediatR;

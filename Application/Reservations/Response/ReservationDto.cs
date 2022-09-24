@@ -1,5 +1,4 @@
-﻿using Application.Categories.Response;
-using Application.Common.Mappings;
+﻿using Application.Common.Mappings;
 using AutoMapper;
 using Core.Entities;
 using Core.Enums;

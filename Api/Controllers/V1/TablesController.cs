@@ -1,7 +1,7 @@
-﻿using Application.Tables.Commands;
+﻿using Application.Models;
+using Application.Tables.Commands;
 using Application.Tables.Queries;
 using Application.Tables.Response;
-using Application.Models;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -136,6 +136,11 @@ namespace Api.Controllers.V1
         {
             try
             {
+                if (id < 0)
+                {
+                    return BadRequest();
+                }
+
                 if (!ModelState.IsValid)
                 {
                     return BadRequest();

@@ -1,5 +1,5 @@
-﻿using Application.Tables.Response;
-using Application.Models;
+﻿using Application.Models;
+using Application.Tables.Response;
 using AutoMapper;
 using Core.Common;
 using Core.Entities;
@@ -7,7 +7,6 @@ using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using System.Linq.Expressions;
-using Application.Foods.Response;
 
 namespace Application.Tables.Queries
 {

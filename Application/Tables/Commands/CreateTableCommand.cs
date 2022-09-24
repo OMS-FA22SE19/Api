@@ -1,15 +1,12 @@
-﻿using Application.Categories.Response;
-using Application.Common.Exceptions;
-using Application.Common.Mappings;
-using Application.Tables.Response;
+﻿using Application.Common.Mappings;
 using Application.Models;
+using Application.Tables.Response;
 using AutoMapper;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
-using Application.Foods.Response;
-using Core.Enums;
 
 namespace Application.Tables.Commands
 {

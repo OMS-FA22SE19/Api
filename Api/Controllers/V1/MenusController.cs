@@ -1,9 +1,11 @@
 ﻿using Application.Categories.Response;
+using Application.Foods.Queries;
 using Application.Menus.Commands;
 using Application.Menus.Queries;
 using Application.Menus.Response;
 using Application.Models;
 using Core.Common;
+using Core.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -126,7 +128,7 @@ namespace Api.Controllers.V1
         {
             try
             {
-                if (!ModelState.IsValid)
+                if (!ModelState.IsValid || id < 0)
                 {
                     return BadRequest();
                 }
@@ -164,6 +166,11 @@ namespace Api.Controllers.V1
         {
             try
             {
+                if (id < 0)
+                {
+                    return BadRequest();
+                }
+
                 var command = new DeleteMenuCommand
                 {
                     Id = id
@@ -173,6 +180,140 @@ namespace Api.Controllers.V1
                 {
                     return NoContent();
                 }
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<MenuDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        [HttpPost("{id}/{foodId}")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddFoodToMenuAsync(int id, int foodId, [FromBody] double price)
+        {
+            try
+            {
+                if (id < 0 || foodId < 0)
+                {
+                    return BadRequest();
+                }
+                if (price < 0)
+                {
+                    return BadRequest($"{nameof(MenuFood.Price)} must have positive value");
+                }
+                var command = new AddExistingFoodToMenuCommand()
+                {
+                    Id = id,
+                    FoodId = foodId,
+                    Price = price
+                };
+                var result = await Mediator.Send(command);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<MenuDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        [HttpPost("{id}/NewFood")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> AddFoodToMenuAsync(int id, [FromBody] AddNewFoodToMenuCommand command)
+        {
+            try
+            {
+                if (id < 0)
+                {
+                    return BadRequest();
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+                command.Id = id;
+                var result = await Mediator.Send(command);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<MenuDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        [HttpGet("{menuId}/Food")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetFoodWithMenuIdAsync(int menuId)
+        {
+            try
+            {
+                if (menuId < 0)
+                {
+                    return BadRequest();
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+                var query = new GetFoodWithMenuIdAndCategoryIdQuery()
+                {
+                    MenuId = menuId
+                };
+                var result = await Mediator.Send(query);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<MenuDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        [HttpGet("{menuId}/Category/{categoryId}/Food")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetFoodWithMenuIdAndCategoryIdAsync(int menuId, int categoryId)
+        {
+            try
+            {
+                if (menuId < 0)
+                {
+                    return BadRequest();
+                }
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+                var query = new GetFoodWithMenuIdAndCategoryIdQuery()
+                {
+                    MenuId = menuId,
+                    CategoryId = categoryId
+                };
+                var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (Exception ex)

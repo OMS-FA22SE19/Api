@@ -52,25 +52,38 @@ namespace Infrastructure.Persistence
         public async Task TrySeedAsync()
         {
             //// Default roles
-            //var administratorRole = new IdentityRole("Administrator");
+            var administratorRole = new IdentityRole("Administrator");
 
-            //if (_roleManager.Roles.All(r => r.Name != administratorRole.Name))
-            //{
-            //    await _roleManager.CreateAsync(administratorRole);
-            //}
+            if (_roleManager.Roles.All(r => r.Name != administratorRole.Name))
+            {
+                await _roleManager.CreateAsync(administratorRole);
+            }
 
-            //// Default users
-            //var administrator = new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost" };
+            // Default users
+            var administrator = new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost" };
 
-            //if (_userManager.Users.All(u => u.UserName != administrator.UserName))
-            //{
-            //    await _userManager.CreateAsync(administrator, "Administrator1!");
-            //    await _userManager.AddToRolesAsync(administrator, new[] { administratorRole.Name });
-            //}
+            if (_userManager.Users.All(u => u.UserName != administrator.UserName))
+            {
+                await _userManager.CreateAsync(administrator, "Administrator1!");
+                await _userManager.AddToRolesAsync(administrator, new[] { administratorRole.Name });
+            }
 
             //// Default data
-            //// Seed, if necessary
 
+            var customerRole = new IdentityRole("Customer");
+            if (_roleManager.Roles.All(r => r.Name != customerRole.Name))
+            {
+                await _roleManager.CreateAsync(customerRole);
+            }
+
+            // Default users
+            var customer = new ApplicationUser { UserName = "defaultCustomer", Email = "longpnhse150499@fpt.edu.vn", PhoneNumber = "0939758999" };
+
+            if (_userManager.Users.All(u => u.UserName != customer.UserName))
+            {
+                await _userManager.CreateAsync(customer, "abc123");
+                await _userManager.AddToRolesAsync(customer, new[] { customerRole.Name });
+            }
         }
     }
 }

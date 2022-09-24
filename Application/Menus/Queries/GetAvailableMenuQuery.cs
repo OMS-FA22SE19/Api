@@ -24,7 +24,7 @@ namespace Application.Menus.Queries
 
         public async Task<Response<MenuDto>> Handle(GetAvailableMenuQuery request, CancellationToken cancellationToken)
         {
-            Menu result = await _unitOfWork.MenuRepository.GetAsync(e => e.IsHidden);
+            Menu result = await _unitOfWork.MenuRepository.GetAsync(e => !e.IsHidden);
             var mappedResult = _mapper.Map<MenuDto>(result);
             return new Response<MenuDto>(mappedResult);
         }
