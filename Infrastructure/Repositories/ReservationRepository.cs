@@ -17,7 +17,10 @@ namespace Infrastructure.Repositories
         {
             IQueryable<Reservation> query = _dbSet;
 
-            query = query.Where(r => r.StartTime >= date && r.StartTime < date.AddDays(1)).OrderBy(r => r.StartTime);
+            query = query.Where(r => 
+            r.StartTime >= date.Date && r.StartTime < date.Date.AddDays(1) 
+            && r.EndTime >= date.Date && r.EndTime < date.Date.AddDays(1)
+            && r.Status != ReservationStatus.Available).OrderBy(r => r.StartTime);
 
             return await query.ToListAsync();
         }

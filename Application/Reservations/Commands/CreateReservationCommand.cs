@@ -10,14 +10,12 @@ using System.ComponentModel.DataAnnotations;
 using Core.Enums;
 using Application.Tables.Response;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Application.Reservations.Commands
 {
     public class CreateReservationCommand : IMapFrom<Reservation>, IRequest<Response<ReservationDto>>
     {
-        [Required]
-        [StringLength(1000, MinimumLength = 5)]
-        public string UserId { get; set; }
         [Required]
         public DateTime StartTime { get; set; }
         [Required]
@@ -50,6 +48,9 @@ namespace Application.Reservations.Commands
         public async Task<Response<ReservationDto>> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
         {
             var entity = _mapper.Map<Reservation>(request);
+
+            var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
+            entity.UserId = user.Id;
 
             entity.Status = ReservationStatus.Reserved;
 

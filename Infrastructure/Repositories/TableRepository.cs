@@ -57,14 +57,12 @@ namespace Infrastructure.Repositories
             IQueryable<Reservation> query = _dbSetReservation;
 
             query = query.Where(r => tableIds.Any(tableId => tableId.Equals(r.TableId))
-                 && !((StartTime < r.StartTime && EndTime < r.StartTime) || (StartTime > r.EndTime && EndTime > r.EndTime))
+                 && !((StartTime < r.StartTime && EndTime <= r.StartTime) || (StartTime >= r.EndTime && EndTime > r.EndTime))
                  && r.Status != ReservationStatus.Available)
                 .OrderBy(r => r.StartTime);
 
             List<int> notAvailableTable = query.Select(e => e.TableId).ToList();
             int AvailableTable = tableIds.Except(notAvailableTable).FirstOrDefault();
-
-            Console.WriteLine(AvailableTable);
 
             return AvailableTable;
         }

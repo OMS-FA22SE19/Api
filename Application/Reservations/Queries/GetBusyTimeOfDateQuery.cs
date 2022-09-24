@@ -41,7 +41,7 @@ namespace Application.Reservations.Queries
             List<BusyTimeDto> listOfBusyTimes = new List<BusyTimeDto>();
             if (tableIds.Any())
             {
-                foreach (Reservation reservation in result)
+                foreach (Reservation reservation in result.ToList())
                 {
                     if (!tableIds.Contains(reservation.TableId))
                     {
@@ -57,12 +57,12 @@ namespace Application.Reservations.Queries
                     foreach (int tableId in tableIds)
                     {
                         var listOfBusyTimesForThisTable = _mapper.Map<List<BusyTimeDto>>(result.Where(r => r.TableId == tableId));
-                        if (listOfBusyTimesForThisTable.Count == 0)
+                        if (!listOfBusyTimesForThisTable.Any())
                         {
                             listOfBusyTimes = new List<BusyTimeDto>();
                             new Response<List<BusyTimeDto>>(listOfBusyTimes);
                         }
-                        if (listOfBusyTimes.Count == 0)
+                        if (!listOfBusyTimes.Any())
                         {
                             listOfBusyTimes = listOfBusyTimesForThisTable;
                         }
