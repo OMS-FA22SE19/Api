@@ -1,6 +1,6 @@
-﻿using Application.Categories.Response;
-using Application.Foods.Response;
+﻿using Application.Foods.Response;
 using Application.Models;
+using Application.Types.Response;
 using AutoMapper;
 using Core.Common;
 using Core.Entities;
@@ -8,6 +8,7 @@ using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using System.Linq.Expressions;
+using Type = Core.Entities.Type;
 
 namespace Application.Foods.Queries
 {
@@ -32,7 +33,7 @@ namespace Application.Foods.Queries
         {
             List<Expression<Func<Food, bool>>> filters = new();
             Func<IQueryable<Food>, IOrderedQueryable<Food>> orderBy = null;
-            string includeProperties = $"{nameof(Food.FoodCategories)}.{nameof(Category)}";
+            string includeProperties = $"{nameof(Food.FoodTypes)}.{nameof(Type)}";
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
@@ -85,15 +86,16 @@ namespace Application.Foods.Queries
             var mappedResult = _mapper.Map<PaginatedList<Food>, PaginatedList<FoodDto>>(result);
             foreach (var item in mappedResult)
             {
-                if (item.Categories is null)
+                if (item.Types is null)
                 {
-                    item.Categories = new List<CategoryDto>();
+                    item.Types = new List<TypeDto>();
                 }
-                foreach (var category in result.First(e => e.Id == item.Id).FoodCategories.Select(e => e.Category))
+                foreach (var foodType in result.FirstOrDefault(e => e.Id == item.Id)?.FoodTypes?.Select(e => e.Type))
                 {
-                    if (category is not null)
+                    if (foodType is not null)
                     {
-                        item.Categories.Add(_mapper.Map<CategoryDto>(category));
+                        item.Types.Add(_mapper.Map<TypeDto>(foodType));
+
                     }
                 }
             }

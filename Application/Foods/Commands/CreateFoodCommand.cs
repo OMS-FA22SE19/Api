@@ -13,23 +13,24 @@ namespace Application.Foods.Commands
     public sealed class CreateFoodCommand : IMapFrom<Food>, IRequest<Response<FoodDto>>
     {
         [Required]
-        [StringLength(1000, MinimumLength = 5)]
+        [StringLength(1000, MinimumLength = 2)]
         public string Name { get; set; }
         [Required]
-        [StringLength(4000, MinimumLength = 5)]
+        [StringLength(4000, MinimumLength = 2)]
         public string Description { get; set; }
         [Required]
-        [StringLength(2000, MinimumLength = 5)]
+        [StringLength(2000, MinimumLength = 2)]
         public string Ingredient { get; set; }
         public bool Available { get; set; } = true;
-        [StringLength(2048, MinimumLength = 5)]
+        [StringLength(2048, MinimumLength = 2)]
         public string PictureUrl { get; set; }
+        public int CourseTypeId { get; set; }
 
-        public IList<int>? Categories { get; set; }
+        public IList<int>? Types { get; set; }
         public void Mapping(Profile profile)
         {
             profile.CreateMap<CreateFoodCommand, Food>()
-                .ForSourceMember(dto => dto.Categories, opt => opt.DoNotValidate());
+                .ForSourceMember(dto => dto.Types, opt => opt.DoNotValidate());
         }
     }
 
@@ -47,23 +48,30 @@ namespace Application.Foods.Commands
         public async Task<Response<FoodDto>> Handle(CreateFoodCommand request, CancellationToken cancellationToken)
         {
             var entity = _mapper.Map<Food>(request);
-            if (request.Categories != null && request.Categories.Any())
+
+            var courseType = await _unitOfWork.CourseTypeRepository.GetAsync(e => e.Id == request.CourseTypeId && !e.IsDeleted);
+            if (courseType is null)
             {
-                foreach (var categoryId in request.Categories)
+                throw new NotFoundException(nameof(Food.CourseType), request.CourseTypeId);
+            }
+
+            if (request.Types?.Any() == true)
+            {
+                foreach (var typeId in request.Types)
                 {
-                    var inDatabase = await _unitOfWork.CategoryRepository.GetAsync(e => e.Id == categoryId);
+                    var inDatabase = await _unitOfWork.TypeRepository.GetAsync(e => e.Id == typeId);
                     if (inDatabase is null)
                     {
-                        throw new NotFoundException(nameof(Category), categoryId);
+                        throw new NotFoundException(nameof(Core.Entities.Type), typeId);
                     }
-                    if (entity.FoodCategories is null)
+                    if (entity.FoodTypes is null)
                     {
-                        entity.FoodCategories = new List<FoodCategory>();
+                        entity.FoodTypes = new List<FoodType>();
                     }
-                    entity.FoodCategories.Add(new FoodCategory
+                    entity.FoodTypes.Add(new FoodType
                     {
                         Food = entity,
-                        CategoryId = inDatabase.Id
+                        TypeId = inDatabase.Id
                     });
                 }
 

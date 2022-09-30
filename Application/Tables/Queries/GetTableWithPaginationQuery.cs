@@ -30,9 +30,9 @@ namespace Application.Tables.Queries
         {
             List<Expression<Func<Table, bool>>> filters = new();
             Func<IQueryable<Table>, IOrderedQueryable<Table>> orderBy = null;
-            string includeProperties = "";
+            string includeProperties = $"{nameof(Table.TableType)}";
 
-            filters.Add(e => e.IsDeleted == false);
+            filters.Add(e => !e.IsDeleted);
             switch (request.OrderBy)
             {
                 case (TableProperty.NumOfSeats):
@@ -54,10 +54,10 @@ namespace Application.Tables.Queries
                 case (TableProperty.Type):
                     if (request.IsDescending)
                     {
-                        orderBy = e => e.OrderByDescending(x => x.Type);
+                        orderBy = e => e.OrderByDescending(x => x.TableType.Name);
                         break;
                     }
-                    orderBy = e => e.OrderBy(x => x.Type);
+                    orderBy = e => e.OrderBy(x => x.TableType.Name);
                     break;
                 default:
                     break;

@@ -1,8 +1,5 @@
-﻿using Application.Categories.Response;
-using Application.Common.Mappings;
-using AutoMapper;
+﻿using Application.Common.Mappings;
 using Core.Entities;
-using Core.Enums;
 
 namespace Application.Reservations.Response
 {

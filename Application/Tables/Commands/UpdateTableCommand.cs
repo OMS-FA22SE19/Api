@@ -22,9 +22,7 @@ namespace Application.Tables.Commands
         [EnumDataType(typeof(TableStatus))]
         [JsonConverter(typeof(StringEnumConverter))]
         public TableStatus Status { get; set; }
-        [EnumDataType(typeof(TableType))]
-        [JsonConverter(typeof(StringEnumConverter))]
-        public TableType Type { get; set; }
+        public int TableTypeId { get; set; }
 
         public void Mapping(Profile profile)
         {
@@ -49,6 +47,11 @@ namespace Application.Tables.Commands
             if (entity is null)
             {
                 throw new NotFoundException(nameof(Table), request.Id);
+            }
+            var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == request.TableTypeId);
+            if (tableType is null)
+            {
+                throw new NotFoundException(nameof(Table.TableType), request.TableTypeId);
             }
             var updatedEntity = _mapper.Map<Table>(request);
 

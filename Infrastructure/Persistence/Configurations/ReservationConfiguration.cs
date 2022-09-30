@@ -26,6 +26,10 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(e => e.Status)
                 .HasColumnType("int");
 
+            builder.Property<int>("NumOfPeople")
+                .HasDefaultValue(1)
+                .HasColumnType("int");
+
             builder.Property<int>("TableId")
                 .HasColumnType("int");
 

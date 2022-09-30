@@ -1,20 +1,20 @@
-﻿using Application.Tables.Response;
-using Application.Models;
+﻿using Application.Models;
+using Application.Tables.Response;
 using AutoMapper;
+using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
-using Core.Entities;
 
 namespace Application.Tables.Queries
 {
-    public class GetTypeOfTableQuery : IRequest<Response<List<TableTypeDto>>>
+    public class GetTypeOfTableQuery : IRequest<Response<List<TableByTypeDto>>>
     {
         [Required]
         public int NumsOfPeople { get; init; }
     }
 
-    public class GetTypeOfTableQueryHandler : IRequestHandler<GetTypeOfTableQuery, Response<List<TableTypeDto>>>
+    public class GetTypeOfTableQueryHandler : IRequestHandler<GetTypeOfTableQuery, Response<List<TableByTypeDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -25,28 +25,29 @@ namespace Application.Tables.Queries
             _mapper = mapper;
         }
 
-        public async Task<Response<List<TableTypeDto>>> Handle(GetTypeOfTableQuery request, CancellationToken cancellationToken)
+        public async Task<Response<List<TableByTypeDto>>> Handle(GetTypeOfTableQuery request, CancellationToken cancellationToken)
         {
             var resultSeatNumber = await _unitOfWork.TableRepository.GetClosestNumOfSeatTable(request.NumsOfPeople);
-            if (resultSeatNumber == 0)
+            if (resultSeatNumber <= 0)
             {
-                return new Response<List<TableTypeDto>>("error");
+                return new Response<List<TableByTypeDto>>($"No available table for numOfSeat: {request.NumsOfPeople}");
             }
 
             var result = await _unitOfWork.TableRepository.GetTableWithSeatsNumber(resultSeatNumber);
 
-            List<TableTypeDto> ListTableType = new List<TableTypeDto>();
+            List<TableByTypeDto> ListTableType = new List<TableByTypeDto>();
 
             foreach (Table table in result)
             {
-                var tableType = ListTableType.SingleOrDefault(t => t.Type == table.Type);
+                var tableType = ListTableType.FirstOrDefault(t => t.TableTypeId == table.TableTypeId);
                 if (tableType == null)
                 {
                     List<int> tableIds = new List<int>();
                     tableIds.Add(table.Id);
-                    ListTableType.Add(new TableTypeDto()
+                    ListTableType.Add(new TableByTypeDto()
                     {
-                        Type = table.Type,
+                        TableTypeId = table.TableTypeId,
+                        TableTypeName = table.TableType.Name,
                         NumOfSeats = resultSeatNumber,
                         Total = 1,
                         TableIds = tableIds
@@ -58,7 +59,7 @@ namespace Application.Tables.Queries
                     tableType.TableIds.Add(table.Id);
                 }
             }
-            return new Response<List<TableTypeDto>>(ListTableType);
+            return new Response<List<TableByTypeDto>>(ListTableType);
         }
     }
 }

@@ -1,12 +1,12 @@
-﻿using Application.Reservations.Response;
+﻿using Application.Common.Exceptions;
 using Application.Models;
+using Application.Reservations.Response;
 using AutoMapper;
+using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
-using Application.Common.Exceptions;
-using Core.Entities;
-using Core.Enums;
 
 namespace Application.Reservations.Commands
 {

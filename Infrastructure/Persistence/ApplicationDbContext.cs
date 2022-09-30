@@ -27,15 +27,17 @@ namespace Infrastructure.Persistence
             _auditableEntitySaveChangesInterceptor = auditableEntitySaveChangesInterceptor;
         }
 
-        public DbSet<Category> Categories => Set<Category>();
+        public DbSet<Core.Entities.Type> Types => Set<Core.Entities.Type>();
         public DbSet<Food> Foods => Set<Food>();
-        public DbSet<FoodCategory> FoodCategories => Set<FoodCategory>();
+        public DbSet<FoodType> FoodTypes => Set<FoodType>();
+        public DbSet<CourseType> CourseTypes => Set<CourseType>();
         public DbSet<Menu> Menus => Set<Menu>();
         public DbSet<MenuFood> MenuFoods => Set<MenuFood>();
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
         public DbSet<Reservation> Reservations => Set<Reservation>();
         public DbSet<Table> Tables => Set<Table>();
+        public DbSet<TableType> TableTypes => Set<TableType>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

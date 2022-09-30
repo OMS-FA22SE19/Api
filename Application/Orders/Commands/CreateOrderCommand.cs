@@ -1,4 +1,5 @@
-﻿using Application.Common.Mappings;
+﻿using Application.Common.Exceptions;
+using Application.Common.Mappings;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Response;
@@ -41,15 +42,30 @@ namespace Application.Orders.Commands
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
             var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => !e.IsHidden);
+            var table = await _unitOfWork.TableRepository.GetAsync(e => e.Id == request.TableId && !e.IsDeleted, $"{nameof(Table.TableType)}");
+            if (table is null)
+            {
+                throw new NotFoundException(nameof(Order.Table), request.TableId);
+            }
+
+            var reservation = await _unitOfWork.ReservationRepository.GetReservationWithDateAndTableId(table.Id, DateTime.UtcNow.AddHours(7));
+            if (reservation is null)
+            {
+                throw new NotFoundException(nameof(Reservation), $"with TableId {table.Id}");
+            }
 
             var entity = new Order
             {
-                Id = $"{request.TableId}-{user.PhoneNumber}-{DateTime.UtcNow.AddHours(7).ToString("dd-MM-yyyy-HH:mm:ss")}",
+                Id = $"{table.Id}-{user.PhoneNumber}-{DateTime.UtcNow.AddHours(7).ToString("dd-MM-yyyy-HH:mm:ss")}",
                 UserId = user.Id,
+                TableId = table.Id,
                 Date = DateTime.UtcNow.AddHours(7),
                 Status = OrderStatus.Processing,
-                OrderDetails = new List<OrderDetail>()
+                OrderDetails = new List<OrderDetail>(),
             };
+
+            //Comment until online payment complete
+            //entity.PrePaid = reservation.NumOfPeople * table.TableType.ChargePerSeat;
 
             foreach (var dish in request.OrderDetails)
             {

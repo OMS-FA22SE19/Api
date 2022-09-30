@@ -1,9 +1,9 @@
-﻿using Application.Categories.Response;
-using Application.Foods.Queries;
+﻿using Application.Foods.Queries;
 using Application.Menus.Commands;
 using Application.Menus.Queries;
 using Application.Menus.Response;
 using Application.Models;
+using Application.Types.Response;
 using Core.Common;
 using Core.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -134,7 +134,7 @@ namespace Api.Controllers.V1
                 }
                 if (id != command.Id)
                 {
-                    var response = new Response<CategoryDto>("The Id do not match")
+                    var response = new Response<TypeDto>("The Id do not match")
                     {
                         StatusCode = HttpStatusCode.BadRequest
                     };
@@ -275,7 +275,7 @@ namespace Api.Controllers.V1
                 {
                     return BadRequest();
                 }
-                var query = new GetFoodWithMenuIdAndCategoryIdQuery()
+                var query = new GetFoodWithMenuIdAndTypeIdQuery()
                 {
                     MenuId = menuId
                 };
@@ -292,11 +292,11 @@ namespace Api.Controllers.V1
             }
         }
 
-        [HttpGet("{menuId}/Category/{categoryId}/Food")]
+        [HttpGet("{menuId}/Type/{categoryId}/Food")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetFoodWithMenuIdAndCategoryIdAsync(int menuId, int categoryId)
+        public async Task<IActionResult> GetFoodWithMenuIdAndTypeIdAsync(int menuId, int categoryId)
         {
             try
             {
@@ -308,10 +308,10 @@ namespace Api.Controllers.V1
                 {
                     return BadRequest();
                 }
-                var query = new GetFoodWithMenuIdAndCategoryIdQuery()
+                var query = new GetFoodWithMenuIdAndTypeIdQuery()
                 {
                     MenuId = menuId,
-                    CategoryId = categoryId
+                    TypeId = categoryId
                 };
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);

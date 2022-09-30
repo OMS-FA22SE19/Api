@@ -41,9 +41,17 @@ namespace Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasColumnType("nvarchar(300)");
 
+            builder.Property<int>("TableId")
+                .IsRequired()
+                .HasColumnType("int");
+
             builder.HasOne(e => e.User)
                 .WithMany(e => e.Orders)
                 .HasForeignKey(e => e.UserId);
+
+            builder.HasOne(e => e.Table)
+                .WithMany(e => e.Orders)
+                .HasForeignKey(e => e.TableId);
 
             builder.HasMany(e => e.OrderDetails)
                 .WithOne(e => e.Order)
