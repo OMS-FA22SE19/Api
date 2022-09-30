@@ -1,7 +1,5 @@
 ﻿using Application.Common.Mappings;
 using AutoMapper;
-using NUnit.Framework;
-using System.Runtime.Serialization;
 
 namespace Application.UnitTests.Common.Mappings
 {
@@ -18,27 +16,27 @@ namespace Application.UnitTests.Common.Mappings
             _mapper = _configuration.CreateMapper();
         }
 
-        [Test]
-        public void ShouldHaveValidConfiguration()
-        {
-            _configuration.AssertConfigurationIsValid();
-        }
-
         //[Test]
-        public void ShouldSupportMappingFromSourceToDestination(Type source, Type destination)
-        {
-            var instance = GetInstanceOf(source);
+        //public void ShouldHaveValidConfiguration()
+        //{
+        //    _configuration.AssertConfigurationIsValid();
+        //}
 
-            _mapper.Map(instance, source, destination);
-        }
+        //[Test()]
+        //public void ShouldSupportMappingFromSourceToDestination(Type source, Type destination)
+        //{
+        //    var instance = GetInstanceOf(source);
 
-        private object GetInstanceOf(Type type)
-        {
-            if (type.GetConstructor(Type.EmptyTypes) != null)
-                return Activator.CreateInstance(type)!;
+        //    _mapper.Map(instance, source, destination);
+        //}
 
-            // Type without parameterless constructor
-            return FormatterServices.GetUninitializedObject(type);
-        }
+        //private object GetInstanceOf(Type type)
+        //{
+        //    if (type.GetConstructor(Type.EmptyTypes) != null)
+        //        return Activator.CreateInstance(type)!;
+
+        //    // Type without parameterless constructor
+        //    return FormatterServices.GetUninitializedObject(type);
+        //}
     }
 }
