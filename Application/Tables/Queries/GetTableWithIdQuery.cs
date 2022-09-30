@@ -1,6 +1,7 @@
 ﻿using Application.Models;
 using Application.Tables.Response;
 using AutoMapper;
+using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
@@ -26,7 +27,7 @@ namespace Application.Tables.Queries
 
         public async Task<Response<TableDto>> Handle(GetTableWithIdQuery request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.TableRepository.GetAsync(e => e.Id == request.Id && e.IsDeleted == false);
+            var result = await _unitOfWork.TableRepository.GetAsync(e => e.Id == request.Id && !e.IsDeleted, $"{nameof(Table.TableType)}");
             var mappedResult = _mapper.Map<TableDto>(result);
             return new Response<TableDto>(mappedResult);
         }

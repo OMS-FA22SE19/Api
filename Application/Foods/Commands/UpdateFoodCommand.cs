@@ -7,6 +7,7 @@ using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
+using Type = Core.Entities.Type;
 
 namespace Application.Foods.Commands
 {
@@ -15,23 +16,24 @@ namespace Application.Foods.Commands
         [Required]
         public int Id { get; set; }
         [Required]
-        [StringLength(1000, MinimumLength = 5)]
+        [StringLength(1000, MinimumLength = 2)]
         public string Name { get; set; }
         [Required]
-        [StringLength(4000, MinimumLength = 5)]
+        [StringLength(4000, MinimumLength = 2)]
         public string Description { get; set; }
         [Required]
-        [StringLength(2000, MinimumLength = 5)]
+        [StringLength(2000, MinimumLength = 2)]
         public string Ingredient { get; set; }
         public bool Available { get; set; } = true;
-        [StringLength(2048, MinimumLength = 5)]
+        [StringLength(2048, MinimumLength = 2)]
         public string PictureUrl { get; set; }
+        public int CourseTypeId { get; set; }
 
-        public IList<int> Categories { get; set; }
+        public IList<int> Types { get; set; }
         public void Mapping(Profile profile)
         {
             profile.CreateMap<UpdateFoodCommand, Food>()
-                .ForSourceMember(dto => dto.Categories, opt => opt.DoNotValidate());
+                .ForSourceMember(dto => dto.Types, opt => opt.DoNotValidate());
         }
     }
 
@@ -48,35 +50,41 @@ namespace Application.Foods.Commands
 
         public async Task<Response<FoodDto>> Handle(UpdateFoodCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.Id);
+            var entity = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Food.FoodTypes)}");
             if (entity is null)
             {
                 throw new NotFoundException(nameof(Food), request.Id);
             }
+
+            var courseType = await _unitOfWork.CourseTypeRepository.GetAsync(e => e.Id == request.CourseTypeId && !e.IsDeleted);
+            if (courseType is null)
+            {
+                throw new NotFoundException(nameof(Food.CourseType), request.CourseTypeId);
+            }
             var updatedEntity = _mapper.Map<Food>(request);
 
-            if (entity.FoodCategories is not null)
+            if (entity.FoodTypes is not null)
             {
-                await _unitOfWork.FoodCategoryRepository.DeleteAsync(entity.FoodCategories);
+                await _unitOfWork.FoodTypeRepository.DeleteAsync(entity.FoodTypes);
             }
 
-            if (request.Categories != null && request.Categories.Any())
+            if (request.Types != null && request.Types.Any())
             {
-                foreach (var categoryId in request.Categories)
+                foreach (var categoryId in request.Types)
                 {
-                    var inDatabase = await _unitOfWork.CategoryRepository.GetAsync(e => e.Id == categoryId);
+                    var inDatabase = await _unitOfWork.TypeRepository.GetAsync(e => e.Id == categoryId);
                     if (inDatabase is null)
                     {
-                        throw new NotFoundException(nameof(Category), categoryId);
+                        throw new NotFoundException(nameof(Type), categoryId);
                     }
-                    if (updatedEntity.FoodCategories is null)
+                    if (updatedEntity.FoodTypes is null)
                     {
-                        updatedEntity.FoodCategories = new List<FoodCategory>();
+                        updatedEntity.FoodTypes = new List<FoodType>();
                     }
-                    updatedEntity.FoodCategories.Add(new FoodCategory
+                    updatedEntity.FoodTypes.Add(new FoodType
                     {
                         FoodId = entity.Id,
-                        CategoryId = inDatabase.Id
+                        TypeId = inDatabase.Id
                     });
                 }
 

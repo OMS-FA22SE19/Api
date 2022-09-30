@@ -1,5 +1,4 @@
 ﻿using Core.Entities;
-using Core.Enums;
 
 namespace Core.Interfaces
 {
@@ -7,7 +6,7 @@ namespace Core.Interfaces
     {
         Task<int> GetClosestNumOfSeatTable(int NumOfPeople);
         Task<int> GetTableAvailableForReservation(List<int> tableIds, DateTime StartTime, DateTime EndTime);
-        Task<List<Table>> GetTableOnNumOfSeatAndType(int NumOfSeat, TableType type);
+        Task<List<Table>> GetTableOnNumOfSeatAndType(int NumOfSeat, int tableTypeId);
         Task<List<Table>> GetTableWithSeatsNumber(int NumOfSeats);
     }
 }

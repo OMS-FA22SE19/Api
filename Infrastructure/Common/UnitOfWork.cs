@@ -9,13 +9,15 @@ namespace Infrastructure.Common
         private readonly IApplicationDbContext _context;
         private ITableRepository _tableRepository;
         private IReservationRepository _reservationRepository;
-        private ICategoryRepository _categoryRepository;
+        private ITypeRepository _typeRepository;
+        private ICourseTypeRepository _courseTypeRepository;
         private IFoodRepository _foodRepository;
-        private IFoodCategoryRepository _foodCategoryRepository;
+        private IFoodTypeRepository _foodTypeRepository;
         private IMenuRepository _menuRepository;
         private IMenuFoodRepository _menuFoodRepository;
         private IOrderRepository _orderRepository;
         private IOrderDetailRepository _orderDetailRepository;
+        private ITableTypeRepository _tableTypeRepository;
 
         public UnitOfWork(IApplicationDbContext context)
         {
@@ -54,26 +56,39 @@ namespace Infrastructure.Common
                 return _foodRepository;
             }
         }
-        public ICategoryRepository CategoryRepository
+        public ITypeRepository TypeRepository
         {
             get
             {
-                if (_categoryRepository is null)
+                if (_typeRepository is null)
                 {
-                    _categoryRepository = new CategoryRepository(_context);
+                    _typeRepository = new TypeRepository(_context);
                 }
-                return _categoryRepository;
+                return _typeRepository;
             }
         }
-        public IFoodCategoryRepository FoodCategoryRepository
+
+        public ICourseTypeRepository CourseTypeRepository
         {
             get
             {
-                if (_foodCategoryRepository is null)
+                if (_courseTypeRepository is null)
                 {
-                    _foodCategoryRepository = new FoodCategoryRepository(_context);
+                    _courseTypeRepository = new CourseTypeRepository(_context);
                 }
-                return _foodCategoryRepository;
+                return _courseTypeRepository;
+            }
+        }
+
+        public IFoodTypeRepository FoodTypeRepository
+        {
+            get
+            {
+                if (_foodTypeRepository is null)
+                {
+                    _foodTypeRepository = new FoodTypeRepository(_context);
+                }
+                return _foodTypeRepository;
             }
         }
 
@@ -121,6 +136,18 @@ namespace Infrastructure.Common
                     _orderDetailRepository = new OrderDetailRepository(_context);
                 }
                 return _orderDetailRepository;
+            }
+        }
+
+        public ITableTypeRepository TableTypeRepository
+        {
+            get
+            {
+                if (_tableTypeRepository is null)
+                {
+                    _tableTypeRepository = new TableTypeRepository(_context);
+                }
+                return _tableTypeRepository;
             }
         }
 

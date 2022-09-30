@@ -1,12 +1,10 @@
-﻿using Application.Reservations.Response;
-using Application.Models;
+﻿using Application.Models;
+using Application.Reservations.Response;
 using AutoMapper;
+using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
-using Core.Entities;
-using System.Collections.Generic;
-using Core.Enums;
 
 namespace Application.Reservations.Queries
 {
@@ -17,7 +15,7 @@ namespace Application.Reservations.Queries
         [Required]
         public int NumOfSeats { get; set; }
         [Required]
-        public TableType tableType { get; set; }
+        public int TableTypeId { get; set; }
     }
 
     public class GetBusyTimeOfDateQueryHandler : IRequestHandler<GetBusyTimeOfDateQuery, Response<List<BusyTimeDto>>>
@@ -30,12 +28,12 @@ namespace Application.Reservations.Queries
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
-        
+
         public async Task<Response<List<BusyTimeDto>>> Handle(GetBusyTimeOfDateQuery request, CancellationToken cancellationToken)
         {
             var result = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.date);
 
-            var TableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.tableType);
+            var TableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
             List<int> tableIds = TableList.Select(e => e.Id).ToList();
 
             List<BusyTimeDto> listOfBusyTimes = new List<BusyTimeDto>();
@@ -69,17 +67,17 @@ namespace Application.Reservations.Queries
                         else
                         {
                             int counter = 0;
-                            foreach(BusyTimeDto busyTime in listOfBusyTimes.ToList())
+                            foreach (BusyTimeDto busyTime in listOfBusyTimes.ToList())
                             {
                                 if (counter == 0)
                                 {
                                     listOfBusyTimes = new List<BusyTimeDto>();
                                 }
-                                
+
                                 foreach (BusyTimeDto BusyTimeForThisTable in listOfBusyTimesForThisTable)
                                 {
-                                    if (busyTime.StartTime < BusyTimeForThisTable.StartTime 
-                                        && busyTime.EndTime < BusyTimeForThisTable.EndTime 
+                                    if (busyTime.StartTime < BusyTimeForThisTable.StartTime
+                                        && busyTime.EndTime < BusyTimeForThisTable.EndTime
                                         && busyTime.EndTime > BusyTimeForThisTable.StartTime)
                                     {
                                         busyTime.StartTime = BusyTimeForThisTable.StartTime;

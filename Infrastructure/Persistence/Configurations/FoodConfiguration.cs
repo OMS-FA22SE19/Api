@@ -54,11 +54,18 @@ namespace Infrastructure.Persistence.Configurations
                 .HasMaxLength(2048)
                 .HasColumnType("nvarchar(2048)");
 
+            builder.Property<int>("CourseTypeId")
+                .HasColumnType("int");
+
+            builder.HasOne(e => e.CourseType)
+                .WithMany(e => e.Foods)
+                .HasForeignKey(e => e.CourseTypeId);
+
             builder.HasMany(e => e.OrderDetails)
                 .WithOne(e => e.Food)
                 .HasForeignKey(e => e.FoodId);
 
-            builder.HasMany(e => e.FoodCategories)
+            builder.HasMany(e => e.FoodTypes)
                 .WithOne(e => e.Food)
                 .HasForeignKey(e => e.FoodId);
 

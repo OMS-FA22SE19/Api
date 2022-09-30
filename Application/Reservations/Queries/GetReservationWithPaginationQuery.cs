@@ -2,12 +2,11 @@
 using Application.Reservations.Response;
 using AutoMapper;
 using Core.Common;
+using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using System.Linq.Expressions;
-using Application.Foods.Response;
-using Core.Enums;
-using Core.Entities;
 
 namespace Application.Reservations.Queries
 {

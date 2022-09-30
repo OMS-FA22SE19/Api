@@ -1,16 +1,14 @@
-﻿using Application.Categories.Response;
-using Application.Common.Mappings;
+﻿using Application.Common.Mappings;
 using Application.Models;
 using Application.Reservations.Response;
 using AutoMapper;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 using MediatR;
-using System.ComponentModel.DataAnnotations;
-using Core.Enums;
-using Application.Tables.Response;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.Reservations.Commands
 {
@@ -23,7 +21,7 @@ namespace Application.Reservations.Commands
         [Required]
         public int NumOfSeats { get; set; }
         [Required]
-        public TableType tableType { get; set; }
+        public int TableTypeId { get; set; }
         public bool IsPriorFoodOrder { get; set; }
 
         public void Mapping(Profile profile)
@@ -54,7 +52,7 @@ namespace Application.Reservations.Commands
 
             entity.Status = ReservationStatus.Reserved;
 
-            var TableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.tableType);
+            var TableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
             int TableId;
             List<int> tableIds = TableList.Select(e => e.Id).ToList();
             if (tableIds.Any())

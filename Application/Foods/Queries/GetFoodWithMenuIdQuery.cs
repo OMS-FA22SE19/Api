@@ -15,7 +15,7 @@ namespace Application.Foods.Queries
         [Required]
         public int MenuId { get; init; }
         [Required]
-        public int CategoryId { get; set; }
+        public int TypeId { get; set; }
     }
 
     public sealed class GetFoodWithMenuIdQueryHandler : IRequestHandler<GetFoodWithMenuIdQuery, Response<List<FoodDto>>>
@@ -39,9 +39,9 @@ namespace Application.Foods.Queries
 
             List<Expression<Func<Food, bool>>> filters = new();
             Func<IQueryable<Food>, IOrderedQueryable<Food>> orderBy = null;
-            string includeProperties = $"{nameof(Food.FoodCategories)}.{nameof(FoodCategory.Category)},{nameof(Food.MenuFoods)}";
+            string includeProperties = $"{nameof(Food.FoodTypes)}.{nameof(FoodType.Type)},{nameof(Food.MenuFoods)}";
 
-            filters.Add(e => e.FoodCategories.Any(c => c.CategoryId == request.CategoryId) && e.MenuFoods.Any(m => m.MenuId == request.MenuId));
+            filters.Add(e => e.FoodTypes.Any(c => c.TypeId == request.TypeId) && e.MenuFoods.Any(m => m.MenuId == request.MenuId));
 
             var result = await _unitOfWork.FoodRepository.GetAllAsync(filters, orderBy, includeProperties);
             var mappedResult = _mapper.Map<List<FoodDto>>(result);

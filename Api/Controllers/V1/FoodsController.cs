@@ -1,8 +1,8 @@
-﻿using Application.Categories.Response;
-using Application.Foods.Commands;
+﻿using Application.Foods.Commands;
 using Application.Foods.Queries;
 using Application.Foods.Response;
 using Application.Models;
+using Application.Types.Response;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -111,7 +111,7 @@ namespace Api.Controllers.V1
                 }
                 if (id != command.Id)
                 {
-                    var response = new Response<CategoryDto>("The Id do not match")
+                    var response = new Response<TypeDto>("The Id do not match")
                     {
                         StatusCode = HttpStatusCode.BadRequest
                     };

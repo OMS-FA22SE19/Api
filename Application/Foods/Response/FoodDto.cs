@@ -1,5 +1,6 @@
-﻿using Application.Categories.Response;
-using Application.Common.Mappings;
+﻿using Application.Common.Mappings;
+using Application.CourseTypes.Response;
+using Application.Types.Response;
 using AutoMapper;
 using Core.Entities;
 
@@ -14,7 +15,8 @@ namespace Application.Foods.Response
         public bool Available { get; set; } = true;
         public string PictureUrl { get; set; }
         public bool IsDeleted { get; set; }
-        public IList<CategoryDto> Categories { get; set; }
+        public CourseTypeDto CourseType { get; set; }
+        public IList<TypeDto> Types { get; set; }
 
         public void Mapping(Profile profile)
         {

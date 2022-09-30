@@ -1,11 +1,8 @@
-﻿using Application.Common.Mappings;
-using Core.Common;
-using Core.Common.Interfaces;
+﻿using Core.Common.Interfaces;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories
 {
@@ -19,12 +16,12 @@ namespace Infrastructure.Repositories
             _dbSetReservation = context.Reservations;
         }
 
-        public async Task<List<Table>> GetTableOnNumOfSeatAndType(int NumOfSeat, TableType type)
+        public async Task<List<Table>> GetTableOnNumOfSeatAndType(int NumOfSeat, int tableTypeId)
         {
             IQueryable<Table> query = _dbSet;
 
 
-            query = query.Where(t => t.Type == type && t.NumOfSeats == NumOfSeat && t.IsDeleted == false);
+            query = query.Where(t => t.TableTypeId == tableTypeId && t.NumOfSeats == NumOfSeat && t.IsDeleted == false);
 
             return await query.ToListAsync();
         }
@@ -33,12 +30,13 @@ namespace Infrastructure.Repositories
         {
             IQueryable<Table> query = _dbSet;
             int NumOfSeats;
-            query = query.Where(t => t.NumOfSeats >= NumOfPeople && t.IsDeleted == false).OrderBy(t => t.NumOfSeats);
+            query = query.Where(t => t.NumOfSeats >= NumOfPeople && !t.IsDeleted).OrderBy(t => t.NumOfSeats);
             if (query.Any())
             {
                 Table? FirstTable = await query.FirstOrDefaultAsync();
                 NumOfSeats = FirstTable.NumOfSeats;
-            } else return 0;
+            }
+            else return 0;
 
             return NumOfSeats;
         }
@@ -46,10 +44,10 @@ namespace Infrastructure.Repositories
         public async Task<List<Table>> GetTableWithSeatsNumber(int NumOfSeats)
         {
             IQueryable<Table> query = _dbSet;
+            string includeStrings = $"{nameof(Table.TableType)}";
+            query = query.Where(t => t.NumOfSeats == NumOfSeats && !t.IsDeleted);
 
-            query = query.Where(t => t.NumOfSeats == NumOfSeats);
-
-            return await query.ToListAsync();
+            return await query.Include(includeStrings).ToListAsync();
         }
 
         public async Task<int> GetTableAvailableForReservation(List<int> tableIds, DateTime StartTime, DateTime EndTime)

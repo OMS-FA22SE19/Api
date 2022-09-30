@@ -1,6 +1,6 @@
-﻿using Application.Categories.Response;
-using Application.Foods.Response;
+﻿using Application.Foods.Response;
 using Application.Models;
+using Application.Types.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
@@ -28,17 +28,17 @@ namespace Application.Foods.Queries
 
         public async Task<Response<FoodDto>> Handle(GetFoodWithIdQuery request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Food.FoodCategories)}.{nameof(Category)}");
+            var result = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Food.FoodTypes)}.{nameof(Core.Entities.Type)},{nameof(Food.CourseType)}");
             var mappedResult = _mapper.Map<FoodDto>(result);
-            if (mappedResult.Categories is null)
+            if (mappedResult.Types is null)
             {
-                mappedResult.Categories = new List<CategoryDto>();
+                mappedResult.Types = new List<TypeDto>();
             }
-            foreach (var category in result.FoodCategories.Select(e => e.Category))
+            foreach (var foodType in result.FoodTypes.Select(e => e.Type))
             {
-                if (category is not null)
+                if (foodType is not null)
                 {
-                    mappedResult.Categories.Add(_mapper.Map<CategoryDto>(category));
+                    mappedResult.Types.Add(_mapper.Map<TypeDto>(foodType));
                 }
             }
             return new Response<FoodDto>(mappedResult);

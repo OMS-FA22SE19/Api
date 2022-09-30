@@ -9,8 +9,10 @@ namespace Core.Entities
         [Range(1, int.MaxValue)]
         public int NumOfSeats { get; set; }
         public TableStatus Status { get; set; }
-        public TableType Type { get; set; }
+        public int TableTypeId { get; set; }
 
         public IList<Reservation> Reservations { get; set; }
+        public IList<Order> Orders { get; set; }
+        public TableType TableType { get; set; }
     }
 }

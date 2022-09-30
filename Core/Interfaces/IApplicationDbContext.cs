@@ -6,15 +6,17 @@ namespace Core.Common.Interfaces
 {
     public interface IApplicationDbContext : IDisposable
     {
-        DbSet<Category> Categories { get; }
+        DbSet<Entities.Type> Types { get; }
         DbSet<Food> Foods { get; }
-        DbSet<FoodCategory> FoodCategories { get; }
+        DbSet<FoodType> FoodTypes { get; }
+        DbSet<CourseType> CourseTypes { get; }
         DbSet<Menu> Menus { get; }
         DbSet<MenuFood> MenuFoods { get; }
         DbSet<Order> Orders { get; }
         DbSet<OrderDetail> OrderDetails { get; }
         DbSet<Reservation> Reservations { get; }
         DbSet<Table> Tables { get; }
+        DbSet<TableType> TableTypes { get; }
 
         EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
         Task<int> SaveChangesAsync(CancellationToken cancellationToken);

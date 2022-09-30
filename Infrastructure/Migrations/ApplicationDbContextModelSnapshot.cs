@@ -63,7 +63,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
@@ -93,7 +92,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Core.Entities.Category", b =>
+            modelBuilder.Entity("Core.Entities.CourseType", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -125,7 +124,7 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("CourseTypes", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.Food", b =>
@@ -138,6 +137,9 @@ namespace Infrastructure.Migrations
 
                     b.Property<bool>("Available")
                         .HasColumnType("bit");
+
+                    b.Property<int>("CourseTypeId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
@@ -178,24 +180,26 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CourseTypeId");
+
                     b.ToTable("Foods", (string)null);
                 });
 
-            modelBuilder.Entity("Core.Entities.FoodCategory", b =>
+            modelBuilder.Entity("Core.Entities.FoodType", b =>
                 {
-                    b.Property<int>("CategoryId")
+                    b.Property<int>("TypeId")
                         .HasColumnType("int");
 
                     b.Property<int>("FoodId")
                         .HasColumnType("int");
 
-                    b.HasKey("CategoryId", "FoodId");
-
-                    b.HasIndex("CategoryId");
+                    b.HasKey("TypeId", "FoodId");
 
                     b.HasIndex("FoodId");
 
-                    b.ToTable("FoodCategory", (string)null);
+                    b.HasIndex("TypeId");
+
+                    b.ToTable("FoodType", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.Menu", b =>
@@ -297,11 +301,16 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<int>("TableId")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserId")
                         .IsRequired()
                         .HasColumnType("nvarchar(300)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("TableId");
 
                     b.HasIndex("UserId");
 
@@ -351,6 +360,11 @@ namespace Infrastructure.Migrations
 
                     b.Property<bool>("IsPriorFoodOrder")
                         .HasColumnType("bit");
+
+                    b.Property<int>("NumOfPeople")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
@@ -405,12 +419,70 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int>("Type")
+                    b.Property<int>("TableTypeId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TableTypeId");
+
                     b.ToTable("Tables", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.TableType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<double>("ChargePerSeat")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("TableTypes", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.Type", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Types", (string)null);
                 });
 
             modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.DeviceFlowCodes", b =>
@@ -691,23 +763,34 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Core.Entities.FoodCategory", b =>
+            modelBuilder.Entity("Core.Entities.Food", b =>
                 {
-                    b.HasOne("Core.Entities.Category", "Category")
-                        .WithMany("FoodCategories")
-                        .HasForeignKey("CategoryId")
+                    b.HasOne("Core.Entities.CourseType", "CourseType")
+                        .WithMany("Foods")
+                        .HasForeignKey("CourseTypeId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CourseType");
+                });
+
+            modelBuilder.Entity("Core.Entities.FoodType", b =>
+                {
                     b.HasOne("Core.Entities.Food", "Food")
-                        .WithMany("FoodCategories")
+                        .WithMany("FoodTypes")
                         .HasForeignKey("FoodId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Category");
+                    b.HasOne("Core.Entities.Type", "Type")
+                        .WithMany("FoodTypes")
+                        .HasForeignKey("TypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Food");
+
+                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("Core.Entities.MenuFood", b =>
@@ -731,11 +814,19 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Entities.Order", b =>
                 {
+                    b.HasOne("Core.Entities.Table", "Table")
+                        .WithMany("Orders")
+                        .HasForeignKey("TableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Core.Entities.ApplicationUser", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Table");
 
                     b.Navigation("User");
                 });
@@ -776,6 +867,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("Table");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Core.Entities.Table", b =>
+                {
+                    b.HasOne("Core.Entities.TableType", "TableType")
+                        .WithMany("Tables")
+                        .HasForeignKey("TableTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TableType");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -836,14 +938,14 @@ namespace Infrastructure.Migrations
                     b.Navigation("Reservations");
                 });
 
-            modelBuilder.Entity("Core.Entities.Category", b =>
+            modelBuilder.Entity("Core.Entities.CourseType", b =>
                 {
-                    b.Navigation("FoodCategories");
+                    b.Navigation("Foods");
                 });
 
             modelBuilder.Entity("Core.Entities.Food", b =>
                 {
-                    b.Navigation("FoodCategories");
+                    b.Navigation("FoodTypes");
 
                     b.Navigation("MenuFoods");
 
@@ -862,7 +964,19 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Entities.Table", b =>
                 {
+                    b.Navigation("Orders");
+
                     b.Navigation("Reservations");
+                });
+
+            modelBuilder.Entity("Core.Entities.TableType", b =>
+                {
+                    b.Navigation("Tables");
+                });
+
+            modelBuilder.Entity("Core.Entities.Type", b =>
+                {
+                    b.Navigation("FoodTypes");
                 });
 #pragma warning restore 612, 618
         }

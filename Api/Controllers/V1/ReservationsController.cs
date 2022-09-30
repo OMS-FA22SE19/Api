@@ -1,12 +1,11 @@
-﻿using Application.Reservations.Commands;
+﻿using Application.Models;
+using Application.Reservations.Commands;
 using Application.Reservations.Queries;
 using Application.Reservations.Response;
-using Application.Models;
+using Application.Tables.Response;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using Application.Tables.Commands;
-using Application.Tables.Response;
 
 namespace Api.Controllers.V1
 {

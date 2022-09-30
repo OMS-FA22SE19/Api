@@ -5,12 +5,14 @@
         ITableRepository TableRepository { get; }
         IReservationRepository ReservationRepository { get; }
         IFoodRepository FoodRepository { get; }
-        ICategoryRepository CategoryRepository { get; }
-        IFoodCategoryRepository FoodCategoryRepository { get; }
+        ITypeRepository TypeRepository { get; }
+        ICourseTypeRepository CourseTypeRepository { get; }
+        IFoodTypeRepository FoodTypeRepository { get; }
         IMenuRepository MenuRepository { get; }
         IMenuFoodRepository MenuFoodRepository { get; }
         IOrderRepository OrderRepository { get; }
-        public IOrderDetailRepository OrderDetailRepository { get; }
+        IOrderDetailRepository OrderDetailRepository { get; }
+        ITableTypeRepository TableTypeRepository { get; }
         Task CompleteAsync(CancellationToken cancellationToken);
     }
 }
