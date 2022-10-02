@@ -33,7 +33,7 @@ namespace Application.Foods.Queries
         {
             List<Expression<Func<Food, bool>>> filters = new();
             Func<IQueryable<Food>, IOrderedQueryable<Food>> orderBy = null;
-            string includeProperties = $"{nameof(Food.FoodTypes)}.{nameof(Type)}";
+            string includeProperties = $"{nameof(Food.FoodTypes)}.{nameof(Type)},{nameof(Food.CourseType)}";
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
