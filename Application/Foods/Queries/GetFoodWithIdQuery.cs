@@ -28,7 +28,7 @@ namespace Application.Foods.Queries
 
         public async Task<Response<FoodDto>> Handle(GetFoodWithIdQuery request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Food.FoodTypes)}.{nameof(Core.Entities.Type)},{nameof(Food.CourseType)}");
+            var result = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Food.FoodTypes)}.{nameof(FoodType.Type)},{nameof(Food.CourseType)}");
             var mappedResult = _mapper.Map<FoodDto>(result);
             if (mappedResult.Types is null)
             {
