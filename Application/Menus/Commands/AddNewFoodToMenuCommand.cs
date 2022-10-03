@@ -25,6 +25,7 @@ namespace Application.Menus.Commands
         [StringLength(2000, MinimumLength = 2)]
         public string Ingredient { get; set; }
         public bool Available { get; set; } = true;
+        [Required]
         public IFormFile Picture { get; set; }
         public int CourseTypeId { get; set; }
 
