@@ -1,8 +1,10 @@
 ﻿using Application.Common.Exceptions;
 using Application.Foods.Response;
 using Application.Models;
+using Application.Types.Response;
 using AutoMapper;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
@@ -10,12 +12,13 @@ using System.Linq.Expressions;
 
 namespace Application.Foods.Queries
 {
-    public class GetFoodWithMenuIdQuery : IRequest<Response<List<FoodDto>>>
+    public class GetFoodWithMenuIdQuery : PaginationRequest, IRequest<Response<List<FoodDto>>>
     {
         [Required]
         public int MenuId { get; init; }
-        [Required]
-        public int TypeId { get; set; }
+        public int? CourseTypeId { get; init; }
+        public int? TypeId { get; init; }
+        public new FoodProperty? OrderBy { get; init; }
     }
 
     public sealed class GetFoodWithMenuIdQueryHandler : IRequestHandler<GetFoodWithMenuIdQuery, Response<List<FoodDto>>>
@@ -39,13 +42,73 @@ namespace Application.Foods.Queries
 
             List<Expression<Func<Food, bool>>> filters = new();
             Func<IQueryable<Food>, IOrderedQueryable<Food>> orderBy = null;
-            string includeProperties = $"{nameof(Food.FoodTypes)}.{nameof(FoodType.Type)},{nameof(Food.MenuFoods)}";
+            string includeProperties = $"{nameof(Food.FoodTypes)}.{nameof(FoodType.Type)},{nameof(Food.MenuFoods)},{nameof(Food.CourseType)}";
 
-            filters.Add(e => e.FoodTypes.Any(c => c.TypeId == request.TypeId) && e.MenuFoods.Any(m => m.MenuId == request.MenuId));
+            filters.Add(e => e.MenuFoods.Any(m => m.MenuId == request.MenuId));
 
+            if (request.CourseTypeId is not null)
+            {
+                filters.Add(e => e.CourseTypeId == request.CourseTypeId);
+            }
+            if (request.TypeId is not null)
+            {
+                filters.Add(e => e.FoodTypes.Any(x => x.TypeId == request.TypeId));
+            }
+
+            switch (request.OrderBy)
+            {
+                case (FoodProperty.Name):
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.Name);
+                        break;
+                    }
+                    orderBy = e => e.OrderBy(x => x.Name);
+                    break;
+                case (FoodProperty.Description):
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.Description);
+                        break;
+                    }
+                    orderBy = e => e.OrderBy(x => x.Description);
+                    break;
+                case (FoodProperty.Ingredient):
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.Ingredient);
+                        break;
+                    }
+                    orderBy = e => e.OrderBy(x => x.Ingredient);
+                    break;
+                case (FoodProperty.Available):
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.Available);
+                        break;
+                    }
+                    orderBy = e => e.OrderBy(x => x.Available);
+                    break;
+                default:
+                    break;
+            }
             var result = await _unitOfWork.FoodRepository.GetAllAsync(filters, orderBy, includeProperties);
             var mappedResult = _mapper.Map<List<FoodDto>>(result);
+            foreach (var item in mappedResult)
+            {
+                if (item.Types is null)
+                {
+                    item.Types = new List<TypeDto>();
+                }
+                foreach (var foodType in result.FirstOrDefault(e => e.Id == item.Id)?.FoodTypes?.Select(e => e.Type))
+                {
+                    if (foodType is not null)
+                    {
+                        item.Types.Add(_mapper.Map<TypeDto>(foodType));
 
+                    }
+                }
+            }
             return new Response<List<FoodDto>>(mappedResult);
         }
     }

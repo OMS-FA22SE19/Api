@@ -1,4 +1,5 @@
-﻿using Application.CourseTypes.Commands;
+﻿using Application.Common.Exceptions;
+using Application.CourseTypes.Commands;
 using Application.CourseTypes.Queries;
 using Application.CourseTypes.Response;
 using Application.Models;
@@ -60,6 +61,10 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
             }
+            catch (NotFoundException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var response = new Response<CourseTypeDto>(ex.Message)
@@ -85,6 +90,10 @@ namespace Api.Controllers.V1
 
                 var result = await Mediator.Send(command);
                 return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -124,6 +133,10 @@ namespace Api.Controllers.V1
                     return NoContent();
                 }
                 return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

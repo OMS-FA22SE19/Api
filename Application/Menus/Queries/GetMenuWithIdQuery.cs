@@ -1,4 +1,5 @@
-﻿using Application.Menus.Response;
+﻿using Application.Common.Exceptions;
+using Application.Menus.Response;
 using Application.Models;
 using AutoMapper;
 using Core.Entities;
@@ -36,6 +37,10 @@ namespace Application.Menus.Queries
             else
             {
                 result = await _unitOfWork.MenuRepository.GetAsync(e => e.Id == request.Id);
+            }
+            if (result is null)
+            {
+                throw new NotFoundException(nameof(Menu), request.Id);
             }
             var mappedResult = _mapper.Map<MenuDto>(result);
             return new Response<MenuDto>(mappedResult);

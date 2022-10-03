@@ -1,4 +1,5 @@
-﻿using Application.Models;
+﻿using Application.Common.Exceptions;
+using Application.Models;
 using Application.OrderDetails.Commands;
 using Application.OrderDetails.Queries;
 using Application.OrderDetails.Response;
@@ -60,6 +61,10 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
             }
+            catch (NotFoundException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var response = new Response<OrderDetailDto>(ex.Message)
@@ -98,6 +103,10 @@ namespace Api.Controllers.V1
                     return NoContent();
                 }
                 return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

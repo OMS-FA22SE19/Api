@@ -1,4 +1,5 @@
-﻿using Application.Foods.Response;
+﻿using Application.Common.Exceptions;
+using Application.Foods.Response;
 using Application.Models;
 using Application.Types.Response;
 using AutoMapper;
@@ -29,6 +30,10 @@ namespace Application.Foods.Queries
         public async Task<Response<FoodDto>> Handle(GetFoodWithIdQuery request, CancellationToken cancellationToken)
         {
             var result = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Food.FoodTypes)}.{nameof(FoodType.Type)},{nameof(Food.CourseType)}");
+            if (result is null)
+            {
+                throw new NotFoundException(nameof(Food), request.Id);
+            }
             var mappedResult = _mapper.Map<FoodDto>(result);
             if (mappedResult.Types is null)
             {
