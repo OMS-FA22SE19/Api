@@ -1,4 +1,5 @@
-﻿using Application.Models;
+﻿using Application.Common.Exceptions;
+using Application.Models;
 using Application.Tables.Response;
 using AutoMapper;
 using Core.Entities;
@@ -28,6 +29,10 @@ namespace Application.Tables.Queries
         public async Task<Response<TableDto>> Handle(GetTableWithIdQuery request, CancellationToken cancellationToken)
         {
             var result = await _unitOfWork.TableRepository.GetAsync(e => e.Id == request.Id && !e.IsDeleted, $"{nameof(Table.TableType)}");
+            if (result is null)
+            {
+                throw new NotFoundException(nameof(Table), $"with {request.Id}");
+            }
             var mappedResult = _mapper.Map<TableDto>(result);
             return new Response<TableDto>(mappedResult);
         }

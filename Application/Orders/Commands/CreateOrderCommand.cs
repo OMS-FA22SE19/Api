@@ -42,6 +42,10 @@ namespace Application.Orders.Commands
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
             var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => !e.IsHidden);
+            if (availableMenu is null)
+            {
+                throw new NotFoundException(nameof(Menu), $"No available {nameof(Menu)}");
+            }
             var table = await _unitOfWork.TableRepository.GetAsync(e => e.Id == request.TableId && !e.IsDeleted, $"{nameof(Table.TableType)}");
             if (table is null)
             {

@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Foods.Response;
 using Application.Models;
@@ -6,6 +7,7 @@ using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.Foods.Commands
@@ -22,8 +24,7 @@ namespace Application.Foods.Commands
         [StringLength(2000, MinimumLength = 2)]
         public string Ingredient { get; set; }
         public bool Available { get; set; } = true;
-        [StringLength(2048, MinimumLength = 2)]
-        public string PictureUrl { get; set; }
+        public IFormFile Picture { get; set; }
         public int CourseTypeId { get; set; }
 
         public IList<int>? Types { get; set; }
@@ -38,11 +39,13 @@ namespace Application.Foods.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IUploadService _uploadService;
 
-        public CreateFoodCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public CreateFoodCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IUploadService uploadService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _uploadService = uploadService;
         }
 
         public async Task<Response<FoodDto>> Handle(CreateFoodCommand request, CancellationToken cancellationToken)
@@ -76,6 +79,9 @@ namespace Application.Foods.Commands
                 }
 
             }
+
+            var pictureUrl = await _uploadService.UploadAsync(request.Picture, "Foods");
+            entity.PictureUrl = pictureUrl;
             var result = await _unitOfWork.FoodRepository.InsertAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)

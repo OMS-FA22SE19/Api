@@ -1,4 +1,5 @@
-﻿using Application.Models;
+﻿using Application.Common.Exceptions;
+using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Response;
 using AutoMapper;
@@ -30,6 +31,10 @@ namespace Application.Orders.Queries
         public async Task<Response<OrderDto>> Handle(GetOrderWithIdQuery request, CancellationToken cancellationToken)
         {
             var result = await _unitOfWork.OrderRepository.GetAsync(e => e.Id.Equals(request.Id), $"{nameof(Order.OrderDetails)}.{nameof(OrderDetail.Food)},{nameof(Order.User)}");
+            if (result is null)
+            {
+                throw new NotFoundException(nameof(Order), $"with TableId {request.Id}");
+            }
             var mappedResult = _mapper.Map<OrderDto>(result);
             double total = 0;
 

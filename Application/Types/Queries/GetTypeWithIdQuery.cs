@@ -1,6 +1,8 @@
-﻿using Application.Models;
+﻿using Application.Common.Exceptions;
+using Application.Models;
 using Application.Types.Response;
 using AutoMapper;
+using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
@@ -27,6 +29,10 @@ namespace Application.Types.Queries
         public async Task<Response<TypeDto>> Handle(GetTypeWithIdQuery request, CancellationToken cancellationToken)
         {
             var result = await _unitOfWork.TypeRepository.GetAsync(e => e.Id == request.Id);
+            if (result is null)
+            {
+                throw new NotFoundException(nameof(FoodType), request.Id);
+            }
             var mappedResult = _mapper.Map<TypeDto>(result);
             return new Response<TypeDto>(mappedResult);
         }

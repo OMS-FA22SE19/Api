@@ -1,6 +1,8 @@
-﻿using Application.Models;
+﻿using Application.Common.Exceptions;
+using Application.Models;
 using Application.Reservations.Response;
 using AutoMapper;
+using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
@@ -27,6 +29,10 @@ namespace Application.Reservations.Queries
         public async Task<Response<ReservationDto>> Handle(GetReservationWithIdQuery request, CancellationToken cancellationToken)
         {
             var result = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.Id);
+            if (result is null)
+            {
+                throw new NotFoundException(nameof(Reservation), $"with {request.Id}");
+            }
             var mappedResult = _mapper.Map<ReservationDto>(result);
             return new Response<ReservationDto>(mappedResult);
         }

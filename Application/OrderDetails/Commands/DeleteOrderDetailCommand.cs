@@ -1,6 +1,8 @@
-﻿using Application.Models;
+﻿using Application.Common.Exceptions;
+using Application.Models;
 using Application.OrderDetails.Response;
 using AutoMapper;
+using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
@@ -27,6 +29,10 @@ namespace Application.OrderDetails.Commands
         public async Task<Response<OrderDetailDto>> Handle(DeleteOrderDetailCommand request, CancellationToken cancellationToken)
         {
             var entity = await _unitOfWork.OrderDetailRepository.GetAsync(e => e.Id == request.Id);
+            if (entity is null)
+            {
+                throw new NotFoundException(nameof(OrderDetail), request.Id);
+            }
             if (entity.Status != Core.Enums.OrderDetailStatus.Received)
             {
                 return new Response<OrderDetailDto>("Invalid Operation! You can only remove received dish")

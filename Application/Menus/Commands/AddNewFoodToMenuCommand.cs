@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Menus.Response;
 using Application.Models;
@@ -6,6 +7,7 @@ using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.Menus.Commands
@@ -23,10 +25,10 @@ namespace Application.Menus.Commands
         [StringLength(2000, MinimumLength = 2)]
         public string Ingredient { get; set; }
         public bool Available { get; set; } = true;
-        [StringLength(2048, MinimumLength = 2)]
-        public string PictureUrl { get; set; }
-        [Required]
-        [Range(0, double.PositiveInfinity)]
+        public IFormFile Picture { get; set; }
+        public int CourseTypeId { get; set; }
+
+        public IList<int>? Types { get; set; }
         public double Price { get; set; }
 
         public void Mapping(Profile profile) => profile.CreateMap<AddNewFoodToMenuCommand, Food>()
@@ -38,11 +40,13 @@ namespace Application.Menus.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IUploadService _uploadService;
 
-        public AddNewFoodToMenuCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public AddNewFoodToMenuCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IUploadService uploadService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _uploadService = uploadService;
         }
 
         public async Task<Response<MenuDto>> Handle(AddNewFoodToMenuCommand request, CancellationToken cancellationToken)
@@ -54,6 +58,42 @@ namespace Application.Menus.Commands
             }
 
             var food = _mapper.Map<Food>(request);
+            var courseType = await _unitOfWork.CourseTypeRepository.GetAsync(e => e.Id == request.CourseTypeId && !e.IsDeleted);
+            if (courseType is null)
+            {
+                throw new NotFoundException(nameof(Food.CourseType), request.CourseTypeId);
+            }
+
+            if (request.Types?.Any() == true)
+            {
+                foreach (var typeId in request.Types)
+                {
+                    var inDatabase = await _unitOfWork.TypeRepository.GetAsync(e => e.Id == typeId);
+                    if (inDatabase is null)
+                    {
+                        throw new NotFoundException(nameof(Core.Entities.Type), typeId);
+                    }
+                    if (food.FoodTypes is null)
+                    {
+                        food.FoodTypes = new List<FoodType>();
+                    }
+                    food.FoodTypes.Add(new FoodType
+                    {
+                        Food = food,
+                        TypeId = inDatabase.Id
+                    });
+                }
+
+            }
+
+            var pictureUrl = await _uploadService.UploadAsync(request.Picture, "Foods");
+            food.PictureUrl = pictureUrl;
+            //var insertedFood = await _unitOfWork.FoodRepository.InsertAsync(food);
+            //await _unitOfWork.CompleteAsync(cancellationToken);
+            //if (insertedFood is null)
+            //{
+            //    return new Response<MenuDto>("error");
+            //}
             await _unitOfWork.MenuFoodRepository.InsertAsync(new MenuFood
             {
                 Food = food,

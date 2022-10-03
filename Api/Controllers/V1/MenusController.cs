@@ -1,4 +1,5 @@
-﻿using Application.Foods.Queries;
+﻿using Application.Common.Exceptions;
+using Application.Foods.Queries;
 using Application.Menus.Commands;
 using Application.Menus.Queries;
 using Application.Menus.Response;
@@ -52,6 +53,10 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
             }
+            catch (NotFoundException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var response = new Response<PaginatedList<MenuDto>>(ex.Message)
@@ -84,6 +89,10 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
             }
+            catch (NotFoundException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var response = new Response<MenuDto>(ex.Message)
@@ -109,6 +118,10 @@ namespace Api.Controllers.V1
 
                 var result = await Mediator.Send(command);
                 return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -147,6 +160,10 @@ namespace Api.Controllers.V1
                     return NoContent();
                 }
                 return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -217,6 +234,10 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(command);
                 return StatusCode((int)result.StatusCode, result);
             }
+            catch (NotFoundException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var response = new Response<MenuDto>(ex.Message)
@@ -231,7 +252,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> AddFoodToMenuAsync(int id, [FromBody] AddNewFoodToMenuCommand command)
+        public async Task<IActionResult> AddFoodToMenuAsync(int id, [FromForm] AddNewFoodToMenuCommand command)
         {
             try
             {
@@ -248,6 +269,10 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(command);
                 return StatusCode((int)result.StatusCode, result);
             }
+            catch (NotFoundException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var response = new Response<MenuDto>(ex.Message)
@@ -262,7 +287,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetFoodWithMenuIdAsync(int menuId)
+        public async Task<IActionResult> GetFoodWithMenuIdAsync(int menuId, int? courseTypeId, int? typeId)
         {
             try
             {
@@ -275,46 +300,18 @@ namespace Api.Controllers.V1
                 {
                     return BadRequest();
                 }
-                var query = new GetFoodWithMenuIdAndTypeIdQuery()
-                {
-                    MenuId = menuId
-                };
-                var result = await Mediator.Send(query);
-                return StatusCode((int)result.StatusCode, result);
-            }
-            catch (Exception ex)
-            {
-                var response = new Response<MenuDto>(ex.Message)
-                {
-                    StatusCode = HttpStatusCode.InternalServerError
-                };
-                return StatusCode((int)response.StatusCode, response);
-            }
-        }
-
-        [HttpGet("{menuId}/Type/{categoryId}/Food")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetFoodWithMenuIdAndTypeIdAsync(int menuId, int categoryId)
-        {
-            try
-            {
-                if (menuId < 0)
-                {
-                    return BadRequest();
-                }
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest();
-                }
-                var query = new GetFoodWithMenuIdAndTypeIdQuery()
+                var query = new GetFoodWithMenuIdQuery()
                 {
                     MenuId = menuId,
-                    TypeId = categoryId
+                    CourseTypeId = courseTypeId,
+                    TypeId = typeId
                 };
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

@@ -1,4 +1,5 @@
-﻿using Application.Models;
+﻿using Application.Common.Exceptions;
+using Application.Models;
 using Application.Tables.Commands;
 using Application.Tables.Queries;
 using Application.Tables.Response;
@@ -60,6 +61,10 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
             }
+            catch (NotFoundException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var response = new Response<TableDto>(ex.Message)
@@ -92,6 +97,10 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
             }
+            catch (NotFoundException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var response = new Response<TableDto>(ex.Message)
@@ -117,6 +126,10 @@ namespace Api.Controllers.V1
 
                 var result = await Mediator.Send(command);
                 return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

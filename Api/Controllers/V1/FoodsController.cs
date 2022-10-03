@@ -1,4 +1,5 @@
-﻿using Application.Foods.Commands;
+﻿using Application.Common.Exceptions;
+using Application.Foods.Commands;
 using Application.Foods.Queries;
 using Application.Foods.Response;
 using Application.Models;
@@ -61,6 +62,10 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
             }
+            catch (NotFoundException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var response = new Response<FoodDto>(ex.Message)
@@ -75,7 +80,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateFoodCommand command)
+        public async Task<IActionResult> PostAsync([FromForm] CreateFoodCommand command)
         {
             try
             {
@@ -86,6 +91,10 @@ namespace Api.Controllers.V1
 
                 var result = await Mediator.Send(command);
                 return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -101,7 +110,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromBody] UpdateFoodCommand command)
+        public async Task<IActionResult> PutAsync(int id, [FromForm] UpdateFoodCommand command)
         {
             try
             {
@@ -124,6 +133,10 @@ namespace Api.Controllers.V1
                     return NoContent();
                 }
                 return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
