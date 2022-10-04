@@ -12,7 +12,7 @@ namespace Application.Menus.Queries
 {
     public sealed class GetMenuWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<MenuDto>>>
     {
-        public new MenuProperty? OrderBy { get; init; }
+        public MenuProperty? OrderBy { get; init; }
         public bool? IsHidden { get; init; }
     }
 
