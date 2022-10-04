@@ -14,7 +14,7 @@ namespace Application.Foods.Queries
 {
     public sealed class GetFoodWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<FoodDto>>>
     {
-        public new FoodProperty? OrderBy { get; init; }
+        public FoodProperty? OrderBy { get; init; }
         public bool? Available { get; init; }
     }
 

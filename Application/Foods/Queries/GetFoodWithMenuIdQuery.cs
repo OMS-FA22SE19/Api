@@ -18,7 +18,7 @@ namespace Application.Foods.Queries
         public int MenuId { get; init; }
         public int? CourseTypeId { get; init; }
         public int? TypeId { get; init; }
-        public new FoodProperty? OrderBy { get; init; }
+        public FoodProperty? OrderBy { get; init; }
     }
 
     public sealed class GetFoodWithMenuIdQueryHandler : IRequestHandler<GetFoodWithMenuIdQuery, Response<List<FoodDto>>>
