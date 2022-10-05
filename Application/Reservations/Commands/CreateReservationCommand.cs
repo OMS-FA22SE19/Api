@@ -78,8 +78,6 @@ namespace Application.Reservations.Commands
             result.Table = await _unitOfWork.TableRepository.GetAsync(e => e.Id == tableId && !e.IsDeleted, $"{nameof(Table.TableType)}");
             result.User = user;
             var mappedResult = _mapper.Map<ReservationDto>(result);
-            mappedResult.User = user;
-            mappedResult.Table = await _unitOfWork.TableRepository.GetAsync(e => e.Id == TableId);
             return new Response<ReservationDto>(mappedResult)
             {
                 StatusCode = System.Net.HttpStatusCode.Created
