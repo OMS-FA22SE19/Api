@@ -4,6 +4,7 @@ using Application.Models;
 using AutoMapper;
 using Core.Common;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 using Moq;
 using NUnit.Framework;
@@ -50,17 +51,64 @@ namespace Application.UnitTests.CourseTypes.Queries
         }
 
         #region Unit Tests
-        [Test]
-        public async Task Should_Return_All()
+
+        [TestCase]
+        [TestCase(1, 50, "", null, false)]
+        [TestCase(1, 2, "", null, false)]
+        [TestCase(2, 2, "", null, false)]
+        [TestCase(1, 50, "", CourseTypeProperty.Id, false)]
+        [TestCase(1, 50, "", CourseTypeProperty.Id, true)]
+        [TestCase(1, 50, "", CourseTypeProperty.Name, false)]
+        [TestCase(1, 50, "", CourseTypeProperty.Name, true)]
+        [TestCase(1, 50, "2", null, false)]
+        [TestCase(1, 50, "start", null, false)]
+        public async Task Should_Return_With_Condition(
+            int pageIndex = 1,
+            int pageSize = 50,
+            string searchValue = "",
+            CourseTypeProperty? orderBy = null,
+            bool IsDescending = false)
         {
             //Arrange
             var request = new GetCourseTypeWithPaginationQuery()
             {
-
+                PageIndex = pageIndex,
+                PageSize = pageSize,
+                SearchValue = searchValue,
+                OrderBy = orderBy,
+                IsDescending = IsDescending
             };
             var handler = new GetCourseTypeWithPaginationQueryHandler(_unitOfWork, _mapper);
+            var conditionedList = _courseTypes;
+            if (!string.IsNullOrWhiteSpace(searchValue))
+            {
+                conditionedList = conditionedList.Where(e => e.Name.Contains(request.SearchValue) || request.SearchValue.Contains(e.Id.ToString())).ToList();
+            }
+
+            conditionedList = conditionedList.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
+            switch (orderBy)
+            {
+                case (CourseTypeProperty.Name):
+                    if (request.IsDescending)
+                    {
+                        conditionedList = conditionedList.OrderByDescending(x => x.Name).ToList();
+                        break;
+                    }
+                    conditionedList = conditionedList.OrderBy(x => x.Name).ToList();
+                    break;
+                case (CourseTypeProperty.Id):
+                    if (request.IsDescending)
+                    {
+                        conditionedList = conditionedList.OrderByDescending(x => x.Id).ToList();
+                        break;
+                    }
+                    conditionedList = conditionedList.OrderBy(x => x.Id).ToList();
+                    break;
+                default:
+                    break;
+            }
             var expectedList = new List<CourseTypeDto>();
-            foreach (var courseTypeDto in _courseTypes)
+            foreach (var courseTypeDto in conditionedList)
             {
                 expectedList.Add(new CourseTypeDto
                 {
@@ -69,16 +117,17 @@ namespace Application.UnitTests.CourseTypes.Queries
                 });
             }
 
-            var expected = new Response<List<CourseTypeDto>>(expectedList);
+            var expected = new Response<PaginatedList<CourseTypeDto>>(new PaginatedList<CourseTypeDto>(expectedList, _courseTypes.Count, pageIndex, pageSize));
             //Act
-            var result = await handler.Handle(request, CancellationToken.None);
+            var actual = await handler.Handle(request, CancellationToken.None);
 
             //Assert
-            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(result.Data, Is.Not.Null);
-            Assert.That(_courseTypes.Count, Is.EqualTo(result.Data.Count));
+            Assert.That(actual.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(actual.Data, Is.Not.Null);
+            Assert.That(actual, Is.TypeOf(expected.GetType()));
+            Assert.That(expected.Data.Count, Is.EqualTo(actual.Data.Count));
+            Assert.IsTrue(actual.Data.SequenceEqual(expected.Data, new CourseTypeDtoComparer()));
         }
-
         #endregion Unit Tests
 
         #region Private member methods
@@ -105,9 +154,11 @@ namespace Application.UnitTests.CourseTypes.Queries
                     {
                         foreach (var filter in filters)
                         {
-                            query.Where(filter);
+                            query = query.Where(filter);
                         }
                     }
+
+                    query = query.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 
                     return orderBy is not null
                             ? new PaginatedList<CourseType>(orderBy(query).ToList(), query.Count(), pageIndex, pageSize)
@@ -135,7 +186,6 @@ namespace Application.UnitTests.CourseTypes.Queries
                 });
             return mapperMock.Object;
         }
-
         #endregion
     }
 }

@@ -10,28 +10,28 @@ namespace Application.UnitTests
                 new CourseType()
                 {
                     Id = 1,
-                    Name = "Starters"
+                    Name = "Others"
                 },
                 new CourseType()
                 {
                     Id = 2,
-                    Name = "Main Courses"
+                    Name = "Starters"
                 },
                 new CourseType()
                 {
                     Id = 3,
-                    Name = "Desserts"
+                    Name = "Main Courses"
                 },
                 new CourseType()
                 {
                     Id = 4,
-                    Name = "Drinks"
+                    Name = "Desserts"
                 },
                 new CourseType()
                 {
                     Id = 5,
-                    Name = "Others"
-                },
+                    Name = "Drinks"
+                }
         };
     }
 }
