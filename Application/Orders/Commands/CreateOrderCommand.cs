@@ -92,6 +92,7 @@ namespace Application.Orders.Commands
             }
 
             var mappedResult = _mapper.Map<OrderDto>(result);
+            mappedResult.FullName = user.FullName;
             mappedResult.PhoneNumber = user.PhoneNumber;
 
             var orderDetails = new List<OrderDetailDto>();
@@ -101,7 +102,7 @@ namespace Application.Orders.Commands
                 var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId));
                 if (element is null)
                 {
-                    var food = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == detail.Id);
+                    var food = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == detail.FoodId);
                     orderDetails.Add(new OrderDetailDto
                     {
                         OrderId = result.Id,
@@ -112,7 +113,6 @@ namespace Application.Orders.Commands
                         Price = detail.Price,
                         Amount = detail.Price
                     });
-                    entity.OrderDetails.Remove(detail);
                 }
                 else
                 {

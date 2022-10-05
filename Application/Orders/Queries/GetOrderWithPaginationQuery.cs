@@ -95,7 +95,7 @@ namespace Application.Orders.Queries
                 {
                     Id = order.Id,
                     UserId = order.UserId,
-                    UserName = order.User.UserName,
+                    FullName = order.User.FullName,
                     PhoneNumber = order.User.PhoneNumber,
                     Date = order.Date.ToString("dd/MM/yyyy HH:mm:ss"),
                     Status = order.Status,

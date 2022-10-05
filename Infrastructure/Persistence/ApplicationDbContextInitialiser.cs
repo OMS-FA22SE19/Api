@@ -60,7 +60,7 @@ namespace Infrastructure.Persistence
             }
 
             // Default users
-            var administrator = new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost" };
+            var administrator = new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost", FullName = "Administrator" };
 
             if (_userManager.Users.All(u => u.UserName != administrator.UserName))
             {
@@ -77,7 +77,7 @@ namespace Infrastructure.Persistence
             }
 
             // Default users
-            var customer = new ApplicationUser { UserName = "defaultCustomer", Email = "longpnhse150499@fpt.edu.vn", PhoneNumber = "0939758999" };
+            var customer = new ApplicationUser { UserName = "defaultCustomer", Email = "longpnhse150499@fpt.edu.vn", PhoneNumber = "0939758999", FullName = "Default Customer" };
 
             if (_userManager.Users.All(u => u.UserName != customer.UserName))
             {
