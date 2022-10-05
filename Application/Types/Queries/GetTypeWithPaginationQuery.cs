@@ -11,7 +11,7 @@ namespace Application.Types.Queries
 {
     public sealed class GetTypeWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<TypeDto>>>
     {
-        public new TypeProperty? OrderBy { get; init; }
+        public TypeProperty? OrderBy { get; init; }
     }
 
     public sealed class GetTypeWithPaginationQueryHandler : IRequestHandler<GetTypeWithPaginationQuery, Response<PaginatedList<TypeDto>>>

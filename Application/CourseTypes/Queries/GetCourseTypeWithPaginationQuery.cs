@@ -12,7 +12,7 @@ namespace Application.CourseTypes.Queries
 {
     public sealed class GetCourseTypeWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<CourseTypeDto>>>
     {
-        public new CourseTypeProperty? OrderBy { get; init; }
+        public CourseTypeProperty? OrderBy { get; init; }
     }
 
     public sealed class GetCourseTypeWithPaginationQueryHandler : IRequestHandler<GetCourseTypeWithPaginationQuery, Response<PaginatedList<CourseTypeDto>>>

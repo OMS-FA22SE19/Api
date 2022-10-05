@@ -12,7 +12,7 @@ namespace Application.Tables.Queries
 {
     public class GetTableWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<TableDto>>>
     {
-        public new TableProperty? OrderBy { get; init; }
+        public TableProperty? OrderBy { get; init; }
     }
 
     public class GetTableWithPaginationQueryHandler : IRequestHandler<GetTableWithPaginationQuery, Response<PaginatedList<TableDto>>>

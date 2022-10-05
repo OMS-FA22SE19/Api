@@ -13,7 +13,7 @@ namespace Application.Orders.Queries
 {
     public sealed class GetOrderWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<OrderDto>>>
     {
-        public new OrderProperty? OrderBy { get; init; }
+        public OrderProperty? OrderBy { get; init; }
         public OrderStatus? Status { get; init; }
     }
 

@@ -31,7 +31,7 @@ namespace Application.Reservations.Queries
         {
             List<Expression<Func<Reservation, bool>>> filters = new();
             Func<IQueryable<Reservation>, IOrderedQueryable<Reservation>> orderBy = null;
-            string includeProperties = "";
+            string includeProperties = $"{nameof(Reservation.User)},{nameof(Reservation.Table)}.{nameof(Table.TableType)}";
 
             if (!string.IsNullOrWhiteSpace(request.userId))
             {
