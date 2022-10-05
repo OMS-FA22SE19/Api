@@ -10,7 +10,7 @@ namespace Application.Orders.Response
     {
         public string Id { get; set; }
         public string UserId { get; set; }
-        public string UserName { get; set; }
+        public string FullName { get; set; }
         public string PhoneNumber { get; set; }
         public string Date { get; set; }
         public OrderStatus Status { get; set; }
@@ -23,7 +23,7 @@ namespace Application.Orders.Response
         {
             profile.CreateMap<Order, OrderDto>()
                 .ForMember(dto => dto.Date, opt => opt.MapFrom(e => e.Date.ToString("dd/MM/yyyy HH:mm:ss")))
-                .ForMember(dto => dto.UserName, opt => opt.MapFrom(e => e.User.UserName))
+                .ForMember(dto => dto.FullName, opt => opt.MapFrom(e => e.User.FullName))
                 .ForMember(dto => dto.PhoneNumber, opt => opt.MapFrom(e => e.User.PhoneNumber))
                 .ReverseMap();
         }
