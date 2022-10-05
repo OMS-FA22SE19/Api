@@ -101,12 +101,13 @@ namespace Application.Orders.Commands
                 var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId));
                 if (element is null)
                 {
+                    var food = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == detail.Id);
                     orderDetails.Add(new OrderDetailDto
                     {
                         OrderId = result.Id,
                         FoodId = detail.FoodId,
-                        FoodName = detail.Food.Name,
-                        Status = OrderDetailStatus.Served,
+                        FoodName = food.Name,
+                        Status = OrderDetailStatus.Received,
                         Quantity = 1,
                         Price = detail.Price,
                         Amount = detail.Price
