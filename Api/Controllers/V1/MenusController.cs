@@ -1,5 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Foods.Queries;
+using Application.Foods.Response;
 using Application.Menus.Commands;
 using Application.Menus.Queries;
 using Application.Menus.Response;
@@ -30,7 +31,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response<List<MenuDto>>>> GetAsync([FromQuery] GetMenuWithPaginationQuery query)
+        public async Task<ActionResult<Response<PaginatedList<MenuDto>>>> GetAsync([FromQuery] GetMenuWithPaginationQuery query)
         {
             try
             {
@@ -201,7 +202,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromBody] UpdateMenuCommand command)
+        public async Task<ActionResult> PutAsync(int id, [FromBody] UpdateMenuCommand command)
         {
             try
             {
@@ -253,7 +254,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteAsync(int id)
+        public async Task<ActionResult> DeleteAsync(int id)
         {
             try
             {
@@ -303,7 +304,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> AddFoodToMenuAsync(int id, int foodId, [FromBody] double price)
+        public async Task<ActionResult> AddFoodToMenuAsync(int id, int foodId, [FromBody] double price)
         {
             try
             {
@@ -364,7 +365,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> AddFoodToMenuAsync(int id, [FromForm] AddNewFoodToMenuCommand command)
+        public async Task<ActionResult> AddFoodToMenuAsync(int id, [FromForm] AddNewFoodToMenuCommand command)
         {
             try
             {
@@ -412,7 +413,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetFoodWithMenuIdAsync(int menuId, int? courseTypeId, int? typeId)
+        public async Task<ActionResult<Response<List<MenuDto>>>> GetFoodWithMenuIdAsync(int menuId, int? courseTypeId, int? typeId)
         {
             try
             {
@@ -440,7 +441,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<MenuDto>(ex.Message)
+                var response = new Response<List<MenuFoodDto>>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

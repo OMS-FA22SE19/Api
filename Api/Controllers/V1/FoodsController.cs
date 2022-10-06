@@ -28,7 +28,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response<List<FoodDto>>>> GetAsync([FromQuery] GetFoodWithPaginationQuery query)
+        public async Task<ActionResult<Response<PaginatedList<FoodDto>>>> GetAsync([FromQuery] GetFoodWithPaginationQuery query)
         {
             try
             {
