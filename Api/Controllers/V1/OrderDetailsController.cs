@@ -39,6 +39,17 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Retrieve a specific OrderDetail by Id.
+        /// </summary>
+        /// <returns>An OrderDetail.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /OrderDetails/1
+        ///
+        /// </remarks>
+        /// <param name="id">The desired id of OrderDetail</param>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
