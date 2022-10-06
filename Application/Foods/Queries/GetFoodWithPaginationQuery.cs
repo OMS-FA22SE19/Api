@@ -37,7 +37,7 @@ namespace Application.Foods.Queries
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
-                filters.Add(e => e.Ingredient.Contains(request.SearchValue) || e.Name.Contains(request.SearchValue));
+                filters.Add(e => e.Ingredient.Contains(request.SearchValue) || e.Name.Contains(request.SearchValue) || request.SearchValue.Equals(e.Id.ToString()));
             }
             if (request.Available is not null)
             {
