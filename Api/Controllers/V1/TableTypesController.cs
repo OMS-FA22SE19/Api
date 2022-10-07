@@ -106,7 +106,7 @@ namespace Api.Controllers.V1
         ///     POST /CourseTypes
         ///     {
         ///        "name": "Outdoor",
-        ///        "chargePerSeat": 20000,
+        ///        "chargePerSeat": 20000
         ///     }
         ///     
         /// </remarks>
@@ -152,7 +152,7 @@ namespace Api.Controllers.V1
         ///     {
         ///        "id": 1,
         ///        "name": "Outdoor",
-        ///        "chargePerSeat": 20000,
+        ///        "chargePerSeat": 20000
         ///     }
         ///
         /// </remarks>

@@ -282,5 +282,41 @@ namespace Api.Controllers.V1
                 return StatusCode((int)response.StatusCode, response);
             }
         }
+
+        /// <summary>
+        /// Retrieve a list of Tables.
+        /// </summary>
+        /// <returns>List of Tables.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Tables/Status
+        ///     
+        /// </remarks>
+        [HttpGet("Status")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Response<PaginatedList<TableStatusDto>>>> GetStatusOfTablesAsync([FromQuery] GetStatusOfTablesQuery query)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await Mediator.Send(query);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<PaginatedList<TableStatusDto>>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
     }
 }
