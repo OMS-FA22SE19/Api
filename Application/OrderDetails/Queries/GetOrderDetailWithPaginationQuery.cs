@@ -35,7 +35,7 @@ namespace Application.OrderDetails.Queries
             Func<IQueryable<OrderDetail>, IOrderedQueryable<OrderDetail>> orderBy = null;
             string includeProperties = $"{nameof(OrderDetail.Order)},{nameof(OrderDetail.Food)}";
 
-            filters.Add(e => e.Order.Date <= _dateTime.Now.AddHours(-3));
+            //filters.Add(e => e.Order.Date <= _dateTime.Now.AddHours(-3));
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {

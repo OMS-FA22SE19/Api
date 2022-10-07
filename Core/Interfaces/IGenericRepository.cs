@@ -7,7 +7,7 @@ namespace Core.Interfaces
     {
         Task<bool> DeleteAsync(IList<TEntity> entityToDelete);
         Task<bool> DeleteAsync(Expression<Func<TEntity, bool>> expression);
-        Task<IList<TEntity>> GetAllAsync(
+        Task<List<TEntity>> GetAllAsync(
             List<Expression<Func<TEntity, bool>>> filters = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             string includeProperties = "");

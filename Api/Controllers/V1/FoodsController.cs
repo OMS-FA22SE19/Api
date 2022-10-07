@@ -159,7 +159,7 @@ namespace Api.Controllers.V1
         ///        "id": 1,
         ///        "name": "Pho",
         ///        "description": "Vietnamese food speciality",
-        ///        "ingredient": "Noodle, beef, soup,
+        ///        "ingredient": "Noodle, beef, soup",
         ///        "available": true,
         ///        "picture" : (upload picture),
         ///        "courseTypeId": 1,

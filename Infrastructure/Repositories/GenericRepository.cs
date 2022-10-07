@@ -50,7 +50,7 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public virtual async Task<IList<TEntity>> GetAllAsync(
+        public virtual async Task<List<TEntity>> GetAllAsync(
             List<Expression<Func<TEntity, bool>>> filters = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             string includeProperties = "")

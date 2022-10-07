@@ -146,7 +146,7 @@ namespace Api.Controllers.V1
         ///     {
         ///        "name": "Casual",
         ///        "description": "An ordinary menu",
-        ///        "isHidden": false,
+        ///        "isHidden": false
         ///     }
         ///     
         /// </remarks>
@@ -193,7 +193,7 @@ namespace Api.Controllers.V1
         ///        "id": 1,
         ///        "name": "Casual",
         ///        "description": "An ordinary menu",
-        ///        "isHidden": false,
+        ///        "isHidden": false
         ///     }
         ///     
         /// </remarks>
@@ -293,7 +293,7 @@ namespace Api.Controllers.V1
         ///
         ///     POST /Menus/1/4
         ///     {
-        ///        "price": 100000,
+        ///        "price": 100000
         ///     }
         ///     
         /// </remarks>
@@ -350,7 +350,7 @@ namespace Api.Controllers.V1
         ///     {
         ///        "name": "Pho",
         ///        "description": "Vietnamese food speciality",
-        ///        "ingredient": "Noodle, beef, soup,
+        ///        "ingredient": "Noodle, beef, soup",
         ///        "available": true,
         ///        "picture" : (upload picture),
         ///        "courseTypeId": 1,
