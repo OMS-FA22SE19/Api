@@ -2,7 +2,7 @@
 
 namespace Core.Entities
 {
-    public sealed class TableType : BaseEntity
+    public sealed class TableType : BaseAuditableEntity
     {
         public string Name { get; set; }
         public double ChargePerSeat { get; set; }

@@ -3,7 +3,7 @@ using Domain.Common;
 
 namespace Core.Entities
 {
-    public sealed class OrderDetail : BaseEntity
+    public sealed class OrderDetail : BaseAuditableEntity
     {
         public string OrderId { get; set; }
         public int FoodId { get; set; }

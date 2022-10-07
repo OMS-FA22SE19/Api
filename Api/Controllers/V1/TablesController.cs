@@ -13,11 +13,21 @@ namespace Api.Controllers.V1
     [ApiController]
     public class TablesController : ApiControllerBase
     {
+        /// <summary>
+        /// Retrieve a list of Tables.
+        /// </summary>
+        /// <returns>List of Tables.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Tables
+        ///     
+        /// </remarks>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetTableWithPaginationQuery query)
+        public async Task<ActionResult<Response<PaginatedList<TableDto>>>> GetAsync([FromQuery] GetTableWithPaginationQuery query)
         {
             try
             {
@@ -39,12 +49,23 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Retrieve a specific Table by Id.
+        /// </summary>
+        /// <returns>A Table.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Tables/1
+        ///
+        /// </remarks>
+        /// <param name="id">The desired id of Table</param>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync(int id)
+        public async Task<ActionResult<Response<TableDto>>> GetByIdAsync(int id)
         {
             try
             {
@@ -75,12 +96,23 @@ namespace Api.Controllers.V1
             }
         }
 
-        [HttpGet("people/{numOfPeople}")]
+        /// <summary>
+        /// Retrieve list of Tables suitable with numOfPeople.
+        /// </summary>
+        /// <returns>List of Tables by TableType.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Tables/People/4
+        ///
+        /// </remarks>
+        /// <param name="numOfPeople">The number of followers</param>
+        [HttpGet("People/{numOfPeople}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetTableType(int numOfPeople)
+        public async Task<ActionResult<Response<List<TableByTypeDto>>>> GetTableType(int numOfPeople)
         {
             try
             {
@@ -111,11 +143,26 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Create a Table.
+        /// </summary>
+        /// <returns>New Table.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Tables
+        ///     {
+        ///        "numOfSeats": 4,
+        ///        "tableTypeId": 1
+        ///     }
+        ///     
+        /// </remarks>
         [HttpPost]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateTableCommand command)
+        public async Task<ActionResult<Response<TableDto>>> PostAsync([FromBody] CreateTableCommand command)
         {
             try
             {
@@ -141,11 +188,29 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Update a specific Course Type.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /Tables/1
+        ///     {
+        ///        "id": 1,
+        ///        "numOfSeats": 4,
+        ///        "tableTypeId": 1,
+        ///        "status": "Available",
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="id">The id of updated Table</param>
         [HttpPut("{id}")]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromForm] UpdateTableCommand command)
+        public async Task<ActionResult> PutAsync(int id, [FromBody] UpdateTableCommand command)
         {
             try
             {
@@ -181,12 +246,22 @@ namespace Api.Controllers.V1
             }
         }
 
-        // DELETE api/Blogs/5
+        /// <summary>
+        /// Delete a specific Table.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /Tables/1
+        ///
+        /// </remarks>
+        /// <param name="id">The id of deleted Table</param>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             try
             {
@@ -201,6 +276,42 @@ namespace Api.Controllers.V1
             catch (Exception ex)
             {
                 var response = new Response<TableDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
+        /// Retrieve a list of Tables.
+        /// </summary>
+        /// <returns>List of Tables.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Tables/Status
+        ///     
+        /// </remarks>
+        [HttpGet("Status")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Response<PaginatedList<TableStatusDto>>>> GetStatusOfTablesAsync([FromQuery] GetStatusOfTablesQuery query)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await Mediator.Send(query);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<PaginatedList<TableStatusDto>>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

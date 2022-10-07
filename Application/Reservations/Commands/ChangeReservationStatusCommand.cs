@@ -42,9 +42,10 @@ namespace Application.Reservations.Commands
             {
                 throw new NotFoundException(nameof(Reservation), request.Id);
             }
-            var updatedEntity = _mapper.Map<Reservation>(entity);
-            updatedEntity.Status = request.Status;
-            var result = await _unitOfWork.ReservationRepository.UpdateAsync(updatedEntity);
+
+            MapToEntity(request, entity);
+
+            var result = await _unitOfWork.ReservationRepository.UpdateAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
@@ -57,5 +58,7 @@ namespace Application.Reservations.Commands
                 StatusCode = System.Net.HttpStatusCode.NoContent
             };
         }
+
+        private static void MapToEntity(ChangeReservationStatusCommand request, Reservation updatedEntity) => updatedEntity.Status = request.Status;
     }
 }

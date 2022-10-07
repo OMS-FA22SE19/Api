@@ -23,7 +23,7 @@ namespace Infrastructure.Repositories
             int pageIndex = 1,
             int pageSize = 50)
         {
-            IQueryable<TEntity> query = _dbSet;
+            IQueryable<TEntity> query = _dbSet.AsNoTracking();
 
 
             if (filters is not null && filters.Any())
@@ -50,12 +50,12 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public virtual async Task<IList<TEntity>> GetAllAsync(
+        public virtual async Task<List<TEntity>> GetAllAsync(
             List<Expression<Func<TEntity, bool>>> filters = null,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
             string includeProperties = "")
         {
-            IQueryable<TEntity> query = _dbSet;
+            IQueryable<TEntity> query = _dbSet.AsNoTracking();
 
 
             if (filters is not null && filters.Any())
@@ -84,7 +84,7 @@ namespace Infrastructure.Repositories
 
         public virtual async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> expression, string includeProperties = "")
         {
-            IQueryable<TEntity> query = _dbSet;
+            IQueryable<TEntity> query = _dbSet.AsNoTracking();
             foreach (var includeProperty in includeProperties.Split
                 (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {

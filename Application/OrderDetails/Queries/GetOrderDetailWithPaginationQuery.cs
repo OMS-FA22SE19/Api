@@ -1,4 +1,5 @@
-﻿using Application.Models;
+﻿using Application.Common.Interfaces;
+using Application.Models;
 using Application.OrderDetails.Response;
 using AutoMapper;
 using Core.Common;
@@ -19,11 +20,13 @@ namespace Application.OrderDetails.Queries
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IDateTime _dateTime;
 
-        public GetOrderDetailWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetOrderDetailWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, IDateTime dateTime)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _dateTime = dateTime;
         }
 
         public async Task<Response<PaginatedList<DishDto>>> Handle(GetOrderDetailWithPaginationQuery request, CancellationToken cancellationToken)
@@ -32,7 +35,7 @@ namespace Application.OrderDetails.Queries
             Func<IQueryable<OrderDetail>, IOrderedQueryable<OrderDetail>> orderBy = null;
             string includeProperties = $"{nameof(OrderDetail.Order)},{nameof(OrderDetail.Food)}";
 
-            filters.Add(e => e.Order.Date <= DateTime.UtcNow.AddHours(7).AddHours(-3));
+            //filters.Add(e => e.Order.Date <= _dateTime.Now.AddHours(-3));
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
@@ -72,7 +75,7 @@ namespace Application.OrderDetails.Queries
                     orderBy = e => e.OrderBy(x => x.Status);
                     break;
                 default:
-                    orderBy = e => e.OrderBy(x => x.Order.Date);
+                    orderBy = e => e.OrderByDescending(x => x.Created);
                     break;
             }
 

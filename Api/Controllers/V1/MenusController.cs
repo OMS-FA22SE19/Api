@@ -1,5 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Foods.Queries;
+using Application.Foods.Response;
 using Application.Menus.Commands;
 using Application.Menus.Queries;
 using Application.Menus.Response;
@@ -16,11 +17,21 @@ namespace Api.Controllers.V1
     [ApiController]
     public sealed class MenusController : ApiControllerBase
     {
+        /// <summary>
+        /// Retrieve a list of Menus.
+        /// </summary>
+        /// <returns>List of Menus.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Menus
+        ///     
+        /// </remarks>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetMenuWithPaginationQuery query)
+        public async Task<ActionResult<Response<PaginatedList<MenuDto>>>> GetAsync([FromQuery] GetMenuWithPaginationQuery query)
         {
             try
             {
@@ -42,11 +53,21 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Retrieve available Menu.
+        /// </summary>
+        /// <returns>A Menu.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Menus/Available
+        ///
+        /// </remarks>
         [HttpGet("Available")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAvailableAsync([FromQuery] GetAvailableMenuQuery query)
+        public async Task<ActionResult<Response<MenuDto>>> GetAvailableAsync([FromQuery] GetAvailableMenuQuery query)
         {
             try
             {
@@ -67,12 +88,23 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Retrieve a specific Menu by Id.
+        /// </summary>
+        /// <returns>A Menu.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Menus/1
+        ///
+        /// </remarks>
+        /// <param name="id">The desired id of Menu</param>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync(int id)
+        public async Task<ActionResult<Response<MenuDto>>> GetByIdAsync(int id)
         {
             try
             {
@@ -103,11 +135,27 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Create a Menu.
+        /// </summary>
+        /// <returns>New Menu.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Menus
+        ///     {
+        ///        "name": "Casual",
+        ///        "description": "An ordinary menu",
+        ///        "isHidden": false
+        ///     }
+        ///     
+        /// </remarks>
         [HttpPost]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateMenuCommand command)
+        public async Task<ActionResult<Response<MenuDto>>> PostAsync([FromBody] CreateMenuCommand command)
         {
             try
             {
@@ -133,11 +181,28 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Update a Menu.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /Menus/1
+        ///     {
+        ///        "id": 1,
+        ///        "name": "Casual",
+        ///        "description": "An ordinary menu",
+        ///        "isHidden": false
+        ///     }
+        ///     
+        /// </remarks>
         [HttpPut("{id}")]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromBody] UpdateMenuCommand command)
+        public async Task<ActionResult> PutAsync(int id, [FromBody] UpdateMenuCommand command)
         {
             try
             {
@@ -175,11 +240,21 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Delete a Menu.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /Menus/1
+        ///     
+        /// </remarks>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteAsync(int id)
+        public async Task<ActionResult> DeleteAsync(int id)
         {
             try
             {
@@ -209,11 +284,27 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Add an existing food to menu with price
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Menus/1/4
+        ///     {
+        ///        "price": 100000
+        ///     }
+        ///     
+        /// </remarks>
+        /// <param name="id">The desired id of Menu</param>
+        /// <param name="foodId">The desired id of Food</param>
+        /// <param name="price">The price of Food in selected Menu</param>
         [HttpPost("{id}/{foodId}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> AddFoodToMenuAsync(int id, int foodId, [FromBody] double price)
+        public async Task<ActionResult> AddFoodToMenuAsync(int id, int foodId, [FromBody] double price)
         {
             try
             {
@@ -248,11 +339,33 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Add new food to menu with price
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Menus/1/NewFood
+        ///     {
+        ///        "name": "Pho",
+        ///        "description": "Vietnamese food speciality",
+        ///        "ingredient": "Noodle, beef, soup",
+        ///        "available": true,
+        ///        "picture" : (upload picture),
+        ///        "courseTypeId": 1,
+        ///        "types" : [1, 2, 5] (array of FoodType ids),
+        ///        "price": 100000
+        ///     }
+        ///     
+        /// </remarks>
+        /// <param name="id">The desired id of Menu</param>
         [HttpPost("{id}/NewFood")]
+        [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> AddFoodToMenuAsync(int id, [FromForm] AddNewFoodToMenuCommand command)
+        public async Task<ActionResult> AddFoodToMenuAsync(int id, [FromForm] AddNewFoodToMenuCommand command)
         {
             try
             {
@@ -283,11 +396,24 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Retrieve a list of Food in Menu with Id.
+        /// </summary>
+        /// <returns>List of Foods.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Menus/Food
+        ///     
+        /// </remarks>
+        /// <param name="menuId">The desired id of Menu</param>
+        /// <param name="courseTypeId">The CourseTypeId of the Foods</param>
+        /// <param name="typeId">The TypeId of the Foods</param>
         [HttpGet("{menuId}/Food")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetFoodWithMenuIdAsync(int menuId, int? courseTypeId, int? typeId)
+        public async Task<ActionResult<Response<List<MenuDto>>>> GetFoodWithMenuIdAsync(int menuId, int? courseTypeId, int? typeId)
         {
             try
             {
@@ -315,7 +441,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<MenuDto>(ex.Message)
+                var response = new Response<List<MenuFoodDto>>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

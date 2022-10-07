@@ -30,6 +30,7 @@ namespace Application.Menus.Commands
         public int CourseTypeId { get; set; }
 
         public IList<int>? Types { get; set; }
+        [Required]
         public double Price { get; set; }
 
         public void Mapping(Profile profile) => profile.CreateMap<AddNewFoodToMenuCommand, Food>()

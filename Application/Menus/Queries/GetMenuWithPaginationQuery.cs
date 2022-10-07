@@ -37,7 +37,7 @@ namespace Application.Menus.Queries
             {
                 filters.Add(e => e.Name.Contains(request.SearchValue)
                     || e.Description.Contains(request.SearchValue)
-                    || request.SearchValue.Equals(e.Id));
+                    || request.SearchValue.Equals(e.Id.ToString()));
             }
             if (request.IsHidden != null)
             {

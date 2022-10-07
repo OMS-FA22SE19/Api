@@ -13,11 +13,21 @@ namespace Api.Controllers.V1
     [ApiController]
     public sealed class TypesController : ApiControllerBase
     {
+        /// <summary>
+        /// Retrieve a list of Food Types.
+        /// </summary>
+        /// <returns>List of Food Types.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Types
+        ///     
+        /// </remarks>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetTypeWithPaginationQuery query)
+        public async Task<ActionResult<Response<PaginatedList<TypeDto>>>> GetAsync([FromQuery] GetTypeWithPaginationQuery query)
         {
             try
             {
@@ -39,12 +49,23 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Retrieve a specific Food Type by Id.
+        /// </summary>
+        /// <returns>A Food Type.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Types/1
+        ///
+        /// </remarks>
+        /// <param name="id">The desired id of Food Type</param>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync(int id)
+        public async Task<ActionResult<Response<TypeDto>>> GetByIdAsync(int id)
         {
             try
             {
@@ -75,11 +96,25 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Create a Food Type.
+        /// </summary>
+        /// <returns>New Food Type.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Types
+        ///     {
+        ///        "name": "Dairy"
+        ///     }
+        ///     
+        /// </remarks>
         [HttpPost]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateTypeCommand command)
+        public async Task<ActionResult<Response<TypeDto>>> PostAsync([FromBody] CreateTypeCommand command)
         {
             try
             {
@@ -105,11 +140,27 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Update a specific Food Type.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /Types/1
+        ///     {
+        ///        "id": 1,
+        ///        "name": "Dairy"
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="id">The id of updated Food Type</param>
         [HttpPut("id")]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromBody] UpdateTypeCommand command)
+        public async Task<ActionResult> PutAsync(int id, [FromBody] UpdateTypeCommand command)
         {
             try
             {
@@ -148,11 +199,22 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Delete a specific Food Type.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /Types/1
+        ///
+        /// </remarks>
+        /// <param name="id">The id of deleted Food Type</param>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteAsync(int id)
+        public async Task<ActionResult> DeleteAsync(int id)
         {
             try
             {

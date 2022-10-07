@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Models;
 using Application.OrderDetails.Response;
@@ -30,12 +31,14 @@ namespace Application.Orders.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
+        private readonly IDateTime _dateTime;
 
-        public CreateOrderCommandHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper)
+        public CreateOrderCommandHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IDateTime dateTime)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
+            _dateTime = dateTime;
         }
 
         public async Task<Response<OrderDto>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -63,7 +66,7 @@ namespace Application.Orders.Commands
                 Id = $"{table.Id}-{user.PhoneNumber}-{DateTime.UtcNow.AddHours(7).ToString("dd-MM-yyyy-HH:mm:ss")}",
                 UserId = user.Id,
                 TableId = table.Id,
-                Date = DateTime.UtcNow.AddHours(7),
+                Date = _dateTime.Now,
                 Status = OrderStatus.Processing,
                 OrderDetails = new List<OrderDetail>(),
             };
@@ -75,11 +78,15 @@ namespace Application.Orders.Commands
             {
                 for (int i = 0; i < dish.Value; i++)
                 {
-                    var price = (await _unitOfWork.MenuFoodRepository.GetAsync(e => e.FoodId == dish.Key && e.MenuId == availableMenu.Id)).Price;
+                    var food = await _unitOfWork.MenuFoodRepository.GetAsync(e => e.FoodId == dish.Key && e.MenuId == availableMenu.Id);
+                    if (food is null)
+                    {
+                        throw new NotFoundException(nameof(Food), dish.Key);
+                    }
                     entity.OrderDetails.Add(new OrderDetail
                     {
                         FoodId = dish.Key,
-                        Price = price,
+                        Price = food.Price,
                         Status = OrderDetailStatus.Received
                     });
                 }

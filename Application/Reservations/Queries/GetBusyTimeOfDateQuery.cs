@@ -11,7 +11,7 @@ namespace Application.Reservations.Queries
     public class GetBusyTimeOfDateQuery : IRequest<Response<List<BusyTimeDto>>>
     {
         [Required]
-        public DateTime date { get; init; }
+        public DateTime Date { get; init; }
         [Required]
         public int NumOfSeats { get; set; }
         [Required]
@@ -31,7 +31,7 @@ namespace Application.Reservations.Queries
 
         public async Task<Response<List<BusyTimeDto>>> Handle(GetBusyTimeOfDateQuery request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.date);
+            var result = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.Date);
 
             var TableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
             List<int> tableIds = TableList.Select(e => e.Id).ToList();

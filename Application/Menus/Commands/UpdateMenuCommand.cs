@@ -45,9 +45,10 @@ namespace Application.Menus.Commands
             {
                 throw new NotFoundException(nameof(Menu), request.Id);
             }
-            var updatedEntity = _mapper.Map<Menu>(request);
 
-            var result = await _unitOfWork.MenuRepository.UpdateAsync(updatedEntity);
+            MapToEntity(request, entity);
+
+            var result = await _unitOfWork.MenuRepository.UpdateAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
@@ -59,6 +60,13 @@ namespace Application.Menus.Commands
                 Succeeded = true,
                 StatusCode = System.Net.HttpStatusCode.NoContent
             };
+        }
+
+        private static void MapToEntity(UpdateMenuCommand request, Menu entity)
+        {
+            entity.Name = request.Name;
+            entity.Description = request.Description;
+            entity.IsHidden = request.IsHidden;
         }
     }
 }

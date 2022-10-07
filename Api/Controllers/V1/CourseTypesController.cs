@@ -13,11 +13,21 @@ namespace Api.Controllers.V1
     [ApiController]
     public sealed class CourseTypesController : ApiControllerBase
     {
+        /// <summary>
+        /// Retrieve a list of Course Types.
+        /// </summary>
+        /// <returns>List of Course Types.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /CourseTypes
+        ///     
+        /// </remarks>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetCourseTypeWithPaginationQuery query)
+        public async Task<ActionResult<Response<PaginatedList<CourseTypeDto>>>> GetAsync([FromQuery] GetCourseTypeWithPaginationQuery query)
         {
             try
             {
@@ -39,12 +49,23 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Retrieve a specific Course Type by Id.
+        /// </summary>
+        /// <returns>A Course Type.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /CourseTypes/1
+        ///
+        /// </remarks>
+        /// <param name="id">The desired id of Course Type</param>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync(int id)
+        public async Task<ActionResult<Response<CourseTypeDto>>> GetByIdAsync(int id)
         {
             try
             {
@@ -75,11 +96,25 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Create a Course Type.
+        /// </summary>
+        /// <returns>New Course Type.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /CourseTypes
+        ///     {
+        ///        "name": "Starters"
+        ///     }
+        ///     
+        /// </remarks>
         [HttpPost]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateCourseTypeCommand command)
+        public async Task<ActionResult<Response<CourseTypeDto>>> PostAsync([FromBody] CreateCourseTypeCommand command)
         {
             try
             {
@@ -105,11 +140,27 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Update a specific Course Type.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /CourseTypes/1
+        ///     {
+        ///        "id": 1,
+        ///        "name": "Starters"
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="id">The id of updated Course Type</param>
         [HttpPut("id")]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromBody] UpdateCourseTypeCommand command)
+        public async Task<ActionResult> PutAsync(int id, [FromBody] UpdateCourseTypeCommand command)
         {
             try
             {
@@ -148,11 +199,22 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Delete a specific Course Type.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /CourseTypes/1
+        ///
+        /// </remarks>
+        /// <param name="id">The id of deleted Course Type</param>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteAsync(int id)
+        public async Task<ActionResult> DeleteAsync(int id)
         {
             try
             {
