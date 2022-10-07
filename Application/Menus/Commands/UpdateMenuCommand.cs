@@ -62,7 +62,7 @@ namespace Application.Menus.Commands
             };
         }
 
-        private static void MapToEntity(UpdateMenuCommand request, Menu? entity)
+        private static void MapToEntity(UpdateMenuCommand request, Menu entity)
         {
             entity.Name = request.Name;
             entity.Description = request.Description;

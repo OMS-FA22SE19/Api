@@ -45,8 +45,7 @@ namespace Application.Orders.Commands
                 return new Response<OrderDto>($"Order {entity.Id} cannot be confirmed. Make sure all dishes have been served!");
             }
 
-            entity.Status = OrderStatus.Paid;
-            entity.Date = entity.Created;
+            MapToEntity(entity);
             var result = await _unitOfWork.OrderRepository.UpdateAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
 
@@ -95,6 +94,11 @@ namespace Application.Orders.Commands
                 Total = total
             };
             return new Response<OrderDto>(bill);
+        }
+
+        private static void MapToEntity(Order entity)
+        {
+            entity.Status = OrderStatus.Paid;
         }
     }
 }

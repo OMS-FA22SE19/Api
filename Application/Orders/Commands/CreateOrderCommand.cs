@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Models;
 using Application.OrderDetails.Response;
@@ -30,12 +31,14 @@ namespace Application.Orders.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
+        private readonly IDateTime _dateTime;
 
-        public CreateOrderCommandHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper)
+        public CreateOrderCommandHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IDateTime dateTime)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
+            _dateTime = dateTime;
         }
 
         public async Task<Response<OrderDto>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
@@ -63,7 +66,7 @@ namespace Application.Orders.Commands
                 Id = $"{table.Id}-{user.PhoneNumber}-{DateTime.UtcNow.AddHours(7).ToString("dd-MM-yyyy-HH:mm:ss")}",
                 UserId = user.Id,
                 TableId = table.Id,
-                Date = DateTime.UtcNow.AddHours(7),
+                Date = _dateTime.Now,
                 Status = OrderStatus.Processing,
                 OrderDetails = new List<OrderDetail>(),
             };

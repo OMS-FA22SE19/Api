@@ -43,7 +43,7 @@ namespace Application.CourseTypes.Commands
                 throw new NotFoundException(nameof(CourseType), request.Id);
             }
 
-            entity.Name = request.Name;
+            MapToEntity(request, entity);
 
             var result = await _unitOfWork.CourseTypeRepository.UpdateAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
@@ -58,5 +58,7 @@ namespace Application.CourseTypes.Commands
                 StatusCode = System.Net.HttpStatusCode.NoContent
             };
         }
+
+        private static void MapToEntity(UpdateCourseTypeCommand request, CourseType entity) => entity.Name = request.Name;
     }
 }

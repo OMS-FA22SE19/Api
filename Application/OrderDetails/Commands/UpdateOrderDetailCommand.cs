@@ -89,6 +89,6 @@ namespace Application.OrderDetails.Commands
             };
         }
 
-        private static void MapToEntity(UpdateOrderDetailCommand request, OrderDetail? entity) => entity.Status = request.Status;
+        private static void MapToEntity(UpdateOrderDetailCommand request, OrderDetail entity) => entity.Status = request.Status;
     }
 }

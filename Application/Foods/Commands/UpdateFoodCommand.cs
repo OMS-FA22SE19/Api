@@ -113,7 +113,7 @@ namespace Application.Foods.Commands
             };
         }
 
-        private static void MapToEntity(UpdateFoodCommand request, Food? entity)
+        private static void MapToEntity(UpdateFoodCommand request, Food entity)
         {
             entity.Name = request.Name;
             entity.Description = request.Description;
