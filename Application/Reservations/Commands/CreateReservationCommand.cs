@@ -52,13 +52,13 @@ namespace Application.Reservations.Commands
 
             entity.Status = ReservationStatus.Reserved;
 
-            var TableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
-            int TableId;
-            List<int> tableIds = TableList.Select(e => e.Id).ToList();
+            var tableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
+            int tableId;
+            List<int> tableIds = tableList.Select(e => e.Id).ToList();
             if (tableIds.Any())
             {
-                TableId = await _unitOfWork.TableRepository.GetTableAvailableForReservation(tableIds, request.StartTime, request.EndTime);
-                if (TableId == 0)
+                tableId = await _unitOfWork.TableRepository.GetTableAvailableForReservation(tableIds, request.StartTime, request.EndTime);
+                if (tableId == 0)
                 {
                     return new Response<ReservationDto>("There is no table available");
                 }
@@ -68,13 +68,15 @@ namespace Application.Reservations.Commands
                 return new Response<ReservationDto>("There is no table available");
             }
 
-            entity.TableId = TableId;
+            entity.TableId = tableId;
             var result = await _unitOfWork.ReservationRepository.InsertAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
                 return new Response<ReservationDto>("error");
             }
+            result.Table = await _unitOfWork.TableRepository.GetAsync(e => e.Id == tableId && !e.IsDeleted, $"{nameof(Table.TableType)}");
+            result.User = user;
             var mappedResult = _mapper.Map<ReservationDto>(result);
             return new Response<ReservationDto>(mappedResult)
             {

@@ -12,16 +12,16 @@ using System.Linq.Expressions;
 
 namespace Application.Foods.Queries
 {
-    public class GetFoodWithMenuIdQuery : PaginationRequest, IRequest<Response<List<FoodDto>>>
+    public class GetFoodWithMenuIdQuery : PaginationRequest, IRequest<Response<List<MenuFoodDto>>>
     {
         [Required]
         public int MenuId { get; init; }
         public int? CourseTypeId { get; init; }
         public int? TypeId { get; init; }
-        public new FoodProperty? OrderBy { get; init; }
+        public FoodProperty? OrderBy { get; init; }
     }
 
-    public sealed class GetFoodWithMenuIdQueryHandler : IRequestHandler<GetFoodWithMenuIdQuery, Response<List<FoodDto>>>
+    public sealed class GetFoodWithMenuIdQueryHandler : IRequestHandler<GetFoodWithMenuIdQuery, Response<List<MenuFoodDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -32,7 +32,7 @@ namespace Application.Foods.Queries
             _mapper = mapper;
         }
 
-        public async Task<Response<List<FoodDto>>> Handle(GetFoodWithMenuIdQuery request, CancellationToken cancellationToken)
+        public async Task<Response<List<MenuFoodDto>>> Handle(GetFoodWithMenuIdQuery request, CancellationToken cancellationToken)
         {
             var menu = await _unitOfWork.MenuRepository.GetAsync(e => e.Id == request.MenuId);
             if (menu is null)
@@ -93,9 +93,10 @@ namespace Application.Foods.Queries
                     break;
             }
             var result = await _unitOfWork.FoodRepository.GetAllAsync(filters, orderBy, includeProperties);
-            var mappedResult = _mapper.Map<List<FoodDto>>(result);
+            var mappedResult = _mapper.Map<List<MenuFoodDto>>(result);
             foreach (var item in mappedResult)
             {
+                item.Price = result.First(e => e.Id == item.Id).MenuFoods.First(e => e.MenuId == request.MenuId).Price;
                 if (item.Types is null)
                 {
                     item.Types = new List<TypeDto>();
@@ -109,7 +110,7 @@ namespace Application.Foods.Queries
                     }
                 }
             }
-            return new Response<List<FoodDto>>(mappedResult);
+            return new Response<List<MenuFoodDto>>(mappedResult);
         }
     }
 }

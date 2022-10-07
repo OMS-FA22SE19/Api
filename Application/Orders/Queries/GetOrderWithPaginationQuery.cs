@@ -13,7 +13,7 @@ namespace Application.Orders.Queries
 {
     public sealed class GetOrderWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<OrderDto>>>
     {
-        public new OrderProperty? OrderBy { get; init; }
+        public OrderProperty? OrderBy { get; init; }
         public OrderStatus? Status { get; init; }
     }
 
@@ -95,7 +95,7 @@ namespace Application.Orders.Queries
                 {
                     Id = order.Id,
                     UserId = order.UserId,
-                    UserName = order.User.UserName,
+                    FullName = order.User.FullName,
                     PhoneNumber = order.User.PhoneNumber,
                     Date = order.Date.ToString("dd/MM/yyyy HH:mm:ss"),
                     Status = order.Status,

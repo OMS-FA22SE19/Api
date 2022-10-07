@@ -12,7 +12,7 @@ namespace Application.CourseTypes.Queries
 {
     public sealed class GetCourseTypeWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<CourseTypeDto>>>
     {
-        public new CourseTypeProperty? OrderBy { get; init; }
+        public CourseTypeProperty? OrderBy { get; init; }
     }
 
     public sealed class GetCourseTypeWithPaginationQueryHandler : IRequestHandler<GetCourseTypeWithPaginationQuery, Response<PaginatedList<CourseTypeDto>>>
@@ -34,7 +34,7 @@ namespace Application.CourseTypes.Queries
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
-                filters.Add(e => e.Name.Contains(request.SearchValue) || request.SearchValue.Equals(e.Id));
+                filters.Add(e => e.Name.Contains(request.SearchValue) || request.SearchValue.Contains(e.Id.ToString()));
             }
 
             switch (request.OrderBy)

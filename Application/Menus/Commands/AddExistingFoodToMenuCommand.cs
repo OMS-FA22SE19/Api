@@ -55,7 +55,8 @@ namespace Application.Menus.Commands
             await _unitOfWork.MenuFoodRepository.InsertAsync(new MenuFood
             {
                 FoodId = request.FoodId,
-                MenuId = request.Id
+                MenuId = request.Id,
+                Price = request.Price
             });
 
             await _unitOfWork.CompleteAsync(cancellationToken);

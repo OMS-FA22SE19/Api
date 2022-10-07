@@ -28,7 +28,7 @@ namespace Infrastructure.Repositories
         public async Task<Reservation> GetReservationWithDateAndTableId(int tableId, DateTime date)
         {
             IQueryable<Reservation> query = _dbSet;
-            return await query.OrderByDescending(e => e.StartTime).FirstOrDefaultAsync(e => e.TableId == tableId && e.StartTime < date.AddHours(1) && e.StartTime > date.AddHours(-1));
+            return await query.OrderByDescending(e => e.StartTime).FirstOrDefaultAsync(e => e.TableId == tableId && e.StartTime < date.AddHours(2) && e.StartTime > date.AddHours(-2));
         }
     }
 }
