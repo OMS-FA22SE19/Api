@@ -13,11 +13,21 @@ namespace Api.Controllers.V1
     [ApiController]
     public class OrderDetailsController : ApiControllerBase
     {
+        /// <summary>
+        /// Retrieve a list of OrderDetails.
+        /// </summary>
+        /// <returns>A list of OrderDetails.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /OrderDetails
+        ///
+        /// </remarks>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetOrderDetailWithPaginationQuery query)
+        public async Task<ActionResult<Response<PaginatedList<DishDto>>>> GetAsync([FromQuery] GetOrderDetailWithPaginationQuery query)
         {
             try
             {
@@ -31,7 +41,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<PaginatedList<OrderDetailDto>>(ex.Message)
+                var response = new Response<PaginatedList<DishDto>>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -55,7 +65,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync(int id)
+        public async Task<ActionResult<Response<DishDto>>> GetByIdAsync(int id)
         {
             try
             {
@@ -78,7 +88,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<OrderDetailDto>(ex.Message)
+                var response = new Response<DishDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -86,11 +96,27 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Update status a specific OrderDetail.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /OrderDetails/1
+        ///     {
+        ///        "id": 1,
+        ///        "status": "Received"
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="id">The id of updated Food</param>
         [HttpPut("id")]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromBody] UpdateOrderDetailCommand command)
+        public async Task<ActionResult> PutAsync(int id, [FromBody] UpdateOrderDetailCommand command)
         {
             try
             {
@@ -101,7 +127,7 @@ namespace Api.Controllers.V1
 
                 if (id != command.Id)
                 {
-                    var response = new Response<OrderDetailDto>("The Id do not match")
+                    var response = new Response<DishDto>("The Id do not match")
                     {
                         StatusCode = HttpStatusCode.BadRequest
                     };
@@ -121,7 +147,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<OrderDetailDto>(ex.Message)
+                var response = new Response<DishDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

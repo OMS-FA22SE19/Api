@@ -38,7 +38,7 @@ namespace Infrastructure
 
             services
                 .AddDefaultIdentity<ApplicationUser>()
-                .AddRoles<IdentityRole>()
+                .AddRoles<ApplicationRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
             services.Configure<IdentityOptions>(options =>

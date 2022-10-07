@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Core.Entities
 {
-    public sealed class Reservation : BaseEntity
+    public sealed class Reservation : BaseAuditableEntity
     {
         [Required]
         public string UserId { get; set; }

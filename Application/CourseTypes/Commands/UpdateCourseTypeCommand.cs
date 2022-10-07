@@ -42,8 +42,10 @@ namespace Application.CourseTypes.Commands
             {
                 throw new NotFoundException(nameof(CourseType), request.Id);
             }
-            var updatedEntity = _mapper.Map<CourseType>(request);
-            var result = await _unitOfWork.CourseTypeRepository.UpdateAsync(updatedEntity);
+
+            entity.Name = request.Name;
+
+            var result = await _unitOfWork.CourseTypeRepository.UpdateAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {

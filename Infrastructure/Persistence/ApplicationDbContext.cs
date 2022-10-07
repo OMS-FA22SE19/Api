@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace Infrastructure.Persistence
 {
-    public sealed class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, IApplicationDbContext, IDisposable
+    public sealed class ApplicationDbContext : ApiAuthorizationDbContext<ApplicationUser>, IApplicationDbContext
     {
         private readonly IMediator _mediator;
         private readonly AuditableEntitySaveChangesInterceptor _auditableEntitySaveChangesInterceptor;
@@ -39,11 +39,32 @@ namespace Infrastructure.Persistence
         public DbSet<Table> Tables => Set<Table>();
         public DbSet<TableType> TableTypes => Set<TableType>();
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            base.OnModelCreating(modelBuilder);
 
-            base.OnModelCreating(builder);
+            modelBuilder.Entity<ApplicationUser>(b =>
+            {
+                b.HasOne(e => e.Role)
+                    .WithMany(e => e.Users)
+                    .HasForeignKey(e => e.RoleId)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity<ApplicationRole>(b =>
+            {
+                b.Property(e => e.Id)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasColumnType("nvarchar(50)");
+
+                b.HasMany(e => e.Users)
+                    .WithOne(e => e.Role)
+                    .HasForeignKey(e => e.RoleId)
+                    .IsRequired();
+
+            });
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

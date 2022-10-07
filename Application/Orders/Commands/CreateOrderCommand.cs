@@ -75,11 +75,15 @@ namespace Application.Orders.Commands
             {
                 for (int i = 0; i < dish.Value; i++)
                 {
-                    var price = (await _unitOfWork.MenuFoodRepository.GetAsync(e => e.FoodId == dish.Key && e.MenuId == availableMenu.Id)).Price;
+                    var food = await _unitOfWork.MenuFoodRepository.GetAsync(e => e.FoodId == dish.Key && e.MenuId == availableMenu.Id);
+                    if (food is null)
+                    {
+                        throw new NotFoundException(nameof(Food), dish.Key);
+                    }
                     entity.OrderDetails.Add(new OrderDetail
                     {
                         FoodId = dish.Key,
-                        Price = price,
+                        Price = food.Price,
                         Status = OrderDetailStatus.Received
                     });
                 }

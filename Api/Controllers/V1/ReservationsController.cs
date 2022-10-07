@@ -14,11 +14,21 @@ namespace Api.Controllers.V1
     [ApiController]
     public class ReservationsController : ApiControllerBase
     {
+        /// <summary>
+        /// Retrieve a list of Reservations.
+        /// </summary>
+        /// <returns>List of Reservations.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Reservations
+        ///     
+        /// </remarks>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetReservationWithPaginationQuery query)
+        public async Task<ActionResult<PaginatedList<ReservationDto>>> GetAsync([FromQuery] GetReservationWithPaginationQuery query)
         {
             try
             {
@@ -40,12 +50,23 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Retrieve a specific Reservation by Id.
+        /// </summary>
+        /// <returns>A Reservation.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Reservations/1
+        ///
+        /// </remarks>
+        /// <param name="id">The desired id of Reservation</param>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync(int id)
+        public async Task<ActionResult<ReservationDto>> GetByIdAsync(int id)
         {
             try
             {
@@ -76,12 +97,22 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Retrieve list of unavailable Reservations in a date.
+        /// </summary>
+        /// <returns>List of Reservations.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Reservations/BusyDate
+        ///
+        /// </remarks>
         [HttpGet("BusyDate")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetBusyTimeWithSetOfTable([FromQuery] GetBusyTimeOfDateQuery query)
+        public async Task<ActionResult<Response<List<BusyTimeDto>>>> GetBusyTimeWithSetOfTable([FromQuery] GetBusyTimeOfDateQuery query)
         {
             try
             {
@@ -107,11 +138,29 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Create a Reservation.
+        /// </summary>
+        /// <returns>New Reservation.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Reservations
+        ///     {
+        ///         "startTime": "2022-10-07T04:19:19.466Z",
+        ///         "endTime": "2022-10-07T04:19:19.466Z",
+        ///         "numOfSeats": 4,
+        ///         "tableTypeId": 2,
+        ///         "isPriorFoodOrder": false
+        ///     }
+        ///     
+        /// </remarks>
         [HttpPost]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateReservationCommand command)
+        public async Task<ActionResult<Response<ReservationDto>>> PostAsync([FromBody] CreateReservationCommand command)
         {
             try
             {
@@ -137,11 +186,27 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Update status of a Reservation.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /Reservations/1
+        ///     {
+        ///         "id": 1,
+        ///         "status": "Available"
+        ///     }
+        ///     
+        /// </remarks>
+        /// <param name="id">The id of updated Reservation</param>
         [HttpPut("{id}")]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromForm] ChangeReservationStatusCommand command)
+        public async Task<ActionResult> PutAsync(int id, [FromBody] ChangeReservationStatusCommand command)
         {
             try
             {
@@ -176,12 +241,22 @@ namespace Api.Controllers.V1
             }
         }
 
-        // DELETE api/Blogs/5
+        /// <summary>
+        /// Delete a specific Reservation.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /Reservations/1
+        ///
+        /// </remarks>
+        /// <param name="id">The id of deleted Reservation</param>
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             try
             {

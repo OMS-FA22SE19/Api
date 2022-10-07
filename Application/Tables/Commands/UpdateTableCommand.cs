@@ -53,9 +53,10 @@ namespace Application.Tables.Commands
             {
                 throw new NotFoundException(nameof(Table.TableType), request.TableTypeId);
             }
-            var updatedEntity = _mapper.Map<Table>(request);
 
-            var result = await _unitOfWork.TableRepository.UpdateAsync(updatedEntity);
+            MapToEntity(request, entity);
+
+            var result = await _unitOfWork.TableRepository.UpdateAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
@@ -67,6 +68,13 @@ namespace Application.Tables.Commands
             {
                 StatusCode = System.Net.HttpStatusCode.NoContent
             };
+        }
+
+        private static void MapToEntity(UpdateTableCommand request, Table? entity)
+        {
+            entity.NumOfSeats = request.NumOfSeats;
+            entity.Status = request.Status;
+            entity.TableTypeId = request.TableTypeId;
         }
     }
 }

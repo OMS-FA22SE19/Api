@@ -156,6 +156,7 @@ namespace Api.Controllers.V1
         /// </remarks>
         /// <param name="id">The id of updated Course Type</param>
         [HttpPut("id")]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

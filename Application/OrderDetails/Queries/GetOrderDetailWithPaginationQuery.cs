@@ -72,7 +72,7 @@ namespace Application.OrderDetails.Queries
                     orderBy = e => e.OrderBy(x => x.Status);
                     break;
                 default:
-                    orderBy = e => e.OrderBy(x => x.Order.Date);
+                    orderBy = e => e.OrderByDescending(x => x.Created);
                     break;
             }
 
