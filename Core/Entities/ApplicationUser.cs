@@ -14,7 +14,5 @@ namespace Core.Entities
         public bool IsDeleted { get; set; }
         public IList<Reservation> Reservations { get; set; }
         public IList<Order> Orders { get; set; }
-        public string RoleId { get; set; }
-        public ApplicationRole Role { get; set; }
     }
 }

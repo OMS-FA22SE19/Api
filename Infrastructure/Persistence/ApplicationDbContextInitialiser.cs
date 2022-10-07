@@ -10,9 +10,9 @@ namespace Infrastructure.Persistence
         private readonly ILogger<ApplicationDbContextInitialiser> _logger;
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<ApplicationRole> _roleManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<ApplicationRole> roleManager)
+        public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _logger = logger;
             _context = context;
@@ -52,7 +52,7 @@ namespace Infrastructure.Persistence
         public async Task TrySeedAsync()
         {
             //// Default roles
-            var administratorRole = new ApplicationRole("Administrator");
+            var administratorRole = new IdentityRole("Administrator");
 
             if (_roleManager.Roles.All(r => r.Name != administratorRole.Name))
             {
@@ -60,29 +60,29 @@ namespace Infrastructure.Persistence
             }
 
             // Default users
-            var adminRole = await _roleManager.FindByNameAsync("Administrator");
-            var administrator = new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost", FullName = "Administrator", RoleId = adminRole.Id };
+            var administrator = new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost", FullName = "Administrator" };
 
             if (_userManager.Users.All(u => u.UserName != administrator.UserName))
             {
                 await _userManager.CreateAsync(administrator, "Administrator1!");
+                await _userManager.AddToRolesAsync(administrator, new[] { administratorRole.Name });
             }
 
             //// Default data
 
-            var customerRole = new ApplicationRole("Customer");
+            var customerRole = new IdentityRole("Customer");
             if (_roleManager.Roles.All(r => r.Name != customerRole.Name))
             {
                 await _roleManager.CreateAsync(customerRole);
             }
 
             // Default users
-            var cusRole = await _roleManager.FindByNameAsync("Customer");
-            var customer = new ApplicationUser { UserName = "defaultCustomer", Email = "longpnhse150499@fpt.edu.vn", PhoneNumber = "0939758999", FullName = "Default Customer", RoleId = cusRole.Id };
+            var customer = new ApplicationUser { UserName = "defaultCustomer", Email = "longpnhse150499@fpt.edu.vn", PhoneNumber = "0939758999", FullName = "Default Customer" };
 
             if (_userManager.Users.All(u => u.UserName != customer.UserName))
             {
                 await _userManager.CreateAsync(customer, "abc123");
+                await _userManager.AddToRolesAsync(customer, new[] { customerRole.Name });
             }
         }
     }
