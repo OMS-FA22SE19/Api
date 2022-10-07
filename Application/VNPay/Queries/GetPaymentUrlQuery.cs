@@ -1,5 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Models;
+using Application.Orders.Response;
 using Application.Types.Response;
 using Application.VNPay.Response;
 using AutoMapper;
@@ -21,8 +22,6 @@ namespace Application.VNPay.Queries
         public int ammount { get; init; }
         [Required]
         public string orderId { get; init; }
-        [Required]
-        public string bankCode { get; init; }
     }
 
     public sealed class GetPaymentUrlQueryHandler : IRequestHandler<GetPaymentUrlQuery, Response<PaymentUrlDto>>
@@ -39,6 +38,22 @@ namespace Application.VNPay.Queries
 
         public async Task<Response<PaymentUrlDto>> Handle(GetPaymentUrlQuery request, CancellationToken cancellationToken)
         {
+            var entity = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.orderId, $"{nameof(Order.OrderDetails)},{nameof(Order.User)}");
+            if (entity is null)
+            {
+                throw new NotFoundException(nameof(Order), request.orderId);
+            }
+
+            if (entity.OrderDetails.Any(e => e.Status != OrderDetailStatus.Served))
+            {
+                return new Response<PaymentUrlDto>($"Order {entity.Id} cannot be confirmed. Make sure all dishes have been served!");
+            }
+
+            if (entity.Status == OrderStatus.Paid)
+            {
+                return new Response<PaymentUrlDto>($"Order {entity.Id} cannot be Paid again!");
+            }
+
             Payment payment = new Payment
             {
                 Id = DateTime.Now.ToString("yyyyMMddHHmmss"),
@@ -71,8 +86,6 @@ namespace Application.VNPay.Queries
             vnpay.AddRequestData("vnp_Command", "pay");
             vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
             vnpay.AddRequestData("vnp_Amount", (request.ammount*100).ToString());
-
-            vnpay.AddRequestData("vnp_BankCode", request.bankCode);
 
             vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));//yyyyMMddHHmmss
             vnpay.AddRequestData("vnp_CurrCode", "VND");
