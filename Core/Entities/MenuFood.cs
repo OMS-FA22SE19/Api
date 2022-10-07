@@ -1,12 +1,10 @@
-﻿using Core.Common;
+﻿using Domain.Common;
 using System.ComponentModel.DataAnnotations;
 
 namespace Core.Entities
 {
-    public sealed class MenuFood : Entity
+    public sealed class MenuFood : BaseAuditableEntity
     {
-        [Key]
-        public int Id { get; set; }
         [Required]
         public int MenuId { get; set; }
         [Required]

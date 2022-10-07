@@ -13,11 +13,21 @@ namespace Api.Controllers.V1
     [ApiController]
     public sealed class OrdersController : ApiControllerBase
     {
+        /// <summary>
+        /// Retrieve a list of Orders.
+        /// </summary>
+        /// <returns>List of Orders.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Orders
+        ///     
+        /// </remarks>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetOrderWithPaginationQuery query)
+        public async Task<ActionResult<Response<PaginatedList<OrderDto>>>> GetAsync([FromQuery] GetOrderWithPaginationQuery query)
         {
             try
             {
@@ -39,12 +49,21 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// Retrieve a specific Order.
+        /// </summary>
+        /// <returns>An Orders.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Orders/9-0939758999-07-10-2022-10:55:10
+        ///     
+        /// </remarks>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync(string id)
+        public async Task<ActionResult<Response<OrderDto>>> GetByIdAsync(string id)
         {
             try
             {
@@ -75,11 +94,29 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Create an Order.
+        /// </summary>
+        /// <returns>New Order.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Orders
+        ///     {
+        ///        "tableId": "9",
+        ///        "orderDetails": {
+        ///             "2": 3 (FoodId: quantity),
+        ///             "8": 2
+        ///         }
+        ///     }
+        ///     
+        /// </remarks>
         [HttpPost]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateOrderCommand command)
+        public async Task<ActionResult> PostAsync([FromBody] CreateOrderCommand command)
         {
             try
             {
@@ -105,11 +142,21 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// Confirm a processing Order.
+        /// 
+        /// </summary>
+        /// <returns>An Orders.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Orders/9-0939758999-07-10-2022-10:55:10/Confirm
+        ///     
+        /// </remarks>
         [HttpPost("{id}/Confirm")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> ConfirmAsync(string id)
+        public async Task<ActionResult> ConfirmAsync(string id)
         {
             try
             {

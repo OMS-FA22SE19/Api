@@ -11,7 +11,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.OrderDetails.Commands
 {
-    public sealed class UpdateOrderDetailCommand : IMapFrom<OrderDetail>, IRequest<Response<OrderDetailDto>>
+    public sealed class UpdateOrderDetailCommand : IMapFrom<OrderDetail>, IRequest<Response<DishDto>>
     {
         [Required]
         public int Id { get; set; }
@@ -23,7 +23,7 @@ namespace Application.OrderDetails.Commands
         }
     }
 
-    public sealed class UpdateOrderDetailCommandHandler : IRequestHandler<UpdateOrderDetailCommand, Response<OrderDetailDto>>
+    public sealed class UpdateOrderDetailCommandHandler : IRequestHandler<UpdateOrderDetailCommand, Response<DishDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -34,7 +34,7 @@ namespace Application.OrderDetails.Commands
             _mapper = mapper;
         }
 
-        public async Task<Response<OrderDetailDto>> Handle(UpdateOrderDetailCommand request, CancellationToken cancellationToken)
+        public async Task<Response<DishDto>> Handle(UpdateOrderDetailCommand request, CancellationToken cancellationToken)
         {
             var entity = await _unitOfWork.OrderDetailRepository.GetAsync(e => e.Id == request.Id);
             if (entity is null)
@@ -46,7 +46,7 @@ namespace Application.OrderDetails.Commands
                 case OrderDetailStatus.Cancelled:
                     if (entity.Status != OrderDetailStatus.Received)
                     {
-                        return new Response<OrderDetailDto>("Invalid Operation! You can only cancel received dish")
+                        return new Response<DishDto>("Invalid Operation! You can only cancel received dish")
                         {
                             StatusCode = System.Net.HttpStatusCode.BadRequest
                         };
@@ -55,7 +55,7 @@ namespace Application.OrderDetails.Commands
                 case OrderDetailStatus.Processing:
                     if (entity.Status != OrderDetailStatus.Received)
                     {
-                        return new Response<OrderDetailDto>("Invalid Operation! You can only procceed received dish")
+                        return new Response<DishDto>("Invalid Operation! You can only procceed received dish")
                         {
                             StatusCode = System.Net.HttpStatusCode.BadRequest
                         };
@@ -64,7 +64,7 @@ namespace Application.OrderDetails.Commands
                 case OrderDetailStatus.Served:
                     if (entity.Status != OrderDetailStatus.Processing)
                     {
-                        return new Response<OrderDetailDto>("Invalid Operation! You can only serve processing dish")
+                        return new Response<DishDto>("Invalid Operation! You can only serve processing dish")
                         {
                             StatusCode = System.Net.HttpStatusCode.BadRequest
                         };
@@ -73,20 +73,22 @@ namespace Application.OrderDetails.Commands
                 default:
                     break;
             }
-            entity.Status = request.Status;
+            MapToEntity(request, entity);
 
             var result = await _unitOfWork.OrderDetailRepository.UpdateAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
-                return new Response<OrderDetailDto>("error");
+                return new Response<DishDto>("error");
             }
-            var mappedResult = _mapper.Map<OrderDetailDto>(result);
-            return new Response<OrderDetailDto>()
+            var mappedResult = _mapper.Map<DishDto>(result);
+            return new Response<DishDto>()
             {
                 Succeeded = true,
                 StatusCode = System.Net.HttpStatusCode.NoContent
             };
         }
+
+        private static void MapToEntity(UpdateOrderDetailCommand request, OrderDetail entity) => entity.Status = request.Status;
     }
 }

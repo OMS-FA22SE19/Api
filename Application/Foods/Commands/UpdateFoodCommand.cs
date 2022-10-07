@@ -27,8 +27,7 @@ namespace Application.Foods.Commands
         [StringLength(2000, MinimumLength = 2)]
         public string Ingredient { get; set; }
         public bool Available { get; set; } = true;
-        [Required]
-        public IFormFile Picture { get; set; }
+        public IFormFile? Picture { get; set; }
         public int CourseTypeId { get; set; }
 
         public IList<int> Types { get; set; }
@@ -65,7 +64,8 @@ namespace Application.Foods.Commands
             {
                 throw new NotFoundException(nameof(Food.CourseType), request.CourseTypeId);
             }
-            var updatedEntity = _mapper.Map<Food>(request);
+
+            MapToEntity(request, entity);
 
             if (entity.FoodTypes is not null)
             {
@@ -81,11 +81,11 @@ namespace Application.Foods.Commands
                     {
                         throw new NotFoundException(nameof(Type), categoryId);
                     }
-                    if (updatedEntity.FoodTypes is null)
+                    if (entity.FoodTypes is null)
                     {
-                        updatedEntity.FoodTypes = new List<FoodType>();
+                        entity.FoodTypes = new List<FoodType>();
                     }
-                    updatedEntity.FoodTypes.Add(new FoodType
+                    entity.FoodTypes.Add(new FoodType
                     {
                         FoodId = entity.Id,
                         TypeId = inDatabase.Id
@@ -94,9 +94,12 @@ namespace Application.Foods.Commands
 
             }
 
-            var pictureUrl = await _uploadService.UploadAsync(request.Picture, "Foods");
-            updatedEntity.PictureUrl = pictureUrl;
-            var result = await _unitOfWork.FoodRepository.UpdateAsync(updatedEntity);
+            if (request.Picture is not null)
+            {
+                var pictureUrl = await _uploadService.UploadAsync(request.Picture, "Foods");
+                entity.PictureUrl = pictureUrl;
+            }
+            var result = await _unitOfWork.FoodRepository.UpdateAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
@@ -108,6 +111,15 @@ namespace Application.Foods.Commands
                 Succeeded = true,
                 StatusCode = System.Net.HttpStatusCode.NoContent
             };
+        }
+
+        private static void MapToEntity(UpdateFoodCommand request, Food entity)
+        {
+            entity.Name = request.Name;
+            entity.Description = request.Description;
+            entity.Ingredient = request.Ingredient;
+            entity.Available = request.Available;
+            entity.CourseTypeId = request.CourseTypeId;
         }
     }
 }

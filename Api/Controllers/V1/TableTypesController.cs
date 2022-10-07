@@ -13,11 +13,21 @@ namespace Api.Controllers.V1
     [ApiController]
     public class TableTypesController : ApiControllerBase
     {
+        /// <summary>
+        /// Retrieve a list of Table Types.
+        /// </summary>
+        /// <returns>List of Table Types.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /TableTypes
+        ///     
+        /// </remarks>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAsync([FromQuery] GetTableTypeWithPaginationQuery query)
+        public async Task<ActionResult<Response<PaginatedList<TableTypeDto>>>> GetAsync([FromQuery] GetTableTypeWithPaginationQuery query)
         {
             try
             {
@@ -39,12 +49,23 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Retrieve a specific Table Type by Id.
+        /// </summary>
+        /// <returns>A Table Type.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /TableTypes/1
+        ///
+        /// </remarks>
+        /// <param name="id">The desired id of Table Type</param>
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync(int id)
+        public async Task<ActionResult<Response<TableTypeDto>>> GetByIdAsync(int id)
         {
             try
             {
@@ -75,11 +96,26 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Create a Table Type.
+        /// </summary>
+        /// <returns>New Table Type.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /CourseTypes
+        ///     {
+        ///        "name": "Outdoor",
+        ///        "chargePerSeat": 20000,
+        ///     }
+        ///     
+        /// </remarks>
         [HttpPost]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PostAsync([FromBody] CreateTableTypeCommand command)
+        public async Task<ActionResult<Response<TableTypeDto>>> PostAsync([FromBody] CreateTableTypeCommand command)
         {
             try
             {
@@ -105,11 +141,28 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Update a specific Table Type.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /TableTypes/1
+        ///     {
+        ///        "id": 1,
+        ///        "name": "Outdoor",
+        ///        "chargePerSeat": 20000,
+        ///     }
+        ///
+        /// </remarks>
+        /// <param name="id">The id of updated Table Type</param>
         [HttpPut("id")]
+        [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> PutAsync(int id, [FromBody] UpdateTableTypeCommand command)
+        public async Task<ActionResult> PutAsync(int id, [FromBody] UpdateTableTypeCommand command)
         {
             try
             {
@@ -148,11 +201,22 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// <summary>
+        /// Delete a specific Table Type.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     DELETE /TableTypes/1
+        ///
+        /// </remarks>
+        /// <param name="id">The id of deleted Table Type</param>
         [HttpDelete("id")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteAsync(int id)
+        public async Task<ActionResult> DeleteAsync(int id)
         {
             try
             {

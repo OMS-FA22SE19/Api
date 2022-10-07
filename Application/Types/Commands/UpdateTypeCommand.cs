@@ -42,8 +42,10 @@ namespace Application.Types.Commands
             {
                 throw new NotFoundException(nameof(Type), request.Id);
             }
-            var updatedEntity = _mapper.Map<Core.Entities.Type>(request);
-            var result = await _unitOfWork.TypeRepository.UpdateAsync(updatedEntity);
+
+            MapToEntity(request, entity);
+
+            var result = await _unitOfWork.TypeRepository.UpdateAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
@@ -56,5 +58,7 @@ namespace Application.Types.Commands
                 StatusCode = System.Net.HttpStatusCode.NoContent
             };
         }
+
+        private static void MapToEntity(UpdateTypeCommand request, Type? entity) => entity.Name = request.Name;
     }
 }
