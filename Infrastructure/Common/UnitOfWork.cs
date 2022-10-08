@@ -17,6 +17,7 @@ namespace Infrastructure.Common
         private IMenuFoodRepository _menuFoodRepository;
         private IOrderRepository _orderRepository;
         private IOrderDetailRepository _orderDetailRepository;
+        private IPaymentRepository _paymentRepository;
         private ITableTypeRepository _tableTypeRepository;
 
         public UnitOfWork(IApplicationDbContext context)
@@ -136,6 +137,18 @@ namespace Infrastructure.Common
                     _orderDetailRepository = new OrderDetailRepository(_context);
                 }
                 return _orderDetailRepository;
+            }
+        }
+
+        public IPaymentRepository PaymentRepository
+        {
+            get
+            {
+                if (_paymentRepository is null)
+                {
+                    _paymentRepository = new PaymentRepository(_context);
+                }
+                return _paymentRepository;
             }
         }
 

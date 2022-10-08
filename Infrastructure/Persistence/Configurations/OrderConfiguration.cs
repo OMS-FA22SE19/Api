@@ -57,6 +57,10 @@ namespace Infrastructure.Persistence.Configurations
                 .WithOne(e => e.Order)
                 .HasForeignKey(e => e.OrderId);
 
+            builder.HasMany(e => e.Payments)
+                .WithOne(e => e.Order)
+                .HasForeignKey(e => e.OrderId);
+
             builder.HasKey("Id");
 
             builder.HasIndex("UserId");

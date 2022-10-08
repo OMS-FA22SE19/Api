@@ -14,6 +14,7 @@ namespace Core.Common.Interfaces
         DbSet<MenuFood> MenuFoods { get; }
         DbSet<Order> Orders { get; }
         DbSet<OrderDetail> OrderDetails { get; }
+        DbSet<Payment> Payments { get; }
         DbSet<Reservation> Reservations { get; }
         DbSet<Table> Tables { get; }
         DbSet<TableType> TableTypes { get; }
