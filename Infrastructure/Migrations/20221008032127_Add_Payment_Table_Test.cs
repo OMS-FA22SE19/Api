@@ -4,7 +4,7 @@
 
 namespace Infrastructure.Migrations
 {
-    public partial class Add_Payment_Table : Migration
+    public partial class Add_Payment_Table_Test : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

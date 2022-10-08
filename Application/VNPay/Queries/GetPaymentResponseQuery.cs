@@ -44,45 +44,45 @@ namespace Application.VNPay.Queries
             string vnp_SecureHash = request.vnp_SecureHash;
 
             VnPayLibrary vnpay = new VnPayLibrary();
-            //bool checkSignature = vnpay.ValidateSignature(vnp_SecureHash, vnp_HashSecret);
-            //if (checkSignature)
-            //{
-                if (responseCode == "00" && transactionStatus == "00")
-                {
-                    var entity = await _unitOfWork.PaymentRepository.GetAsync(e => e.Id == paymentId);
-                    if (entity is null)
-                    {
-                        throw new NotFoundException(nameof(Order), paymentId);
-                    }
-                    entity.Status = PaymentStatus.Paid;
-
-                    var entityOrder = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == entity.OrderId);
-                    if (entityOrder is null)
-                    {
-                        throw new NotFoundException(nameof(Order), paymentId);
-                    }
-                    entityOrder.Status = OrderStatus.Paid;
-
-                    var result = await _unitOfWork.PaymentRepository.UpdateAsync(entity);
-                    await _unitOfWork.OrderRepository.UpdateAsync(entityOrder);
-                    await _unitOfWork.CompleteAsync(cancellationToken);
-                    if (result is null)
-                    {
-                        return new Response<PaymentDto>("error");
-                    }
-                    var mappedResult = _mapper.Map<PaymentDto>(result);
-                    return new Response<PaymentDto>()
-                    {
-                        Succeeded = true,
-                        StatusCode = System.Net.HttpStatusCode.NoContent
-                    };
-                }
-            //}
-            return new Response<PaymentDto>()
+            if (responseCode == "00" && transactionStatus == "00")
             {
-                Succeeded = false,
-                StatusCode = System.Net.HttpStatusCode.BadRequest
-            };
+                var entity = await _unitOfWork.PaymentRepository.GetAsync(e => e.Id == paymentId);
+                if (entity is null)
+                {
+                    throw new NotFoundException(nameof(Order), paymentId);
+                }
+                entity.Status = PaymentStatus.Paid;
+
+                var result = await _unitOfWork.PaymentRepository.UpdateAsync(entity);
+                await _unitOfWork.CompleteAsync(cancellationToken);
+                if (result is null)
+                {
+                    return new Response<PaymentDto>("error");
+                }
+                var mappedResult = _mapper.Map<PaymentDto>(result);
+                return new Response<PaymentDto>(mappedResult);
+            }
+            else
+            {
+                var entity = await _unitOfWork.PaymentRepository.GetAsync(e => e.Id == paymentId);
+                if (entity is null)
+                {
+                    throw new NotFoundException(nameof(Order), paymentId);
+                }
+                entity.Status = PaymentStatus.Failed;
+
+                var result = await _unitOfWork.PaymentRepository.UpdateAsync(entity);
+                await _unitOfWork.CompleteAsync(cancellationToken);
+                if (result is null)
+                {
+                    return new Response<PaymentDto>("error");
+                }
+                var mappedResult = _mapper.Map<PaymentDto>(result);
+                return new Response<PaymentDto>("Transaction failed")
+                {
+                    Succeeded = false
+                };
+            }
         }
     }
 }
