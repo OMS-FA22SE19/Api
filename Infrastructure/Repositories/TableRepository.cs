@@ -64,5 +64,25 @@ namespace Infrastructure.Repositories
 
             return AvailableTable;
         }
+
+        public async Task<List<Table>> GetAllAvailableTableWithDateAndTableType(DateTime startTime, DateTime endTime, int tableTypeId, int numOfPeople)
+        {
+            IQueryable<Table> query = _dbSet;
+            IQueryable<Reservation> queryReservation = _dbSetReservation;
+
+            List<Table> listTable = await query.Where(t => t.TableTypeId == tableTypeId && t.NumOfSeats <= numOfPeople + 2 && t.IsDeleted == false)
+                .Include(t => t.TableType)
+                .OrderBy(t => t.NumOfSeats)
+                .ToListAsync();
+
+            queryReservation = queryReservation.Where(r => 
+            !((startTime < r.StartTime && endTime <= r.StartTime) || (startTime >= r.EndTime && endTime > r.EndTime))
+                && r.Table.TableTypeId == tableTypeId);
+
+            List<int> listOfTableIdNotAvailable = queryReservation.Select(e => e.TableId).ToList();
+            listTable.RemoveAll(item => listOfTableIdNotAvailable.Contains(item.Id));
+
+            return listTable;
+        }
     }
 }

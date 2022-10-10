@@ -19,5 +19,7 @@ namespace Core.Entities
 
         public Table Table { get; set; }
         public ApplicationUser User { get; set; }
+
+        public IList<ReservationTable> ReservationTables { get; set; }
     }
 }

@@ -13,6 +13,7 @@ namespace Core.Entities
 
         public IList<Reservation> Reservations { get; set; }
         public IList<Order> Orders { get; set; }
+        public IList<ReservationTable> ReservationsTables { get; set; }
         public TableType TableType { get; set; }
     }
 }

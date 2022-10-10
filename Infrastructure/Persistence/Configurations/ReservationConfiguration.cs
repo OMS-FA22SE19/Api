@@ -41,9 +41,9 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany(e => e.Reservations)
                 .HasForeignKey(e => e.UserId);
 
-            builder.HasOne(e => e.Table)
-                .WithMany(e => e.Reservations)
-                .HasForeignKey(e => e.TableId);
+            builder.HasMany(e => e.ReservationTables)
+                .WithOne(e => e.Reservation)
+                .HasForeignKey(e => e.ReservationId);
 
             builder.HasKey("Id");
 

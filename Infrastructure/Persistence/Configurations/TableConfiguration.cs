@@ -44,13 +44,13 @@ namespace Infrastructure.Persistence.Configurations
                 .WithOne(e => e.Table)
                 .HasForeignKey(e => e.TableId);
 
-            builder.HasMany(e => e.Reservations)
-                .WithOne(e => e.Table)
-                .HasForeignKey(e => e.TableId);
-
             builder.HasOne(e => e.TableType)
                 .WithMany(e => e.Tables)
                 .HasForeignKey(e => e.TableTypeId);
+
+            builder.HasMany(e => e.ReservationsTables)
+                .WithOne(e => e.Table)
+                .HasForeignKey(e => e.TableId);
 
             builder.HasKey("Id");
 
