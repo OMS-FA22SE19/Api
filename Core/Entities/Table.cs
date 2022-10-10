@@ -11,7 +11,7 @@ namespace Core.Entities
         public TableStatus Status { get; set; }
         public int TableTypeId { get; set; }
 
-        public IList<Reservation> Reservations { get; set; }
+        //public IList<Reservation> Reservations { get; set; }
         public IList<Order> Orders { get; set; }
         public IList<ReservationTable> ReservationsTables { get; set; }
         public TableType TableType { get; set; }

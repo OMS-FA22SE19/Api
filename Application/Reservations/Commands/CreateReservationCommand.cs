@@ -1,5 +1,6 @@
 ﻿using Application.Common.Mappings;
 using Application.Models;
+using Application.Orders.Commands;
 using Application.Reservations.Response;
 using AutoMapper;
 using Core.Entities;
@@ -18,8 +19,9 @@ namespace Application.Reservations.Commands
         public DateTime StartTime { get; set; }
         [Required]
         public DateTime EndTime { get; set; }
-        [Required]
-        public int NumOfSeats { get; set; }
+        //[Required]
+        //public int NumOfSeats { get; set; }
+        public Dictionary<int, int> NumOfSeats { get; set; }
         [Required]
         public int TableTypeId { get; set; }
         public bool IsPriorFoodOrder { get; set; }
@@ -51,31 +53,49 @@ namespace Application.Reservations.Commands
             entity.UserId = user.Id;
 
             entity.Status = ReservationStatus.Reserved;
-
-            var tableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
             int tableId;
-            List<int> tableIds = tableList.Select(e => e.Id).ToList();
-            if (tableIds.Any())
+            List<int> listTableIdToAdd = new List<int>();
+            foreach (var seat in request.NumOfSeats)
             {
-                tableId = await _unitOfWork.TableRepository.GetTableAvailableForReservation(tableIds, request.StartTime, request.EndTime);
-                if (tableId == 0)
+                for (int i = 0; i < seat.Value; i++)
                 {
-                    return new Response<ReservationDto>("There is no table available");
+                    var tableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(seat.Key, request.TableTypeId);
+                    var tableIds = tableList.Select(e => e.Id).Except(listTableIdToAdd).ToList();
+                    if (tableIds.Any())
+                    {
+                        tableId = await _unitOfWork.TableRepository.GetTableAvailableForReservation(tableIds, request.StartTime, request.EndTime);
+                        if (tableId == 0)
+                        {
+                            return new Response<ReservationDto>("There is no table available");
+                        }
+                        listTableIdToAdd.Add(tableId);
+                    }
+                    else
+                    {
+                        return new Response<ReservationDto>("There is no table available");
+                    }
                 }
             }
-            else
-            {
-                return new Response<ReservationDto>("There is no table available");
-            }
 
-            entity.TableId = tableId;
+
+            //entity.TableId = tableId;
+
+            entity.ReservationTables = new List<ReservationTable>();
+            for (int i = 0; i < listTableIdToAdd.Count; i++)
+            {
+                entity.ReservationTables.Add(new ReservationTable
+                {
+                    Reservation = entity,
+                    TableId = listTableIdToAdd[i]
+                });
+            }
             var result = await _unitOfWork.ReservationRepository.InsertAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
                 return new Response<ReservationDto>("error");
             }
-            result.Table = await _unitOfWork.TableRepository.GetAsync(e => e.Id == tableId && !e.IsDeleted, $"{nameof(Table.TableType)}");
+            //result.Table = await _unitOfWork.TableRepository.GetAsync(e => e.Id == tableId && !e.IsDeleted, $"{nameof(Table.TableType)}");
             result.User = user;
             var mappedResult = _mapper.Map<ReservationDto>(result);
             return new Response<ReservationDto>(mappedResult)

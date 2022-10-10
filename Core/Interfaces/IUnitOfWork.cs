@@ -14,6 +14,7 @@
         IOrderDetailRepository OrderDetailRepository { get; }
         IPaymentRepository PaymentRepository { get; }
         ITableTypeRepository TableTypeRepository { get; }
+        IReservationTableRepository ReservationTableRepository { get; }
         Task CompleteAsync(CancellationToken cancellationToken);
     }
 }

@@ -37,6 +37,7 @@ namespace Infrastructure.Persistence
         public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
         public DbSet<Payment> Payments => Set<Payment>();
         public DbSet<Reservation> Reservations => Set<Reservation>();
+        public DbSet<ReservationTable> ReservationTables => Set<ReservationTable>();
         public DbSet<Table> Tables => Set<Table>();
         public DbSet<TableType> TableTypes => Set<TableType>();
 
