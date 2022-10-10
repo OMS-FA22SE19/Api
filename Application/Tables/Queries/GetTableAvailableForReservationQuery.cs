@@ -78,8 +78,6 @@ namespace Application.Tables.Queries
                 tableType.ListOfNumOfSeats = listNumOfTableWithSeat;
 
                 var mappedResult = _mapper.Map<List<Table>, List<TableDto>>(result);
-                //return new Response<List<TableDto>>(mappedResult);
-                //return new Response<List<TableByNumOfSeatDto>>(listNumOfTableWithSeat);
                 return new Response<TableTypeWithListOfNumOfSeatsDto>(tableType);
 
             }

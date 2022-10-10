@@ -91,7 +91,6 @@ namespace Infrastructure.Repositories
                 && r.ReservationTables.Any(ReservationTable => ReservationTable.Table.TableTypeId == tableTypeId));
 
             List<int> ReservationIds = queryReservation.Select(r => r.Id).ToList();
-            //List<int> listOfTableIdNotAvailable = queryReservation.Select(e => e.TableId).ToList();
             List<int> listOfTableIdNotAvailable = queryReservationTable
                 .Where(rt => ReservationIds.Any(ReservationId => ReservationId.Equals(rt.ReservationId)))
                 .Select(rt => rt.TableId).Distinct().ToList();
