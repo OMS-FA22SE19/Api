@@ -48,29 +48,6 @@ namespace Application.Reservations.Commands
 
             MapToEntity(request, entity);
 
-            if (request.Status == ReservationStatus.CheckIn)
-            {
-                if (_dateTime.Now >= entity.StartTime.AddMinutes(-15))
-                {
-                    var reservationTable = await _unitOfWork.ReservationTableRepository.GetAllAsync();
-                    reservationTable.RemoveAll(rt => !(rt.ReservationId == request.Id));
-                    foreach (ReservationTable rt in reservationTable)
-                    {
-                        var table = await _unitOfWork.TableRepository.GetAsync(t => t.Id == rt.TableId);
-                        if (table is null)
-                        {
-                            throw new NotFoundException(nameof(Reservation), rt.TableId);
-                        }
-                        table.Status = TableStatus.Occupied;
-                        await _unitOfWork.TableRepository.UpdateAsync(table);
-                    }
-                } 
-                else
-                {
-                    return new Response<ReservationDto>("It not the time to check in yet");
-                }
-            }
-
             var result = await _unitOfWork.ReservationRepository.UpdateAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
