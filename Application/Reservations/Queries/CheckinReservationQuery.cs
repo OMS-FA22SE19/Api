@@ -36,7 +36,7 @@ namespace Application.Reservations.Queries
         public async Task<Response<ReservationDto>> Handle(CheckinReservationQuery request, CancellationToken cancellationToken)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
-            var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.UserId.Equals(user.Id) && _dateTime.Now >= e.StartTime.AddMinutes(-15) && _dateTime.Now <= e.EndTime,
+            var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.UserId.Equals(user.Id) && _dateTime.Now >= e.StartTime.AddMinutes(-15) && _dateTime.Now <= e.EndTime && e.Status != ReservationStatus.CheckIn,
                 $"{nameof(Reservation.ReservationTables)}");
             if (entity is null)
             {
