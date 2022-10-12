@@ -286,12 +286,11 @@ namespace Api.Controllers.V1
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /Reservations/Checkin
+        ///     Get /Reservations/Checkin
         ///     {
         ///     }
         ///     
         /// </remarks>
-        /// <param name="id">The id of updated Reservation</param>
         [HttpGet("Checkin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
