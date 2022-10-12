@@ -1,5 +1,6 @@
 ﻿using Application.Common.Mappings;
 using Application.Tables.Response;
+using Application.Types.Response;
 using Application.Users;
 using AutoMapper;
 using Core.Entities;
@@ -16,7 +17,7 @@ namespace Application.Reservations.Response
         public DateTime EndTime { get; set; }
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
-        public TableDto Table { get; set; }
+        public IList<ReservationTableDto> ReservationTables { get; set; }
         public UserDto User { get; set; }
 
         public void Mapping(Profile profile)

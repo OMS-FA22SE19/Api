@@ -9,11 +9,12 @@ namespace Infrastructure.Repositories
     public sealed class TableRepository : GenericRepository<Table>, ITableRepository
     {
         private IQueryable<Reservation> _dbSetReservation;
-
+        private IQueryable<ReservationTable> _dbSetReservationTable;
         public TableRepository(IApplicationDbContext context) : base(context)
         {
             _dbSet = context.Tables;
             _dbSetReservation = context.Reservations;
+            _dbSetReservationTable = context.ReservationTables;
         }
 
         public async Task<List<Table>> GetTableOnNumOfSeatAndType(int NumOfSeat, int tableTypeId)
@@ -53,16 +54,49 @@ namespace Infrastructure.Repositories
         public async Task<int> GetTableAvailableForReservation(List<int> tableIds, DateTime StartTime, DateTime EndTime)
         {
             IQueryable<Reservation> query = _dbSetReservation;
+            IQueryable<ReservationTable> queryReservationTable = _dbSetReservationTable;
 
-            query = query.Where(r => tableIds.Any(tableId => tableId.Equals(r.TableId))
+            queryReservationTable = queryReservationTable.Where(rt => tableIds.Any(tableId => tableId.Equals(rt.TableId)));
+            List<int> reservationTableList = queryReservationTable.Select(rt => rt.ReservationId).ToList();
+
+            query = query.Where(r => reservationTableList.Any(reservationTable => reservationTable.Equals(r.Id))
                  && !((StartTime < r.StartTime && EndTime <= r.StartTime) || (StartTime >= r.EndTime && EndTime > r.EndTime))
                  && r.Status != ReservationStatus.Available)
                 .OrderBy(r => r.StartTime);
 
-            List<int> notAvailableTable = query.Select(e => e.TableId).ToList();
+            List<int> ReservationIds = query.Select(r => r.Id).ToList();
+
+            List<int> notAvailableTable = queryReservationTable
+                .Where(rt => ReservationIds.Any(ReservationId => ReservationId.Equals(rt.ReservationId)))
+                .Select(rt => rt.TableId).Distinct().ToList();
             int AvailableTable = tableIds.Except(notAvailableTable).FirstOrDefault();
 
             return AvailableTable;
+        }
+
+        public async Task<List<Table>> GetAllAvailableTableWithDateAndTableType(DateTime startTime, DateTime endTime, int tableTypeId, int numOfPeople)
+        {
+            IQueryable<Table> query = _dbSet;
+            IQueryable<Reservation> queryReservation = _dbSetReservation;
+            IQueryable<ReservationTable> queryReservationTable = _dbSetReservationTable;
+
+
+            List<Table> listTable = await query.Where(t => t.TableTypeId == tableTypeId && t.NumOfSeats <= numOfPeople + 2 && t.IsDeleted == false)
+                .Include(t => t.TableType)
+                .OrderBy(t => t.NumOfSeats)
+                .ToListAsync();
+
+            queryReservation = queryReservation.Where(r => 
+            !((startTime < r.StartTime && endTime <= r.StartTime) || (startTime >= r.EndTime && endTime > r.EndTime))
+                && r.ReservationTables.Any(ReservationTable => ReservationTable.Table.TableTypeId == tableTypeId));
+
+            List<int> ReservationIds = queryReservation.Select(r => r.Id).ToList();
+            List<int> listOfTableIdNotAvailable = queryReservationTable
+                .Where(rt => ReservationIds.Any(ReservationId => ReservationId.Equals(rt.ReservationId)))
+                .Select(rt => rt.TableId).Distinct().ToList();
+            listTable.RemoveAll(item => listOfTableIdNotAvailable.Contains(item.Id));
+
+            return listTable;
         }
     }
 }

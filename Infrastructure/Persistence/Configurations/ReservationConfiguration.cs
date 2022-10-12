@@ -30,9 +30,6 @@ namespace Infrastructure.Persistence.Configurations
                 .HasDefaultValue(1)
                 .HasColumnType("int");
 
-            builder.Property<int>("TableId")
-                .HasColumnType("int");
-
             builder.Property<string>("UserId")
                 .IsRequired()
                 .HasColumnType("nvarchar(300)");
@@ -41,13 +38,11 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany(e => e.Reservations)
                 .HasForeignKey(e => e.UserId);
 
-            builder.HasOne(e => e.Table)
-                .WithMany(e => e.Reservations)
-                .HasForeignKey(e => e.TableId);
+            builder.HasMany(e => e.ReservationTables)
+                .WithOne(e => e.Reservation)
+                .HasForeignKey(e => e.ReservationId);
 
             builder.HasKey("Id");
-
-            builder.HasIndex("TableId");
 
             builder.HasIndex("UserId");
 

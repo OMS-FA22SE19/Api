@@ -8,8 +8,8 @@ namespace Core.Entities
     {
         [Required]
         public string UserId { get; set; }
-        [Required]
-        public int TableId { get; set; }
+        //[Required]
+        //public int TableId { get; set; }
         [Range(1, 1000)]
         public int NumOfPeople { get; set; } = 1;
         public DateTime StartTime { get; set; } = DateTime.UtcNow;
@@ -17,7 +17,9 @@ namespace Core.Entities
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
 
-        public Table Table { get; set; }
+        //public Table Table { get; set; }
         public ApplicationUser User { get; set; }
+
+        public IList<ReservationTable> ReservationTables { get; set; }
     }
 }

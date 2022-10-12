@@ -30,7 +30,7 @@ namespace Application.Tables.Queries
             {
                 List<Expression<Func<Table, bool>>> filters = new();
                 Func<IQueryable<Table>, IOrderedQueryable<Table>> orderBy = null;
-                string includeProperties = $"{nameof(Table.TableType)},{nameof(Table.Orders)},{nameof(Table.Reservations)}.{nameof(Reservation.User)}";
+                string includeProperties = $"{nameof(Table.TableType)},{nameof(Table.Orders)},{nameof(Table.ReservationsTables)}.{nameof(ReservationTable.Reservation)}";
 
                 switch (request.OrderBy)
                 {
@@ -72,11 +72,12 @@ namespace Application.Tables.Queries
                     bool isChanged = false;
                     var table = result.FirstOrDefault(e => e.Id == item.Id);
 
-                    var reservation = table.Reservations.FirstOrDefault(e => e.StartTime <= _dateTime.Now && e.EndTime > _dateTime.Now);
-                    if (reservation is not null)
+                    var tableReservation =  table.ReservationsTables.ToList();
+                    var reservationTable = tableReservation.FirstOrDefault(rt => rt.Reservation.StartTime <= _dateTime.Now && rt.Reservation.EndTime > _dateTime.Now);
+                    if (reservationTable is not null)
                     {
-                        userId = reservation.UserId;
-                        fullName = reservation.User?.FullName;
+                        userId = reservationTable.Reservation.UserId;
+                        fullName = reservationTable.Reservation.User?.FullName;
                         isChanged = table.Status != TableStatus.Reserved;
                         table.Status = TableStatus.Reserved;
                     }
@@ -85,8 +86,8 @@ namespace Application.Tables.Queries
                     if (order is not null)
                     {
                         item.OrderId = order.Id;
-                        userId = reservation.UserId;
-                        fullName = reservation.User?.FullName;
+                        userId = reservationTable.Reservation.UserId;
+                        fullName = reservationTable.Reservation.User?.FullName;
                         isChanged = table.Status != TableStatus.Occupied;
                         table.Status = TableStatus.Occupied;
                     }

@@ -16,7 +16,7 @@ namespace Application.Menus.Commands
         public string Name { get; set; }
         [StringLength(1000, MinimumLength = 2)]
         public string Description { get; set; }
-        public bool IsHidden { get; set; } = true;
+        public bool IsHidden { get; set; } = false;
 
         public void Mapping(Profile profile)
         {

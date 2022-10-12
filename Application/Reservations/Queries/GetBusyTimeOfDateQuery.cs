@@ -41,7 +41,8 @@ namespace Application.Reservations.Queries
             {
                 foreach (Reservation reservation in result.ToList())
                 {
-                    if (!tableIds.Contains(reservation.TableId))
+                    List<int> TableOfReservationIDs = reservation.ReservationTables.Select(t => t.TableId).ToList();
+                    if (!tableIds.Any(tableId => TableOfReservationIDs.Contains(tableId)))
                     {
                         result.Remove(reservation);
                     }
@@ -54,7 +55,17 @@ namespace Application.Reservations.Queries
                 {
                     foreach (int tableId in tableIds)
                     {
-                        var listOfBusyTimesForThisTable = _mapper.Map<List<BusyTimeDto>>(result.Where(r => r.TableId == tableId));
+                        List<int> ReservationIdsHaveTableId = new List<int>();
+                        foreach (Reservation reservation in result)
+                        {
+                            int reservationId = reservation.ReservationTables.Where(rt => rt.TableId == tableId).Select(t => t.ReservationId).FirstOrDefault();
+                            if (reservationId != 0)
+                            {
+                                ReservationIdsHaveTableId.Add(reservationId);
+                            }
+                        }
+                            
+                        var listOfBusyTimesForThisTable = _mapper.Map<List<BusyTimeDto>>(result.Where(r => ReservationIdsHaveTableId.Contains(r.Id)));
                         if (!listOfBusyTimesForThisTable.Any())
                         {
                             listOfBusyTimes = new List<BusyTimeDto>();
@@ -74,14 +85,17 @@ namespace Application.Reservations.Queries
                                     listOfBusyTimes = new List<BusyTimeDto>();
                                 }
 
+                                bool added = false;
                                 foreach (BusyTimeDto BusyTimeForThisTable in listOfBusyTimesForThisTable)
                                 {
+                                   
                                     if (busyTime.StartTime < BusyTimeForThisTable.StartTime
                                         && busyTime.EndTime < BusyTimeForThisTable.EndTime
                                         && busyTime.EndTime > BusyTimeForThisTable.StartTime)
                                     {
                                         busyTime.StartTime = BusyTimeForThisTable.StartTime;
                                         listOfBusyTimes.Add(busyTime);
+                                        added = true;
                                     }
                                     else
                                     {
@@ -91,16 +105,22 @@ namespace Application.Reservations.Queries
                                             if (busyTime.EndTime < BusyTimeForThisTable.EndTime)
                                             {
                                                 listOfBusyTimes.Add(busyTime);
+                                                added = true;
                                             }
                                             else
                                             {
                                                 busyTime.EndTime = BusyTimeForThisTable.EndTime;
                                                 listOfBusyTimes.Add(busyTime);
+                                                added = true;
                                             }
                                         }
                                         else
                                         {
-                                            listOfBusyTimes.Remove(busyTime);
+                                            if (!added)
+                                            {
+                                                listOfBusyTimes.Remove(busyTime);
+                                            }
+                                            
                                         }
                                     }
                                 }

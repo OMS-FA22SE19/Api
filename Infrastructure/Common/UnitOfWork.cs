@@ -19,6 +19,7 @@ namespace Infrastructure.Common
         private IOrderDetailRepository _orderDetailRepository;
         private IPaymentRepository _paymentRepository;
         private ITableTypeRepository _tableTypeRepository;
+        private IReservationTableRepository _reservationTableRepository;
 
         public UnitOfWork(IApplicationDbContext context)
         {
@@ -161,6 +162,18 @@ namespace Infrastructure.Common
                     _tableTypeRepository = new TableTypeRepository(_context);
                 }
                 return _tableTypeRepository;
+            }
+        }
+
+        public IReservationTableRepository ReservationTableRepository
+        {
+            get
+            {
+                if (_reservationTableRepository is null)
+                {
+                    _reservationTableRepository = new ReservationTableRepository(_context);
+                }
+                return _reservationTableRepository;
             }
         }
 

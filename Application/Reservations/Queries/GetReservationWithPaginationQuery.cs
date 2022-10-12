@@ -31,7 +31,7 @@ namespace Application.Reservations.Queries
         {
             List<Expression<Func<Reservation, bool>>> filters = new();
             Func<IQueryable<Reservation>, IOrderedQueryable<Reservation>> orderBy = null;
-            string includeProperties = $"{nameof(Reservation.User)},{nameof(Reservation.Table)}.{nameof(Table.TableType)}";
+            string includeProperties = $"{nameof(Reservation.User)},{nameof(Reservation.ReservationTables)}.{nameof(ReservationTable.Table)}.{nameof(Table.TableType)}";
 
             if (!string.IsNullOrWhiteSpace(request.userId))
             {
@@ -44,6 +44,7 @@ namespace Application.Reservations.Queries
 
             var result = await _unitOfWork.ReservationRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, request.PageIndex, request.PageSize);
             var mappedResult = _mapper.Map<PaginatedList<Reservation>, PaginatedList<ReservationDto>>(result);
+            
             return new Response<PaginatedList<ReservationDto>>(mappedResult);
         }
     }

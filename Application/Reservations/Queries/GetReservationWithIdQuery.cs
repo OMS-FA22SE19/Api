@@ -28,7 +28,7 @@ namespace Application.Reservations.Queries
 
         public async Task<Response<ReservationDto>> Handle(GetReservationWithIdQuery request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Reservation.Table)}.{nameof(Table.TableType)},{nameof(Reservation.User)}");
+            var result = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Reservation.ReservationTables)}.{nameof(ReservationTable.Table)}.{nameof(Table.TableType)},{nameof(Reservation.User)}");
             if (result is null)
             {
                 throw new NotFoundException(nameof(Reservation), $"with {request.Id}");
