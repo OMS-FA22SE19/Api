@@ -150,7 +150,10 @@ namespace Api.Controllers.V1
         ///     {
         ///         "startTime": "2022-10-07T04:19:19.466Z",
         ///         "endTime": "2022-10-07T04:19:19.466Z",
-        ///         "numOfSeats": 4,
+        ///         "numOfSeats": {
+        ///             "2": 3 (NumOfSeats: quantity),
+        ///             "8": 2
+        ///         }
         ///         "tableTypeId": 2,
         ///         "isPriorFoodOrder": false
         ///     }
