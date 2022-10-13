@@ -150,7 +150,10 @@ namespace Api.Controllers.V1
         ///     {
         ///         "startTime": "2022-10-07T04:19:19.466Z",
         ///         "endTime": "2022-10-07T04:19:19.466Z",
-        ///         "numOfSeats": 4,
+        ///         "numOfSeats": {
+        ///             "2": 3 (NumOfSeats: quantity),
+        ///             "8": 2
+        ///         }
         ///         "tableTypeId": 2,
         ///         "isPriorFoodOrder": false
         ///     }
@@ -286,12 +289,11 @@ namespace Api.Controllers.V1
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /Reservations/Checkin
+        ///     Get /Reservations/Checkin
         ///     {
         ///     }
         ///     
         /// </remarks>
-        /// <param name="id">The id of updated Reservation</param>
         [HttpGet("Checkin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
