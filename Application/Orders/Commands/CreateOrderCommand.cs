@@ -50,7 +50,7 @@ namespace Application.Orders.Commands
                 throw new NotFoundException($"No available {nameof(Menu)}");
             }
 
-            var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.ReservationId && e.Status == ReservationStatus.CheckIn);
+            var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.ReservationId && e.Status == ReservationStatus.CheckIn, includeProperties: $"{nameof(Reservation.ReservationTables)}");
             if (reservation is null)
             {
                 throw new NotFoundException(nameof(Reservation), $"with reservation {request.ReservationId}");
@@ -129,7 +129,7 @@ namespace Application.Orders.Commands
                 total += detail.Price;
             }
             total -= result.PrePaid;
-
+            mappedResult.Total = total;
             mappedResult.OrderDetails = orderDetails;
             return new Response<OrderDto>(mappedResult)
             {
