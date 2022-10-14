@@ -49,9 +49,9 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany(e => e.Orders)
                 .HasForeignKey(e => e.UserId);
 
-            builder.HasOne(e => e.Table)
-                .WithMany(e => e.Orders)
-                .HasForeignKey(e => e.TableId);
+            builder.HasOne(e => e.Reservation)
+                .WithOne(e => e.Order)
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasMany(e => e.OrderDetails)
                 .WithOne(e => e.Order)

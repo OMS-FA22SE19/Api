@@ -75,7 +75,7 @@ namespace Application.OrderDetails.Queries
                     orderBy = e => e.OrderBy(x => x.Status);
                     break;
                 default:
-                    orderBy = e => e.OrderByDescending(x => x.Created);
+                    orderBy = e => e.OrderBy(x => x.Status).ThenBy(e => e.Created);
                     break;
             }
 

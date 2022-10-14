@@ -1,18 +1,13 @@
 ﻿using Application.Common.Exceptions;
 using Application.Models;
-using Application.Orders.Response;
-using Application.Types.Response;
 using Application.VNPay.Response;
 using AutoMapper;
-using Core.Common;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Configuration;
-using System;
 using System.ComponentModel.DataAnnotations;
-using System.Configuration;
 
 namespace Application.VNPay.Queries
 {
@@ -76,7 +71,7 @@ namespace Application.VNPay.Queries
             if (string.IsNullOrEmpty(vnp_TmnCode) || string.IsNullOrEmpty(vnp_HashSecret))
             {
                 throw new NotFoundException("Vui lòng cấu hình các tham số: vnp_TmnCode,vnp_HashSecret");
-                
+
             }
 
             //Build URL for VNPAY
@@ -85,13 +80,13 @@ namespace Application.VNPay.Queries
             vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
             vnpay.AddRequestData("vnp_Command", "pay");
             vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
-            vnpay.AddRequestData("vnp_Amount", (request.ammount*100).ToString());
+            vnpay.AddRequestData("vnp_Amount", (request.ammount * 100).ToString());
 
             vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));//yyyyMMddHHmmss
             vnpay.AddRequestData("vnp_CurrCode", "VND");
             vnpay.AddRequestData("vnp_IpAddr", "http://localhost:5246");
 
-            
+
             vnpay.AddRequestData("vnp_Locale", "vn");
             vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang: " + request.orderId.ToString());
             //vnpay.AddRequestData("vnp_OrderType", orderCategory.SelectedItem.Value); //default value: other
@@ -102,7 +97,7 @@ namespace Application.VNPay.Queries
 
             string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
             Console.WriteLine("VNPAY URL: {0}", paymentUrl);
-            PaymentUrlDto paymentUrlDto = new PaymentUrlDto() { Url = paymentUrl};
+            PaymentUrlDto paymentUrlDto = new PaymentUrlDto() { Url = paymentUrl };
             return new Response<PaymentUrlDto>(paymentUrlDto);
         }
     }

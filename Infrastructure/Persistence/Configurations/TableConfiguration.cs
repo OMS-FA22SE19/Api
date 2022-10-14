@@ -40,10 +40,6 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property<int>("TableTypeId")
                 .HasColumnType("int");
 
-            builder.HasMany(e => e.Orders)
-                .WithOne(e => e.Table)
-                .HasForeignKey(e => e.TableId);
-
             builder.HasOne(e => e.TableType)
                 .WithMany(e => e.Tables)
                 .HasForeignKey(e => e.TableTypeId);

@@ -1,6 +1,5 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
-using Application.Common.Mappings;
 using Application.Models;
 using Application.Reservations.Response;
 using AutoMapper;
@@ -10,7 +9,7 @@ using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 
 namespace Application.Reservations.Queries
 {
@@ -36,26 +35,35 @@ namespace Application.Reservations.Queries
         public async Task<Response<ReservationDto>> Handle(CheckinReservationQuery request, CancellationToken cancellationToken)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
-            var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.UserId.Equals(user.Id) && _dateTime.Now >= e.StartTime.AddMinutes(-15) && _dateTime.Now <= e.EndTime && e.Status != ReservationStatus.CheckIn,
-                $"{nameof(Reservation.ReservationTables)}");
+            var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.UserId.Equals(user.Id)
+                && _dateTime.Now >= e.StartTime.AddMinutes(-15) && _dateTime.Now <= e.EndTime
+                && e.Status == ReservationStatus.Reserved,
+                    $"{nameof(Reservation.ReservationTables)}");
             if (entity is null)
             {
-                throw new NotFoundException(nameof(Reservation), user.Id);
+                throw new NotFoundException($"No reservation found for user {user.FullName}");
             }
 
             entity.Status = ReservationStatus.CheckIn;
 
-            var reservationTable = await _unitOfWork.ReservationTableRepository.GetAllAsync();
-            reservationTable.RemoveAll(rt => !(rt.ReservationId == entity.Id));
-            foreach (ReservationTable rt in reservationTable)
+            List<Expression<Func<Table, bool>>> filters = new();
+            filters.Add(e => !e.IsDeleted && e.Status == TableStatus.Available && e.NumOfSeats == entity.NumOfSeats && e.TableTypeId == entity.TableTypeId);
+            var tables = await _unitOfWork.TableRepository.GetPaginatedListAsync(filters, pageSize: entity.Quantity);
+
+            var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => !e.IsDeleted && e.Id == entity.TableTypeId);
+
+            foreach (var table in tables)
             {
-                var table = await _unitOfWork.TableRepository.GetAsync(t => t.Id == rt.TableId);
-                if (table is null)
-                {
-                    throw new NotFoundException(nameof(Reservation), rt.TableId);
-                }
                 table.Status = TableStatus.Occupied;
+
+                await _unitOfWork.ReservationTableRepository.InsertAsync(new ReservationTable
+                {
+                    ReservationId = entity.Id,
+                    TableId = table.Id
+                });
+
                 await _unitOfWork.TableRepository.UpdateAsync(table);
+                table.TableType = tableType;
             }
 
             var result = await _unitOfWork.ReservationRepository.UpdateAsync(entity);

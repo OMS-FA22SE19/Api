@@ -47,7 +47,7 @@ namespace Application.Tables.Queries
                     {
                         var count = result.Where(e => e.TableTypeId == table.TableTypeId && e.NumOfSeats == table.NumOfSeats && e.TableType.CanBeCombined).Count();
                         quantity = ((request.NumsOfPeople % table.NumOfSeats) == 0) ? request.NumsOfPeople / table.NumOfSeats : (request.NumsOfPeople / table.NumOfSeats) + 1;
-                        isValid = count > quantity;
+                        isValid = count >= quantity && quantity <= 4;
                     }
                     if (isValid)
                     {
@@ -61,7 +61,7 @@ namespace Application.Tables.Queries
                     }
                 }
             }
-            return new Response<List<TableByTypeDto>>(ListTableType);
+            return new Response<List<TableByTypeDto>>(ListTableType.OrderByDescending(e => e.NumOfSeats).ToList());
         }
     }
 }
