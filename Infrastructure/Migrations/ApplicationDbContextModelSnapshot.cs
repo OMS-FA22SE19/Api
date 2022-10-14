@@ -253,9 +253,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsHidden")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
@@ -416,7 +414,7 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<double>("Ammount")
+                    b.Property<double>("Amount")
                         .HasColumnType("float");
 
                     b.Property<string>("OrderId")
@@ -465,14 +463,21 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(300)");
 
                     b.Property<int>("NumOfPeople")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
+                        .HasColumnType("int");
+
+                    b.Property<int>("NumOfSeats")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TableTypeId")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
@@ -574,6 +579,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<bool>("CanBeCombined")
+                        .HasColumnType("bit");
 
                     b.Property<double>("ChargePerSeat")
                         .HasColumnType("float");

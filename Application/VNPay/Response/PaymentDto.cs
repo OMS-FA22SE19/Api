@@ -8,7 +8,7 @@ namespace Application.Types.Response
         public string Id { get; set; }
         public string orderId { get; set; }
         public string Status { get; set; }
-        public double Ammount { get; set; }
+        public double Amount { get; set; }
 
         public void Mapping(Profile profile)
         {

@@ -1,6 +1,5 @@
 ﻿using Application.Common.Mappings;
 using Application.Models;
-using Application.Orders.Commands;
 using Application.Reservations.Response;
 using AutoMapper;
 using Core.Entities;
@@ -9,6 +8,7 @@ using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.Reservations.Commands
@@ -19,11 +19,14 @@ namespace Application.Reservations.Commands
         public DateTime StartTime { get; set; }
         [Required]
         public DateTime EndTime { get; set; }
-        //[Required]
-        //public int NumOfSeats { get; set; }
-        public Dictionary<int, int> NumOfSeats { get; set; }
+        [Required]
+        public int NumOfPeople { get; set; }
+        [Required]
+        public int NumOfSeats { get; set; }
         [Required]
         public int TableTypeId { get; set; }
+        [Required]
+        public int Quantity { get; set; }
         public bool IsPriorFoodOrder { get; set; }
 
         public void Mapping(Profile profile)
@@ -47,61 +50,62 @@ namespace Application.Reservations.Commands
 
         public async Task<Response<ReservationDto>> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
         {
+            bool isValid = await validateStartEndTime(request);
+            if (!isValid)
+            {
+                return new Response<ReservationDto>($"This reservation is unavailable! Please try again!")
+                {
+                    StatusCode = System.Net.HttpStatusCode.BadRequest
+                };
+            }
             var entity = _mapper.Map<Reservation>(request);
-
             var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
             entity.UserId = user.Id;
-
             entity.Status = ReservationStatus.Reserved;
-            int tableId;
-            List<int> listTableIdToAdd = new List<int>();
-            foreach (var seat in request.NumOfSeats)
-            {
-                for (int i = 0; i < seat.Value; i++)
-                {
-                    var tableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(seat.Key, request.TableTypeId);
-                    var tableIds = tableList.Select(e => e.Id).Except(listTableIdToAdd).ToList();
-                    if (tableIds.Any())
-                    {
-                        tableId = await _unitOfWork.TableRepository.GetTableAvailableForReservation(tableIds, request.StartTime, request.EndTime);
-                        if (tableId == 0)
-                        {
-                            return new Response<ReservationDto>("There is no table available");
-                        }
-                        listTableIdToAdd.Add(tableId);
-                    }
-                    else
-                    {
-                        return new Response<ReservationDto>("There is no table available");
-                    }
-                }
-            }
-
-
-            //entity.TableId = tableId;
-
-            entity.ReservationTables = new List<ReservationTable>();
-            for (int i = 0; i < listTableIdToAdd.Count; i++)
-            {
-                entity.ReservationTables.Add(new ReservationTable
-                {
-                    Reservation = entity,
-                    TableId = listTableIdToAdd[i]
-                });
-            }
             var result = await _unitOfWork.ReservationRepository.InsertAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
                 return new Response<ReservationDto>("error");
             }
-            //result.Table = await _unitOfWork.TableRepository.GetAsync(e => e.Id == tableId && !e.IsDeleted, $"{nameof(Table.TableType)}");
             result.User = user;
             var mappedResult = _mapper.Map<ReservationDto>(result);
             return new Response<ReservationDto>(mappedResult)
             {
                 StatusCode = System.Net.HttpStatusCode.Created
             };
+        }
+
+        private async Task<bool> validateStartEndTime(CreateReservationCommand request)
+        {
+            var reservation = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.StartTime.Date, request.TableTypeId, request.NumOfSeats);
+
+            var tables = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
+            var maxTables = tables.Count - request.Quantity;
+            var times = reservation.Select(e => e.StartTime).Concat(reservation.Select(e => e.EndTime)).ToImmutableSortedSet();
+            var busyTimes = new List<BusyTimeDto>();
+
+            for (int i = 0; i < (times.Count - 1); i++)
+            {
+                var count = reservation.Where(e => e.StartTime <= times[i] && e.EndTime >= times[i + 1]).ToList().Sum(e => e.Quantity);
+                if (maxTables - count < 0)
+                {
+                    var time = busyTimes.FirstOrDefault(e => e.EndTime == times[i]);
+                    if (time is null)
+                    {
+                        busyTimes.Add(new BusyTimeDto
+                        {
+                            StartTime = times[i],
+                            EndTime = times[i + 1]
+                        });
+                    }
+                    else
+                    {
+                        time.EndTime = times[i + 1];
+                    }
+                }
+            }
+            return busyTimes.All(e => request.StartTime > e.EndTime || request.EndTime < e.StartTime);
         }
     }
 }

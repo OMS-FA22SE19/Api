@@ -30,8 +30,7 @@ namespace Infrastructure.Persistence.Configurations
                 .HasColumnType("bit");
 
             builder.Property<bool>("IsHidden")
-                .HasColumnType("bit")
-                .HasDefaultValue(true);
+                .HasColumnType("bit");
 
             builder.Property<DateTime?>("LastModified")
                 .HasColumnType("datetime2");

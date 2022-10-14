@@ -9,8 +9,7 @@ namespace Application.Tables.Response
         public int NumOfSeats { get; set; }
         public int TableTypeId { get; set; }
         public string TableTypeName { get; set; }
-        public int Total { get; set; }
-        public IList<int> TableIds { get; set; }
+        public int Quantity { get; set; }
 
         public void Mapping(Profile profile)
         {

@@ -17,12 +17,15 @@ namespace Infrastructure.Repositories
             _dbSetReservationTable = context.ReservationTables;
         }
 
-        public async Task<List<Table>> GetTableOnNumOfSeatAndType(int NumOfSeat, int tableTypeId)
+        public async Task<List<Table>> GetTableOnNumOfSeatAndType(int NumOfSeat, int? tableTypeId)
         {
             IQueryable<Table> query = _dbSet;
 
-
-            query = query.Where(t => t.TableTypeId == tableTypeId && t.NumOfSeats == NumOfSeat && t.IsDeleted == false);
+            if (tableTypeId is not null)
+            {
+                query = query.Where(t => t.TableTypeId == tableTypeId);
+            }
+            query = query.Where(t => t.NumOfSeats == NumOfSeat && t.IsDeleted == false);
 
             return await query.ToListAsync();
         }
@@ -86,7 +89,7 @@ namespace Infrastructure.Repositories
                 .OrderBy(t => t.NumOfSeats)
                 .ToListAsync();
 
-            queryReservation = queryReservation.Where(r => 
+            queryReservation = queryReservation.Where(r =>
             !((startTime < r.StartTime && endTime <= r.StartTime) || (startTime >= r.EndTime && endTime > r.EndTime))
                 && r.ReservationTables.Any(ReservationTable => ReservationTable.Table.TableTypeId == tableTypeId));
 

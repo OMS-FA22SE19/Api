@@ -89,6 +89,7 @@ namespace Application.Orders.Commands
                 Id = entity.Id,
                 Date = entity.Date.ToString(),
                 PhoneNumber = entity.User.PhoneNumber,
+                Status = OrderStatus.Paid,
                 OrderDetails = orderDetails,
                 PrePaid = entity.PrePaid,
                 Total = total

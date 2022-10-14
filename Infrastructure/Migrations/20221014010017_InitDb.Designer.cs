@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20221008032127_Add_Payment_Table_Test")]
-    partial class Add_Payment_Table_Test
+    [Migration("20221014010017_InitDb")]
+    partial class InitDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -255,9 +255,7 @@ namespace Infrastructure.Migrations
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsHidden")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
+                        .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
@@ -418,7 +416,7 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<double>("Ammount")
+                    b.Property<double>("Amount")
                         .HasColumnType("float");
 
                     b.Property<string>("OrderId")
@@ -467,9 +465,13 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(300)");
 
                     b.Property<int>("NumOfPeople")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
+                        .HasColumnType("int");
+
+                    b.Property<int>("NumOfSeats")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
@@ -477,7 +479,7 @@ namespace Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<int>("TableId")
+                    b.Property<int>("TableTypeId")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
@@ -486,11 +488,49 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TableId");
-
                     b.HasIndex("UserId");
 
                     b.ToTable("Reservations", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.ReservationTable", b =>
+                {
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TableId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.HasKey("ReservationId", "TableId");
+
+                    b.HasIndex("ReservationId");
+
+                    b.HasIndex("TableId");
+
+                    b.ToTable("ReservationTables", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.Table", b =>
@@ -541,6 +581,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<bool>("CanBeCombined")
+                        .HasColumnType("bit");
 
                     b.Property<double>("ChargePerSeat")
                         .HasColumnType("float");
@@ -985,21 +1028,32 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Entities.Reservation", b =>
                 {
-                    b.HasOne("Core.Entities.Table", "Table")
-                        .WithMany("Reservations")
-                        .HasForeignKey("TableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Core.Entities.ApplicationUser", "User")
                         .WithMany("Reservations")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Table");
-
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Core.Entities.ReservationTable", b =>
+                {
+                    b.HasOne("Core.Entities.Reservation", "Reservation")
+                        .WithMany("ReservationTables")
+                        .HasForeignKey("ReservationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.Table", "Table")
+                        .WithMany("ReservationsTables")
+                        .HasForeignKey("TableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Reservation");
+
+                    b.Navigation("Table");
                 });
 
             modelBuilder.Entity("Core.Entities.Table", b =>
@@ -1097,11 +1151,16 @@ namespace Infrastructure.Migrations
                     b.Navigation("Payments");
                 });
 
+            modelBuilder.Entity("Core.Entities.Reservation", b =>
+                {
+                    b.Navigation("ReservationTables");
+                });
+
             modelBuilder.Entity("Core.Entities.Table", b =>
                 {
                     b.Navigation("Orders");
 
-                    b.Navigation("Reservations");
+                    b.Navigation("ReservationsTables");
                 });
 
             modelBuilder.Entity("Core.Entities.TableType", b =>

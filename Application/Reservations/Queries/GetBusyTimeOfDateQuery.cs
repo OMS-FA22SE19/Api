@@ -1,9 +1,9 @@
 ﻿using Application.Models;
 using Application.Reservations.Response;
 using AutoMapper;
-using Core.Entities;
 using Core.Interfaces;
 using MediatR;
+using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.Reservations.Queries
@@ -16,6 +16,8 @@ namespace Application.Reservations.Queries
         public int NumOfSeats { get; set; }
         [Required]
         public int TableTypeId { get; set; }
+        [Required]
+        public int Quantity { get; set; }
     }
 
     public class GetBusyTimeOfDateQueryHandler : IRequestHandler<GetBusyTimeOfDateQuery, Response<List<BusyTimeDto>>>
@@ -31,106 +33,35 @@ namespace Application.Reservations.Queries
 
         public async Task<Response<List<BusyTimeDto>>> Handle(GetBusyTimeOfDateQuery request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.Date);
+            var reservation = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.Date, request.TableTypeId, request.NumOfSeats);
 
-            var TableList = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
-            List<int> tableIds = TableList.Select(e => e.Id).ToList();
+            var tables = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
+            var maxTables = tables.Count - request.Quantity;
+            var times = reservation.Select(e => e.StartTime).Concat(reservation.Select(e => e.EndTime)).ToImmutableSortedSet();
+            var busyTimes = new List<BusyTimeDto>();
 
-            List<BusyTimeDto> listOfBusyTimes = new List<BusyTimeDto>();
-            if (tableIds.Any())
+            for (int i = 0; i < times.Count - 1; i++)
             {
-                foreach (Reservation reservation in result.ToList())
+                var count = reservation.Where(e => e.StartTime <= times[i] && e.EndTime >= times[i + 1]).ToList().Sum(e => e.Quantity);
+                if (maxTables - count < 0)
                 {
-                    List<int> TableOfReservationIDs = reservation.ReservationTables.Select(t => t.TableId).ToList();
-                    if (!tableIds.Any(tableId => TableOfReservationIDs.Contains(tableId)))
+                    var time = busyTimes.FirstOrDefault(e => e.EndTime == times[i]);
+                    if (time is null)
                     {
-                        result.Remove(reservation);
+                        busyTimes.Add(new BusyTimeDto
+                        {
+                            StartTime = times[i],
+                            EndTime = times[i + 1]
+                        });
                     }
-                }
-                if (tableIds.Count == 1)
-                {
-                    listOfBusyTimes = _mapper.Map<List<BusyTimeDto>>(result);
-                }
-                else
-                {
-                    foreach (int tableId in tableIds)
+                    else
                     {
-                        List<int> ReservationIdsHaveTableId = new List<int>();
-                        foreach (Reservation reservation in result)
-                        {
-                            int reservationId = reservation.ReservationTables.Where(rt => rt.TableId == tableId).Select(t => t.ReservationId).FirstOrDefault();
-                            if (reservationId != 0)
-                            {
-                                ReservationIdsHaveTableId.Add(reservationId);
-                            }
-                        }
-                            
-                        var listOfBusyTimesForThisTable = _mapper.Map<List<BusyTimeDto>>(result.Where(r => ReservationIdsHaveTableId.Contains(r.Id)));
-                        if (!listOfBusyTimesForThisTable.Any())
-                        {
-                            listOfBusyTimes = new List<BusyTimeDto>();
-                            new Response<List<BusyTimeDto>>(listOfBusyTimes);
-                        }
-                        if (!listOfBusyTimes.Any())
-                        {
-                            listOfBusyTimes = listOfBusyTimesForThisTable;
-                        }
-                        else
-                        {
-                            int counter = 0;
-                            foreach (BusyTimeDto busyTime in listOfBusyTimes.ToList())
-                            {
-                                if (counter == 0)
-                                {
-                                    listOfBusyTimes = new List<BusyTimeDto>();
-                                }
-
-                                bool added = false;
-                                foreach (BusyTimeDto BusyTimeForThisTable in listOfBusyTimesForThisTable)
-                                {
-                                   
-                                    if (busyTime.StartTime < BusyTimeForThisTable.StartTime
-                                        && busyTime.EndTime < BusyTimeForThisTable.EndTime
-                                        && busyTime.EndTime > BusyTimeForThisTable.StartTime)
-                                    {
-                                        busyTime.StartTime = BusyTimeForThisTable.StartTime;
-                                        listOfBusyTimes.Add(busyTime);
-                                        added = true;
-                                    }
-                                    else
-                                    {
-                                        if (busyTime.StartTime >= BusyTimeForThisTable.StartTime
-                                            && busyTime.StartTime <= BusyTimeForThisTable.EndTime)
-                                        {
-                                            if (busyTime.EndTime < BusyTimeForThisTable.EndTime)
-                                            {
-                                                listOfBusyTimes.Add(busyTime);
-                                                added = true;
-                                            }
-                                            else
-                                            {
-                                                busyTime.EndTime = BusyTimeForThisTable.EndTime;
-                                                listOfBusyTimes.Add(busyTime);
-                                                added = true;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (!added)
-                                            {
-                                                listOfBusyTimes.Remove(busyTime);
-                                            }
-                                            
-                                        }
-                                    }
-                                }
-                                counter++;
-                            }
-                        }
+                        time.EndTime = times[i + 1];
                     }
                 }
             }
-            return new Response<List<BusyTimeDto>>(listOfBusyTimes);
+
+            return new Response<List<BusyTimeDto>>(busyTimes);
         }
     }
 }

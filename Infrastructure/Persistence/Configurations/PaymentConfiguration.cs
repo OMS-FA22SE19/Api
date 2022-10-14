@@ -18,7 +18,7 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property(e => e.Status)
                 .HasColumnType("int");
 
-            builder.Property<double>("Ammount")
+            builder.Property<double>("Amount")
                 .HasColumnType("float");
 
             builder.HasOne(e => e.Order)

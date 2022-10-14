@@ -130,6 +130,7 @@ namespace Application.Orders.Commands
             }
             total -= result.PrePaid;
 
+            mappedResult.Total = total;
             mappedResult.OrderDetails = orderDetails;
             return new Response<OrderDto>(mappedResult)
             {
