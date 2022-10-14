@@ -16,6 +16,7 @@ namespace Application.TableTypes.Commands
         [Required]
         [Range(0, double.PositiveInfinity)]
         public double ChargePerSeat { get; set; }
+        public bool CanBeCombined { get; set; }
 
         public void Mapping(Profile profile)
         {

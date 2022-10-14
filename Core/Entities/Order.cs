@@ -11,15 +11,15 @@ namespace Core.Entities
         [Required]
         public string UserId { get; set; }
         [Required]
-        public int TableId { get; set; }
+        public int ReservationId { get; set; }
         [Required]
-        public DateTime Date { get; set; } = DateTime.UtcNow.AddHours(7);
+        public DateTime Date { get; set; }
         public OrderStatus Status { get; set; }
         [Range(0, double.PositiveInfinity)]
         public double PrePaid { get; set; } = 0;
 
         public ApplicationUser User { get; set; }
-        public Table Table { get; set; }
+        public Reservation Reservation { get; set; }
         public IList<OrderDetail> OrderDetails { get; set; }
         public IList<Payment> Payments { get; set; }
     }

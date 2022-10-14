@@ -12,6 +12,7 @@ namespace Application.Tables.Queries
 {
     public class GetTableWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<TableDto>>>
     {
+        public TableStatus? Status { get; set; }
         public TableProperty? OrderBy { get; init; }
     }
 
@@ -32,7 +33,20 @@ namespace Application.Tables.Queries
             Func<IQueryable<Table>, IOrderedQueryable<Table>> orderBy = null;
             string includeProperties = $"{nameof(Table.TableType)}";
 
-            filters.Add(e => !e.IsDeleted);
+            //filters.Add(e => !e.IsDeleted);
+
+            if (!string.IsNullOrWhiteSpace(request.SearchValue))
+            {
+                filters.Add(e => e.TableTypeId.ToString().Contains(request.SearchValue)
+                                || e.Id.ToString().Contains(request.SearchValue)
+                                || e.NumOfSeats.ToString().Contains(request.SearchValue));
+            }
+
+            if (request.Status is not null)
+            {
+                filters.Add(e => e.Status == request.Status);
+            }
+
             switch (request.OrderBy)
             {
                 case (TableProperty.NumOfSeats):

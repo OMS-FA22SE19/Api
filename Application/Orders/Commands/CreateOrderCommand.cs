@@ -16,7 +16,7 @@ namespace Application.Orders.Commands
 {
     public sealed class CreateOrderCommand : IMapFrom<Order>, IRequest<Response<OrderDto>>
     {
-        public int TableId { get; set; }
+        public int ReservationId { get; set; }
         public Dictionary<int, int> OrderDetails { get; set; }
 
         public void Mapping(Profile profile)
@@ -47,32 +47,32 @@ namespace Application.Orders.Commands
             var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => !e.IsHidden);
             if (availableMenu is null)
             {
-                throw new NotFoundException(nameof(Menu), $"No available {nameof(Menu)}");
-            }
-            var table = await _unitOfWork.TableRepository.GetAsync(e => e.Id == request.TableId && !e.IsDeleted, $"{nameof(Table.TableType)}");
-            if (table is null)
-            {
-                throw new NotFoundException(nameof(Order.Table), request.TableId);
+                throw new NotFoundException($"No available {nameof(Menu)}");
             }
 
-            var reservation = await _unitOfWork.ReservationRepository.GetReservationWithDateAndTableId(table.Id, DateTime.UtcNow.AddHours(7));
+            var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.ReservationId && e.Status == ReservationStatus.CheckIn);
             if (reservation is null)
             {
-                throw new NotFoundException(nameof(Reservation), $"with TableId {table.Id}");
+                throw new NotFoundException(nameof(Reservation), $"with reservation {request.ReservationId}");
             }
 
             var entity = new Order
             {
-                Id = $"{table.Id}-{user.PhoneNumber}-{DateTime.UtcNow.AddHours(7).ToString("dd-MM-yyyy-HH:mm:ss")}",
+                Id = $"{reservation.ReservationTables[0].Id}-{user.PhoneNumber}-{_dateTime.Now.ToString("dd-MM-yyyy-HH:mm:ss")}",
                 UserId = user.Id,
-                TableId = table.Id,
+                ReservationId = reservation.Id,
                 Date = _dateTime.Now,
                 Status = OrderStatus.Processing,
                 OrderDetails = new List<OrderDetail>(),
             };
 
             //Comment until online payment complete
-            //entity.PrePaid = reservation.NumOfPeople * table.TableType.ChargePerSeat;
+            var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => !e.IsDeleted && e.Id == reservation.TableTypeId);
+            if (tableType is null)
+            {
+                throw new NotFoundException(nameof(TableType), reservation.TableTypeId);
+            }
+            entity.PrePaid = reservation.NumOfPeople * tableType.ChargePerSeat;
 
             foreach (var dish in request.OrderDetails)
             {
@@ -130,7 +130,6 @@ namespace Application.Orders.Commands
             }
             total -= result.PrePaid;
 
-            mappedResult.Total = total;
             mappedResult.OrderDetails = orderDetails;
             return new Response<OrderDto>(mappedResult)
             {

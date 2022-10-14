@@ -7,7 +7,6 @@ using Application.Tables.Response;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Api.Controllers.V1
 {

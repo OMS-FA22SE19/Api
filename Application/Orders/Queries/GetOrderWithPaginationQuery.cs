@@ -1,4 +1,5 @@
-﻿using Application.Models;
+﻿using Application.Common.Interfaces;
+using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Response;
 using AutoMapper;
@@ -21,11 +22,13 @@ namespace Application.Orders.Queries
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IDateTime _dateTime;
 
-        public GetOrderWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetOrderWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, IDateTime dateTime)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _dateTime = dateTime;
         }
 
         public async Task<Response<PaginatedList<OrderDto>>> Handle(GetOrderWithPaginationQuery request, CancellationToken cancellationToken)
@@ -45,7 +48,7 @@ namespace Application.Orders.Queries
                 filters.Add(e => e.Status == request.Status);
             }
 
-            filters.Add(e => e.Date > DateTime.UtcNow.AddHours(7).AddHours(-3));
+            filters.Add(e => e.Date > _dateTime.Now.AddHours(-3));
 
             switch (request.OrderBy)
             {

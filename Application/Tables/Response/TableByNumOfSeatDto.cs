@@ -1,5 +1,4 @@
 ﻿using Application.Common.Mappings;
-using AutoMapper;
 using Core.Entities;
 
 namespace Application.Tables.Response

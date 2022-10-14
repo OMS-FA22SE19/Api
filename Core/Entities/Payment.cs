@@ -11,7 +11,7 @@ namespace Core.Entities
         [Required]
         public string OrderId { get; set; }
         public PaymentStatus Status { get; set; }
-        public double Amount { get; set; } = 0;
+        public double Amount { get; set; }
         public Order Order { get; set; }
     }
 }

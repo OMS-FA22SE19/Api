@@ -1,9 +1,7 @@
 ﻿using Application.Common.Mappings;
 using Application.Tables.Response;
-using Application.Users;
 using AutoMapper;
 using Core.Entities;
-using Core.Enums;
 
 namespace Application.Reservations.Response
 {

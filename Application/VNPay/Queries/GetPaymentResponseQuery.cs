@@ -1,17 +1,12 @@
 ﻿using Application.Common.Exceptions;
 using Application.Models;
 using Application.Types.Response;
-using Application.VNPay.Response;
 using AutoMapper;
-using Core.Common;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Configuration;
 
 namespace Application.VNPay.Queries
 {

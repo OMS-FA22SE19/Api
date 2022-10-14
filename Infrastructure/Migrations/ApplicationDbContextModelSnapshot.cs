@@ -343,6 +343,9 @@ namespace Infrastructure.Migrations
                     b.Property<double>("PrePaid")
                         .HasColumnType("float");
 
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -355,7 +358,8 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("TableId");
+                    b.HasIndex("ReservationId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -977,10 +981,10 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Entities.Order", b =>
                 {
-                    b.HasOne("Core.Entities.Table", "Table")
-                        .WithMany("Orders")
-                        .HasForeignKey("TableId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("Core.Entities.Reservation", "Reservation")
+                        .WithOne("Order")
+                        .HasForeignKey("Core.Entities.Order", "ReservationId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("Core.Entities.ApplicationUser", "User")
@@ -989,7 +993,7 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Table");
+                    b.Navigation("Reservation");
 
                     b.Navigation("User");
                 });
@@ -1151,13 +1155,14 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Entities.Reservation", b =>
                 {
+                    b.Navigation("Order")
+                        .IsRequired();
+
                     b.Navigation("ReservationTables");
                 });
 
             modelBuilder.Entity("Core.Entities.Table", b =>
                 {
-                    b.Navigation("Orders");
-
                     b.Navigation("ReservationsTables");
                 });
 

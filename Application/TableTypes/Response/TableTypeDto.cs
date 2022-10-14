@@ -9,6 +9,7 @@ namespace Application.TableTypes.Response
         public int Id { get; set; }
         public string Name { get; set; }
         public double ChargePerSeat { get; set; }
+        public bool CanBeCombined { get; set; }
 
         public void Mapping(Profile profile) => profile.CreateMap<TableType, TableTypeDto>();
     }
