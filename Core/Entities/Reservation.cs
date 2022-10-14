@@ -13,8 +13,8 @@ namespace Core.Entities
         public int TableTypeId { get; set; }
         public int NumOfSeats { get; set; }
         public int Quantity { get; set; }
-        public DateTime StartTime { get; set; } = DateTime.UtcNow.AddHours(7);
-        public DateTime EndTime { get; set; } = DateTime.UtcNow.AddHours(7).AddHours(1).AddMinutes(30);
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
 

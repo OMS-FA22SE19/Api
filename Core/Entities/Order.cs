@@ -13,7 +13,7 @@ namespace Core.Entities
         [Required]
         public int ReservationId { get; set; }
         [Required]
-        public DateTime Date { get; set; } = DateTime.UtcNow.AddHours(7);
+        public DateTime Date { get; set; }
         public OrderStatus Status { get; set; }
         [Range(0, double.PositiveInfinity)]
         public double PrePaid { get; set; } = 0;

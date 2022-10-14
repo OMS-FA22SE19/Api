@@ -58,7 +58,7 @@ namespace Application.Orders.Commands
 
             var entity = new Order
             {
-                Id = $"{reservation.ReservationTables[0].Id}-{user.PhoneNumber}-{DateTime.UtcNow.AddHours(7).ToString("dd-MM-yyyy-HH:mm:ss")}",
+                Id = $"{reservation.ReservationTables[0].Id}-{user.PhoneNumber}-{_dateTime.Now.ToString("dd-MM-yyyy-HH:mm:ss")}",
                 UserId = user.Id,
                 ReservationId = reservation.Id,
                 Date = _dateTime.Now,
