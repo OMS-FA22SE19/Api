@@ -7,6 +7,7 @@ using Application.Tables.Response;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Api.Controllers.V1
 {
@@ -273,6 +274,49 @@ namespace Api.Controllers.V1
             catch (Exception ex)
             {
                 var response = new Response<TableDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
+        /// Update status of a Reservation.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     Get /Reservations/Checkin
+        ///     {
+        ///     }
+        ///     
+        /// </remarks>
+        [HttpGet("Checkin")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> CheckIn([FromQuery] CheckinReservationQuery query)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await Mediator.Send(query);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<ReservationDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Models;
 using Application.Reservations.Response;
@@ -28,11 +29,13 @@ namespace Application.Reservations.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IDateTime _dateTime;
 
-        public ChangeReservationStatusCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public ChangeReservationStatusCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IDateTime dateTime)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _dateTime = dateTime;
         }
 
         public async Task<Response<ReservationDto>> Handle(ChangeReservationStatusCommand request, CancellationToken cancellationToken)
