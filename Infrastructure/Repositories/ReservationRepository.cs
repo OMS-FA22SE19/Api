@@ -15,15 +15,24 @@ namespace Infrastructure.Repositories
             _dbSetReservationTable = context.ReservationTables;
         }
 
-        public async Task<List<Reservation>> GetAllReservationWithDate(DateTime date)
+        public async Task<List<Reservation>> GetAllReservationWithDate(DateTime date, int? tableTypeId, int? numOfSeats)
         {
             IQueryable<Reservation> query = _dbSet;
 
             query = query.Where(r =>
-            r.StartTime >= date.Date && r.StartTime < date.Date.AddDays(1)
-            && r.EndTime >= date.Date && r.EndTime < date.Date.AddDays(1)
+            r.StartTime.Date == date.Date
+            && r.EndTime.Date == date.Date
             && r.Status != ReservationStatus.Available).OrderBy(r => r.StartTime)
-            .Include(r => r.ReservationTables);
+            .Include(r => r.ReservationTables).ThenInclude(r => r.Table);
+
+            if (tableTypeId is not null)
+            {
+                query = query.Where(e => e.TableTypeId == tableTypeId);
+                if (numOfSeats is not null)
+                {
+                    query = query.Where(e => e.NumOfSeats == numOfSeats);
+                }
+            }
 
             return await query.ToListAsync();
         }
@@ -38,7 +47,7 @@ namespace Infrastructure.Repositories
 
             return await query.OrderByDescending(e => e.StartTime)
                 .FirstOrDefaultAsync(e => reservationTableList.Contains(e.Id)
-                && e.StartTime < date.AddHours(2) 
+                && e.StartTime < date.AddHours(2)
                 && e.StartTime > date.AddHours(-2));
         }
     }

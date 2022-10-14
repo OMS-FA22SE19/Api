@@ -148,13 +148,12 @@ namespace Api.Controllers.V1
         ///
         ///     POST /Reservations
         ///     {
-        ///         "startTime": "2022-10-07T04:19:19.466Z",
-        ///         "endTime": "2022-10-07T04:19:19.466Z",
-        ///         "numOfSeats": {
-        ///             "2": 3 (NumOfSeats: quantity),
-        ///             "8": 2
-        ///         }
-        ///         "tableTypeId": 2,
+        ///         "startTime": "2022-10-07T10:00:00",
+        ///         "endTime": "2022-10-07T11:00:00",
+        ///         "numOfPeople":4,
+        ///         "TableTypeId":1
+        ///         "numOfSeats": 4,
+        ///         "quantity": 1,
         ///         "isPriorFoodOrder": false
         ///     }
         ///     

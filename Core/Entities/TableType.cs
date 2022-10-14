@@ -6,6 +6,7 @@ namespace Core.Entities
     {
         public string Name { get; set; }
         public double ChargePerSeat { get; set; }
+        public bool CanBeCombined { get; set; }
 
         public IList<Table> Tables { get; set; }
     }

@@ -27,36 +27,38 @@ namespace Application.Tables.Queries
 
         public async Task<Response<List<TableByTypeDto>>> Handle(GetTypeOfTableQuery request, CancellationToken cancellationToken)
         {
-            var resultSeatNumber = await _unitOfWork.TableRepository.GetClosestNumOfSeatTable(request.NumsOfPeople);
-            if (resultSeatNumber <= 0)
+            var result = await _unitOfWork.TableRepository.GetAllAsync(includeProperties: $"{nameof(Table.TableType)}");
+
+            var ListTableType = new List<TableByTypeDto>();
+
+            foreach (var table in result)
             {
-                return new Response<List<TableByTypeDto>>($"No available table for numOfSeat: {request.NumsOfPeople}");
-            }
-
-            var result = await _unitOfWork.TableRepository.GetTableWithSeatsNumber(resultSeatNumber);
-
-            List<TableByTypeDto> ListTableType = new List<TableByTypeDto>();
-
-            foreach (Table table in result)
-            {
-                var tableType = ListTableType.FirstOrDefault(t => t.TableTypeId == table.TableTypeId);
+                var tableType = ListTableType.FirstOrDefault(t => t.TableTypeId == table.TableTypeId && t.NumOfSeats == table.NumOfSeats);
                 if (tableType == null)
                 {
-                    List<int> tableIds = new List<int>();
-                    tableIds.Add(table.Id);
-                    ListTableType.Add(new TableByTypeDto()
+                    int quantity = 1;
+                    bool isValid = false;
+
+                    if (table.NumOfSeats >= request.NumsOfPeople)
                     {
-                        TableTypeId = table.TableTypeId,
-                        TableTypeName = table.TableType.Name,
-                        NumOfSeats = resultSeatNumber,
-                        Total = 1,
-                        TableIds = tableIds
-                    });
-                }
-                else
-                {
-                    tableType.Total++;
-                    tableType.TableIds.Add(table.Id);
+                        isValid = true;
+                    }
+                    else
+                    {
+                        var count = result.Where(e => e.TableTypeId == table.TableTypeId && e.NumOfSeats == table.NumOfSeats && e.TableType.CanBeCombined).Count();
+                        quantity = ((request.NumsOfPeople % table.NumOfSeats) == 0) ? request.NumsOfPeople / table.NumOfSeats : (request.NumsOfPeople / table.NumOfSeats) + 1;
+                        isValid = count > quantity;
+                    }
+                    if (isValid)
+                    {
+                        ListTableType.Add(new TableByTypeDto()
+                        {
+                            TableTypeId = table.TableTypeId,
+                            TableTypeName = table.TableType.Name,
+                            NumOfSeats = table.NumOfSeats,
+                            Quantity = quantity
+                        });
+                    }
                 }
             }
             return new Response<List<TableByTypeDto>>(ListTableType);

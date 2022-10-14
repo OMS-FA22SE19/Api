@@ -27,7 +27,15 @@ namespace Infrastructure.Persistence.Configurations
                 .HasColumnType("int");
 
             builder.Property<int>("NumOfPeople")
-                .HasDefaultValue(1)
+                .HasColumnType("int");
+
+            builder.Property<int>("TableTypeId")
+                .HasColumnType("int");
+
+            builder.Property<int>("NumOfSeats")
+                .HasColumnType("int");
+
+            builder.Property<int>("Quantity")
                 .HasColumnType("int");
 
             builder.Property<string>("UserId")

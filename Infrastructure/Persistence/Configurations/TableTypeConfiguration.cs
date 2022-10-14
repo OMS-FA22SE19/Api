@@ -14,6 +14,9 @@ namespace Infrastructure.Persistence.Configurations
 
             SqlServerPropertyBuilderExtensions.UseIdentityColumn(builder.Property<int>("Id"), 1L, 1);
 
+            builder.Property<bool>("CanBeCombined")
+                .IsRequired();
+
             builder.Property<string>("Name")
                 .IsRequired()
                 .HasMaxLength(1000)

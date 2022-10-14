@@ -59,7 +59,7 @@ namespace Application.VNPay.Queries
                 Id = DateTime.Now.ToString("yyyyMMddHHmmss"),
                 OrderId = request.orderId.ToString(),
                 Status = PaymentStatus.Processing,
-                Ammount = request.ammount
+                Amount = request.ammount
             };
             var result = await _unitOfWork.PaymentRepository.InsertAsync(payment);
             await _unitOfWork.CompleteAsync(cancellationToken);

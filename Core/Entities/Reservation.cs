@@ -11,9 +11,12 @@ namespace Core.Entities
         //[Required]
         //public int TableId { get; set; }
         [Range(1, 1000)]
-        public int NumOfPeople { get; set; } = 1;
-        public DateTime StartTime { get; set; } = DateTime.UtcNow;
-        public DateTime EndTime { get; set; } = DateTime.UtcNow.AddHours(1).AddMinutes(30);
+        public int NumOfPeople { get; set; }
+        public int TableTypeId { get; set; }
+        public int NumOfSeats { get; set; }
+        public int Quantity { get; set; }
+        public DateTime StartTime { get; set; } = DateTime.UtcNow.AddHours(7);
+        public DateTime EndTime { get; set; } = DateTime.UtcNow.AddHours(7).AddHours(1).AddMinutes(30);
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
 
