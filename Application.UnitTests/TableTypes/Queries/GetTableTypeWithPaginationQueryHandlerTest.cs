@@ -62,8 +62,8 @@ namespace Application.UnitTests.TableTypes.Queries
         [TestCase(1, 50, "", TableTypeProperty.Name, true)]
         [TestCase(1, 50, "", TableTypeProperty.ChargePerSeat, false)]
         [TestCase(1, 50, "", TableTypeProperty.ChargePerSeat, true)]
-        [TestCase(1, 50, "2", null, false)]
-        [TestCase(1, 50, "start", null, false)]
+        [TestCase(1, 50, "random", null, false)]
+        [TestCase(1, 50, "door", null, false)]
         public async Task Should_Return_With_Condition(
             int pageIndex = 1,
             int pageSize = 50,

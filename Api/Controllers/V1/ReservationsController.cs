@@ -219,7 +219,7 @@ namespace Api.Controllers.V1
 
                 if (id != command.Id)
                 {
-                    var response = new Response<TableDto>("The Id do not match")
+                    var response = new Response<ReservationDto>("The Id do not match")
                     {
                         StatusCode = HttpStatusCode.BadRequest
                     };
@@ -235,7 +235,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<TableDto>(ex.Message)
+                var response = new Response<ReservationDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
@@ -272,7 +272,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<TableDto>(ex.Message)
+                var response = new Response<ReservationDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

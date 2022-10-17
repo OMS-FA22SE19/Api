@@ -1,4 +1,5 @@
 ﻿using Core.Entities;
+using Core.Enums;
 
 namespace Application.UnitTests
 {
@@ -57,6 +58,46 @@ namespace Application.UnitTests
                     Name = "Room",
                     ChargePerSeat = 15000,
                     CanBeCombined = false
+                }
+        };
+
+        public static List<Table> Tables
+            => new List<Table>()
+        {
+                new Table()
+                {
+                    Id = 1,
+                    NumOfSeats = 4,
+                    Status = TableStatus.Available,
+                    TableTypeId = 1
+                },
+                new Table()
+                {
+                    Id = 2,
+                    NumOfSeats = 6,
+                    Status = TableStatus.Available,
+                    TableTypeId = 2
+                },
+                new Table()
+                {
+                    Id = 3,
+                    NumOfSeats = 8,
+                    Status = TableStatus.Available,
+                    TableTypeId = 3
+                },
+                new Table()
+                {
+                    Id = 4,
+                    NumOfSeats = 4,
+                    Status = TableStatus.Available,
+                    TableTypeId = 1
+                },
+                new Table()
+                {
+                    Id = 5,
+                    NumOfSeats = 8,
+                    Status = TableStatus.Available,
+                    TableTypeId = 1
                 }
         };
     }
