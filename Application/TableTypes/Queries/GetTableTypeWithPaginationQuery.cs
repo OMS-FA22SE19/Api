@@ -12,7 +12,7 @@ namespace Application.TableTypes.Queries
 {
     public sealed class GetTableTypeWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<TableTypeDto>>>
     {
-        public TableTypeProperty OrderBy { get; set; }
+        public TableTypeProperty? OrderBy { get; set; }
     }
 
     public sealed class GetTableTypeWithPaginationQueryHandler : IRequestHandler<GetTableTypeWithPaginationQuery, Response<PaginatedList<TableTypeDto>>>
@@ -45,6 +45,7 @@ namespace Application.TableTypes.Queries
                     if (request.IsDescending)
                     {
                         orderBy = e => e.OrderByDescending(x => x.Id);
+                        break;
                     }
                     orderBy = e => e.OrderBy(x => x.Id);
                     break;
@@ -52,6 +53,7 @@ namespace Application.TableTypes.Queries
                     if (request.IsDescending)
                     {
                         orderBy = e => e.OrderByDescending(x => x.Name);
+                        break;
                     }
                     orderBy = e => e.OrderBy(x => x.Name);
                     break;
@@ -59,6 +61,7 @@ namespace Application.TableTypes.Queries
                     if (request.IsDescending)
                     {
                         orderBy = e => e.OrderByDescending(x => x.ChargePerSeat);
+                        break;
                     }
                     orderBy = e => e.OrderBy(x => x.ChargePerSeat);
                     break;
