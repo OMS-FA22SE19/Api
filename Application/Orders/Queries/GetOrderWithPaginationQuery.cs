@@ -107,7 +107,7 @@ namespace Application.Orders.Queries
 
                 foreach (var detail in order.OrderDetails)
                 {
-                    var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId));
+                    var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted);
                     if (element is null)
                     {
                         orderDetails.Add(new OrderDetailDto

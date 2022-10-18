@@ -12,7 +12,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class ReservationsController : ApiControllerBase
+    public sealed class ReservationsController : ApiControllerBase
     {
         /// <summary>
         /// Retrieve a list of Reservations.
@@ -292,12 +292,12 @@ namespace Api.Controllers.V1
         ///     }
         ///     
         /// </remarks>
-        [HttpGet("Checkin")]
+        [HttpPost("CheckIn")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> CheckIn([FromQuery] CheckinReservationQuery query)
+        public async Task<ActionResult> CheckIn(CheckinReservationCommand query)
         {
             try
             {

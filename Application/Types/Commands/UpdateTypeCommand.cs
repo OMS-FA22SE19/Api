@@ -37,7 +37,7 @@ namespace Application.Types.Commands
 
         public async Task<Response<TypeDto>> Handle(UpdateTypeCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.TypeRepository.GetAsync(e => e.Id == request.Id);
+            var entity = await _unitOfWork.TypeRepository.GetAsync(e => e.Id == request.Id && !e.IsDeleted);
             if (entity is null)
             {
                 throw new NotFoundException(nameof(Type), request.Id);

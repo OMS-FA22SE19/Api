@@ -1,9 +1,9 @@
-﻿using Domain.Common;
+﻿using Core.Common;
 using System.ComponentModel.DataAnnotations;
 
 namespace Core.Entities
 {
-    public sealed class ReservationTable : BaseAuditableEntity
+    public sealed class ReservationTable : Entity
     {
         [Required]
         public int ReservationId { get; set; }

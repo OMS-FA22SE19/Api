@@ -11,7 +11,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class OrderDetailsController : ApiControllerBase
+    public sealed class OrderDetailsController : ApiControllerBase
     {
         /// <summary>
         /// Retrieve a list of OrderDetails.
