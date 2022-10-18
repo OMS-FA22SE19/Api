@@ -12,6 +12,7 @@ namespace Application.Reservations.Response
         public string UserId { get; set; }
         public int NumOfPeople { get; set; }
         public int TableTypeId { get; set; }
+        public string TableType { get; set; }
         public int NumOfSeats { get; set; }
         public int Quantity { get; set; }
         public DateTime StartTime { get; set; }
