@@ -40,7 +40,7 @@ namespace Application.Menus.Commands
 
         public async Task<Response<MenuDto>> Handle(UpdateMenuCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.MenuRepository.GetAsync(e => e.Id == request.Id);
+            var entity = await _unitOfWork.MenuRepository.GetAsync(e => e.Id == request.Id && !e.IsDeleted);
             if (entity is null)
             {
                 throw new NotFoundException(nameof(Menu), request.Id);

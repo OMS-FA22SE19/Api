@@ -37,7 +37,7 @@ namespace Application.CourseTypes.Commands
 
         public async Task<Response<CourseTypeDto>> Handle(UpdateCourseTypeCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.CourseTypeRepository.GetAsync(e => e.Id == request.Id);
+            var entity = await _unitOfWork.CourseTypeRepository.GetAsync(e => e.Id == request.Id && !e.IsDeleted);
             if (entity is null)
             {
                 throw new NotFoundException(nameof(CourseType), request.Id);

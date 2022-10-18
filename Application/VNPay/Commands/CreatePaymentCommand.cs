@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Helpers;
 using Application.Models;
 using Application.VNPay.Response;
 using AutoMapper;
@@ -9,34 +10,34 @@ using MediatR;
 using Microsoft.Extensions.Configuration;
 using System.ComponentModel.DataAnnotations;
 
-namespace Application.VNPay.Queries
+namespace Application.VNPay.Commands
 {
-    public sealed class GetPaymentUrlQuery : IRequest<Response<PaymentUrlDto>>
+    public sealed class CreatePaymentCommand : IRequest<Response<PaymentUrlDto>>
     {
         [Required]
-        public int ammount { get; init; }
+        public int Amount { get; init; }
         [Required]
-        public string orderId { get; init; }
+        public string OrderId { get; init; }
     }
 
-    public sealed class GetPaymentUrlQueryHandler : IRequestHandler<GetPaymentUrlQuery, Response<PaymentUrlDto>>
+    public sealed class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand, Response<PaymentUrlDto>>
     {
         private readonly IConfiguration _config;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public GetPaymentUrlQueryHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
+        public CreatePaymentCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _config = configuration;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public async Task<Response<PaymentUrlDto>> Handle(GetPaymentUrlQuery request, CancellationToken cancellationToken)
+        public async Task<Response<PaymentUrlDto>> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.orderId, $"{nameof(Order.OrderDetails)},{nameof(Order.User)}");
+            var entity = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.OrderId, $"{nameof(Order.OrderDetails)},{nameof(Order.User)}");
             if (entity is null)
             {
-                throw new NotFoundException(nameof(Order), request.orderId);
+                throw new NotFoundException(nameof(Order), request.OrderId);
             }
 
             if (entity.OrderDetails.Any(e => e.Status != OrderDetailStatus.Served))
@@ -52,9 +53,9 @@ namespace Application.VNPay.Queries
             Payment payment = new Payment
             {
                 Id = DateTime.Now.ToString("yyyyMMddHHmmss"),
-                OrderId = request.orderId.ToString(),
+                OrderId = request.OrderId.ToString(),
                 Status = PaymentStatus.Processing,
-                Amount = request.ammount
+                Amount = request.Amount
             };
             var result = await _unitOfWork.PaymentRepository.InsertAsync(payment);
             await _unitOfWork.CompleteAsync(cancellationToken);
@@ -80,7 +81,7 @@ namespace Application.VNPay.Queries
             vnpay.AddRequestData("vnp_Version", VnPayLibrary.VERSION);
             vnpay.AddRequestData("vnp_Command", "pay");
             vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
-            vnpay.AddRequestData("vnp_Amount", (request.ammount * 100).ToString());
+            vnpay.AddRequestData("vnp_Amount", (request.Amount * 100).ToString());
 
             vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));//yyyyMMddHHmmss
             vnpay.AddRequestData("vnp_CurrCode", "VND");
@@ -88,7 +89,7 @@ namespace Application.VNPay.Queries
 
 
             vnpay.AddRequestData("vnp_Locale", "vn");
-            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang: " + request.orderId.ToString());
+            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang: " + request.OrderId.ToString());
             //vnpay.AddRequestData("vnp_OrderType", orderCategory.SelectedItem.Value); //default value: other
             vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
             vnpay.AddRequestData("vnp_TxnRef", payment.Id.ToString());//order.OrderId.ToString());

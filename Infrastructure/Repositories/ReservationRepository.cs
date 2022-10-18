@@ -22,7 +22,8 @@ namespace Infrastructure.Repositories
             query = query.Where(r =>
             r.StartTime.Date == date.Date
             && r.EndTime.Date == date.Date
-            && r.Status != ReservationStatus.Available).OrderBy(r => r.StartTime)
+            && r.Status != ReservationStatus.Available
+            && !r.IsDeleted).OrderBy(r => r.StartTime)
             .Include(r => r.ReservationTables).ThenInclude(r => r.Table);
 
             if (tableTypeId is not null)

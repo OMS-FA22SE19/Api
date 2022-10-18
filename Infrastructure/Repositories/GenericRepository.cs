@@ -46,7 +46,7 @@ namespace Infrastructure.Repositories
             }
             else
             {
-                return await query.PaginatedListAsync(pageIndex, pageSize); ;
+                return await query.PaginatedListAsync(pageIndex, pageSize);
             }
         }
 
@@ -91,6 +91,24 @@ namespace Infrastructure.Repositories
                 query = query.Include(includeProperty);
             }
             return await query.FirstOrDefaultAsync(expression);
+        }
+
+        public virtual async Task<TEntity> GetAsync(List<Expression<Func<TEntity, bool>>> filters = null, string includeProperties = "")
+        {
+            IQueryable<TEntity> query = _dbSet.AsNoTracking();
+            if (filters is not null && filters.Any())
+            {
+                foreach (var filter in filters)
+                {
+                    query = query.Where(filter);
+                }
+            }
+            foreach (var includeProperty in includeProperties.Split
+                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                query = query.Include(includeProperty);
+            }
+            return await query.FirstOrDefaultAsync();
         }
 
         public virtual async Task<TEntity> InsertAsync(TEntity entity)

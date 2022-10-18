@@ -53,7 +53,7 @@ namespace Application.Foods.Commands
 
         public async Task<Response<FoodDto>> Handle(UpdateFoodCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Food.FoodTypes)}");
+            var entity = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.Id && !e.IsDeleted && e.Available, $"{nameof(Food.FoodTypes)}");
             if (entity is null)
             {
                 throw new NotFoundException(nameof(Food), request.Id);
@@ -74,12 +74,12 @@ namespace Application.Foods.Commands
 
             if (request.Types != null && request.Types.Any())
             {
-                foreach (var categoryId in request.Types)
+                foreach (var typeId in request.Types)
                 {
-                    var inDatabase = await _unitOfWork.TypeRepository.GetAsync(e => e.Id == categoryId);
+                    var inDatabase = await _unitOfWork.TypeRepository.GetAsync(e => e.Id == typeId);
                     if (inDatabase is null)
                     {
-                        throw new NotFoundException(nameof(Type), categoryId);
+                        throw new NotFoundException(nameof(Type), typeId);
                     }
                     if (entity.FoodTypes is null)
                     {

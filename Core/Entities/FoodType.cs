@@ -1,9 +1,9 @@
-﻿using Domain.Common;
+﻿using Core.Common;
 using System.ComponentModel.DataAnnotations;
 
 namespace Core.Entities
 {
-    public sealed class FoodType : BaseAuditableEntity
+    public sealed class FoodType : Entity
     {
         [Required]
         public int FoodId { get; set; }

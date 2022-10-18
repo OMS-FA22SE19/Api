@@ -1,6 +1,4 @@
 ﻿using Application.Common.Mappings;
-using Application.Tables.Response;
-using Application.Types.Response;
 using Application.Users;
 using AutoMapper;
 using Core.Entities;
@@ -12,7 +10,10 @@ namespace Application.Reservations.Response
     {
         public int Id { get; set; }
         public string UserId { get; set; }
-        public int TableId { get; set; }
+        public int NumOfPeople { get; set; }
+        public int TableTypeId { get; set; }
+        public int NumOfSeats { get; set; }
+        public int Quantity { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public ReservationStatus Status { get; set; }

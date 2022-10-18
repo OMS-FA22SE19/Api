@@ -44,6 +44,8 @@ namespace Application.OrderDetails.Queries
                     || request.SearchValue.Equals(e.Id.ToString()));
             }
 
+            filters.Add(e => !e.IsDeleted);
+
             switch (request.OrderBy)
             {
                 case OrderDetailProperty.OrderId:
