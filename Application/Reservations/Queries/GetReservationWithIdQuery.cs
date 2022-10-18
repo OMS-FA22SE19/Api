@@ -33,7 +33,13 @@ namespace Application.Reservations.Queries
             {
                 throw new NotFoundException(nameof(Reservation), $"with {request.Id}");
             }
+            var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == result.TableTypeId);
+            if (tableType is null)
+            {
+                throw new NotFoundException(nameof(Reservation), result.TableTypeId);
+            }
             var mappedResult = _mapper.Map<ReservationDto>(result);
+            mappedResult.TableType = tableType.Name;
             return new Response<ReservationDto>(mappedResult);
         }
     }
