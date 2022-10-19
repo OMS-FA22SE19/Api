@@ -2,6 +2,7 @@
 using Core.Common;
 using Core.Common.Interfaces;
 using Core.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

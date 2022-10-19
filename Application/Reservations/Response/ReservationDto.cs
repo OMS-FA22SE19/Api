@@ -1,5 +1,5 @@
 ﻿using Application.Common.Mappings;
-using Application.Users;
+using Application.Users.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Enums;
