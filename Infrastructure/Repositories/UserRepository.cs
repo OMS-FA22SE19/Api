@@ -1,30 +1,32 @@
 ﻿using Application.Common.Mappings;
 using Core.Common;
 using Core.Common.Interfaces;
+using Core.Entities;
 using Core.Interfaces;
-using Microsoft.AspNetCore.Identity;
+using Firebase.Auth;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories
 {
-    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : Entity
+    public sealed class UserRepository : IUserRepository
     {
         internal IApplicationDbContext _context;
-        internal DbSet<TEntity> _dbSet;
-        public GenericRepository(IApplicationDbContext context)
+        internal DbSet<ApplicationUser> _dbSet;
+        public UserRepository(IApplicationDbContext context)
         {
             _context = context;
+            _dbSet = context.Users;
         }
 
-        public virtual async Task<PaginatedList<TEntity>> GetPaginatedListAsync(
-            List<Expression<Func<TEntity, bool>>> filters = null,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+        public async Task<PaginatedList<ApplicationUser>> GetPaginatedListAsync(
+            List<Expression<Func<ApplicationUser, bool>>> filters = null,
+            Func<IQueryable<ApplicationUser>, IOrderedQueryable<ApplicationUser>> orderBy = null,
             string includeProperties = "",
             int pageIndex = 1,
             int pageSize = 50)
         {
-            IQueryable<TEntity> query = _dbSet.AsNoTracking();
+            IQueryable<ApplicationUser> query = _dbSet.AsNoTracking();
 
 
             if (filters is not null && filters.Any())
@@ -51,12 +53,12 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public virtual async Task<List<TEntity>> GetAllAsync(
-            List<Expression<Func<TEntity, bool>>> filters = null,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>> orderBy = null,
+        public async Task<List<ApplicationUser>> GetAllAsync(
+            List<Expression<Func<ApplicationUser, bool>>> filters = null,
+            Func<IQueryable<ApplicationUser>, IOrderedQueryable<ApplicationUser>> orderBy = null,
             string includeProperties = "")
         {
-            IQueryable<TEntity> query = _dbSet.AsNoTracking();
+            IQueryable<ApplicationUser> query = _dbSet.AsNoTracking();
 
 
             if (filters is not null && filters.Any())
@@ -83,9 +85,9 @@ namespace Infrastructure.Repositories
             }
         }
 
-        public virtual async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> expression, string includeProperties = "")
+        public async Task<ApplicationUser> GetAsync(Expression<Func<ApplicationUser, bool>> expression, string includeProperties = "")
         {
-            IQueryable<TEntity> query = _dbSet.AsNoTracking();
+            IQueryable<ApplicationUser> query = _dbSet.AsNoTracking();
             foreach (var includeProperty in includeProperties.Split
                 (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
             {
@@ -94,36 +96,21 @@ namespace Infrastructure.Repositories
             return await query.FirstOrDefaultAsync(expression);
         }
 
-        public virtual async Task<TEntity> InsertAsync(TEntity entity)
+        public async Task<ApplicationUser> InsertAsync(ApplicationUser entity)
         {
             _dbSet.Add(entity);
             return await Task.FromResult(entity);
         }
 
-        public virtual async Task<bool> DeleteAsync(Expression<Func<TEntity, bool>> expression)
+        public async Task<bool> DeleteAsync(ApplicationUser entity)
         {
-            var entitiesToDelete = await _dbSet.Where(expression).ToListAsync();
-            if (entitiesToDelete != null)
-            {
-                await DeleteAsync(entitiesToDelete);
-            }
+            entity.IsDeleted = true;
+            _dbSet.Attach(entity);
+            _context.Entry(entity).State = EntityState.Modified;
             return await Task.FromResult(true);
         }
 
-        public virtual async Task<bool> DeleteAsync(IList<TEntity> entitiesToDelete)
-        {
-            foreach (TEntity entity in entitiesToDelete)
-            {
-                if (_context.Entry(entity).State == EntityState.Detached)
-                {
-                    _dbSet.Attach(entity);
-                }
-            }
-            _dbSet.RemoveRange(entitiesToDelete);
-            return await Task.FromResult(true);
-        }
-
-        public virtual async Task<TEntity> UpdateAsync(TEntity entityToUpdate)
+        public async Task<ApplicationUser> UpdateAsync(ApplicationUser entityToUpdate)
         {
             _dbSet.Attach(entityToUpdate);
             _context.Entry(entityToUpdate).State = EntityState.Modified;

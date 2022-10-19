@@ -1,7 +1,7 @@
 ﻿using Application.Common.Mappings;
 using Application.Tables.Response;
 using Application.Types.Response;
-using Application.Users;
+using Application.Users.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Enums;

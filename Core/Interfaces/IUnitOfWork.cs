@@ -2,6 +2,7 @@
 {
     public interface IUnitOfWork
     {
+        IUserRepository UserRepository { get; }
         ITableRepository TableRepository { get; }
         IReservationRepository ReservationRepository { get; }
         IFoodRepository FoodRepository { get; }
