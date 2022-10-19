@@ -45,6 +45,14 @@ namespace Application.Orders.Commands
                 return new Response<OrderDto>($"Order {entity.Id} cannot be confirmed. Make sure all dishes have been served!");
             }
 
+            var reservation = await _unitOfWork.ReservationRepository.GetAsync(r => r.Id == entity.ReservationId, $"{nameof(Reservation.ReservationTables)}");
+            foreach (var rt in reservation.ReservationTables)
+            {
+                var table = await _unitOfWork.TableRepository.GetAsync(t => t.Id == rt.TableId);
+                table.Status = TableStatus.Available;
+                await _unitOfWork.TableRepository.UpdateAsync(table);
+            }
+
             MapToEntity(entity);
             var result = await _unitOfWork.OrderRepository.UpdateAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
