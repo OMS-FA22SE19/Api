@@ -2,16 +2,10 @@
 using Application.Models;
 using Application.Users.Queries;
 using Application.Users.Response;
-using Application.Users.Queries;
-using Application.Users.Response;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using Application.Users.Commands;
-using Application.Users.Response;
-using Application.Users.Commands;
-using Application.Types.Commands;
-using Application.Types.Response;
 
 namespace Api.Controllers.V1
 {
@@ -112,7 +106,7 @@ namespace Api.Controllers.V1
         ///     POST /Users
         ///     {
         ///        "FullName": "Quang",
-        ///        "PhoneNumber": 0931118342,
+        ///        "PhoneNumber": "0931118342",
         ///        "Email": "customerEmail@gmail.com",
         ///        "Role": "Customer",
         ///        "Password": "Password"
@@ -161,7 +155,7 @@ namespace Api.Controllers.V1
         ///     {
         ///        "id": "1",
         ///        "fullName": "Le Van A",
-        ///        "email": "CustomerEmail@gmail.com",
+        ///        "phoneNumber": "0931118342",
         ///        "role": "Customer"
         ///     }
         ///
@@ -183,7 +177,7 @@ namespace Api.Controllers.V1
 
                 if (!Id.Equals(command.Id))
                 {
-                    var response = new Response<TypeDto>("The Id do not match")
+                    var response = new Response<UserDto>("The Id do not match")
                     {
                         StatusCode = HttpStatusCode.BadRequest
                     };
@@ -203,7 +197,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<TypeDto>(ex.Message)
+                var response = new Response<UserDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

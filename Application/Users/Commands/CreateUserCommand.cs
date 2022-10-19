@@ -18,7 +18,6 @@ namespace Application.Users.Commands
         [Required]
         [EmailAddress]
         public string Email { get; set; }
-        [Required]
         public string PhoneNumber { get; set; }
         [Required]
         public string Password { get; set; }
@@ -48,7 +47,7 @@ namespace Application.Users.Commands
 
         public async Task<Response<UserDto>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
-            var user = new ApplicationUser() { UserName = request.PhoneNumber, Email = request.Email, FullName = request.FullName, PhoneNumber = request.PhoneNumber };
+            var user = new ApplicationUser() { UserName = request.Email.Split('@')[0], Email = request.Email, FullName = request.FullName, PhoneNumber = request.PhoneNumber };
             if (await _userManager.FindByNameAsync(request.PhoneNumber) is not null)
             {
                 throw new ArgumentNullException(nameof(user));
