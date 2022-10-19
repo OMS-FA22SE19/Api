@@ -6,8 +6,6 @@ namespace Core.Interfaces
 {
     public interface IUserRepository
     {
-        //Task<bool> DeleteAsync(IList<ApplicationUser> entityToDelete);
-        //Task<bool> DeleteAsync(Expression<Func<ApplicationUser, bool>> expression);
         Task<bool> DeleteAsync(ApplicationUser entity);
         Task<List<ApplicationUser>> GetAllAsync(
             List<Expression<Func<ApplicationUser, bool>>> filters = null,

@@ -18,8 +18,7 @@ namespace Application.Users.Commands
         [Required]
         public string FullName { get; set; }
         [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+        public string PhoneNumber { get; set; }
         [Required]
         public string Role { get; set; }
 
@@ -74,7 +73,7 @@ namespace Application.Users.Commands
         private static void MapToEntity(UpdateUserCommand request, ApplicationUser? entity)
         {
             entity.FullName = request.FullName;
-            entity.Email = request.Email;
+            entity.PhoneNumber = request.PhoneNumber;
         }
     }
 }
