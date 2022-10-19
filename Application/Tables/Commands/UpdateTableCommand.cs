@@ -43,7 +43,7 @@ namespace Application.Tables.Commands
 
         public async Task<Response<TableDto>> Handle(UpdateTableCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.TableRepository.GetAsync(e => e.Id == request.Id);
+            var entity = await _unitOfWork.TableRepository.GetAsync(e => e.Id == request.Id && !e.IsDeleted);
             if (entity is null)
             {
                 throw new NotFoundException(nameof(Table), request.Id);

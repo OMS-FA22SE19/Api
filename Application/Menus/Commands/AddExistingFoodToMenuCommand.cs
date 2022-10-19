@@ -34,13 +34,13 @@ namespace Application.Menus.Commands
 
         public async Task<Response<MenuDto>> Handle(AddExistingFoodToMenuCommand request, CancellationToken cancellationToken)
         {
-            var menuInDatabase = await _unitOfWork.MenuRepository.GetAsync(e => e.Id == request.Id);
+            var menuInDatabase = await _unitOfWork.MenuRepository.GetAsync(e => e.Id == request.Id && !e.IsDeleted);
             if (menuInDatabase is null)
             {
                 throw new NotFoundException(nameof(Menu), request.Id);
             }
 
-            var foodInDatabase = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.FoodId);
+            var foodInDatabase = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.FoodId && !e.IsDeleted);
             if (foodInDatabase is null)
             {
                 throw new NotFoundException(nameof(Food), request.Id);

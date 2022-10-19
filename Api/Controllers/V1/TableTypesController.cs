@@ -11,7 +11,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TableTypesController : ApiControllerBase
+    public sealed class TableTypesController : ApiControllerBase
     {
         /// <summary>
         /// Retrieve a list of Table Types.

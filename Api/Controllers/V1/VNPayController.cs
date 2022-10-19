@@ -1,7 +1,7 @@
 ﻿using Application.Models;
 using Application.Orders.Commands;
 using Application.Orders.Response;
-using Application.VNPay.Queries;
+using Application.VNPay.Commands;
 using Application.VNPay.Response;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -12,11 +12,25 @@ namespace Api.Controllers.V1
     [ApiController]
     public sealed class VNPayController : ApiControllerBase
     {
-        [HttpGet("GetUrl")]
+        /// <summary>
+        /// Create a Payment.
+        /// </summary>
+        /// <returns>Url redirect to VNPay.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /VNPay
+        ///     {
+        ///        "Amount": 200000,
+        ///        "OrderId": "1-0939758999-14-10-2022-21:07:57"
+        ///     }
+        ///     
+        /// </remarks>
+        [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetPaymentUrl([FromQuery] GetPaymentUrlQuery query)
+        public async Task<ActionResult<Response<PaymentUrlDto>>> GetPaymentUrl([FromBody] CreatePaymentCommand query)
         {
             try
             {
@@ -38,11 +52,17 @@ namespace Api.Controllers.V1
             }
         }
 
-        [HttpGet("Response")]
+        /// <summary>
+        /// Check payment.
+        /// </summary>
+        /// <returns>Payment.</returns>
+        /// <remarks>
+        /// </remarks>
+        [HttpPost("Check")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetPaymentResponse([FromQuery] GetPaymentResponseQuery query)
+        public async Task<ActionResult<Response<OrderDto>>> GetPaymentResponse(CheckPaymentCommand query)
         {
             try
             {
@@ -56,7 +76,7 @@ namespace Api.Controllers.V1
                 {
                     ConfirmPaymentOrderCommand confirmQuery = new ConfirmPaymentOrderCommand()
                     {
-                        Id = result.Data.orderId
+                        Id = result.Data.OrderId
                     };
                     var billResult = await Mediator.Send(confirmQuery);
                     return StatusCode((int)billResult.StatusCode, billResult);

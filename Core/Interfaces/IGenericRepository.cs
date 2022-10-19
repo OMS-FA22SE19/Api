@@ -17,6 +17,7 @@ namespace Core.Interfaces
             string includeProperties = "",
             int pageIndex = 1,
             int pageSize = 50);
+        Task<TEntity> GetAsync(List<Expression<Func<TEntity, bool>>> filters = null, string includeProperties = "");
         Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> expression, string includeProperties = "");
         Task<TEntity> InsertAsync(TEntity entity);
         Task<TEntity> UpdateAsync(TEntity entityToUpdate);
