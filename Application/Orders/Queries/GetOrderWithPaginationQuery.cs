@@ -48,7 +48,7 @@ namespace Application.Orders.Queries
                 filters.Add(e => e.Status == request.Status);
             }
 
-            //filters.Add(e => e.Date > _dateTime.Now.AddHours(-3));
+            filters.Add(e => e.Date > _dateTime.Now.AddHours(-3));
 
             switch (request.OrderBy)
             {
