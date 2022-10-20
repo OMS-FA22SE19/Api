@@ -10,6 +10,7 @@ namespace Application.TableTypes.Response
         public string Name { get; set; }
         public double ChargePerSeat { get; set; }
         public bool CanBeCombined { get; set; }
+        public bool IsDeleted { get; set; }
 
         public void Mapping(Profile profile) => profile.CreateMap<TableType, TableTypeDto>();
     }

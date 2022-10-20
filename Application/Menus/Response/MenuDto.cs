@@ -10,6 +10,7 @@ namespace Application.Menus.Response
         public string Name { get; set; }
         public string Description { get; set; }
         public bool IsHidden { get; set; }
+        public bool IsDeleted { get; set; }
 
         public void Mapping(Profile profile)
         {

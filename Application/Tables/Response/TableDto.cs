@@ -11,6 +11,7 @@ namespace Application.Tables.Response
         public int Id { get; set; }
         public int NumOfSeats { get; set; }
         public TableStatus Status { get; set; }
+        public bool IsDeleted { get; set; }
         public TableTypeDto TableType { get; set; }
 
         public void Mapping(Profile profile)
