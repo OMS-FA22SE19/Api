@@ -9,7 +9,7 @@ using System.Net;
 
 namespace Api.Controllers.V1
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
     public sealed class OrderDetailsController : ApiControllerBase
     {
@@ -111,7 +111,7 @@ namespace Api.Controllers.V1
         ///
         /// </remarks>
         /// <param name="id">The id of updated Food</param>
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
