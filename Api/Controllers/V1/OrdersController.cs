@@ -51,7 +51,7 @@ namespace Api.Controllers.V1
 
         /// Retrieve a specific Order.
         /// </summary>
-        /// <returns>An Orders.</returns>
+        /// <returns>An Order.</returns>
         /// <remarks>
         /// Sample request:
         ///
@@ -94,13 +94,13 @@ namespace Api.Controllers.V1
             }
         }
 
-        /// Retrieve a specific Order.
+        /// Retrieve current order of a table.
         /// </summary>
-        /// <returns>An Orders.</returns>
+        /// <returns>An Order.</returns>
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /Orders/9-0939758999-07-10-2022-10:55:10
+        ///     GET /Orders/Table/1
         ///     
         /// </remarks>
         [HttpGet("Table/{id}")]
