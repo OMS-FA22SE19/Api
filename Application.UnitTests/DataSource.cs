@@ -100,5 +100,35 @@ namespace Application.UnitTests
                     TableTypeId = 1
                 }
         };
+
+        public static List<Core.Entities.Type> Types
+            => new List<Core.Entities.Type>()
+        {
+                new Core.Entities.Type()
+                {
+                    Id = 1,
+                    Name = "Diary"
+                },
+                new Core.Entities.Type()
+                {
+                    Id = 2,
+                    Name = "Fruit and vegetables"
+                },
+                new Core.Entities.Type()
+                {
+                    Id = 3,
+                    Name = "Protein"
+                },
+                new Core.Entities.Type()
+                {
+                    Id = 4,
+                    Name = "Fat"
+                },
+                new Core.Entities.Type()
+                {
+                    Id = 5,
+                    Name = "Starchy food"
+                }
+        };
     }
 }
