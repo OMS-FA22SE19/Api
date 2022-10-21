@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Helpers;
 using Application.Models;
 using Application.Types.Response;
 using AutoMapper;
@@ -8,35 +9,35 @@ using Core.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Configuration;
 
-namespace Application.VNPay.Queries
+namespace Application.VNPay.Commands
 {
-    public sealed class GetPaymentResponseQuery : IRequest<Response<PaymentDto>>
+    public sealed class CheckPaymentCommand : IRequest<Response<PaymentDto>>
     {
-        public string vnp_TxnRef { get; init; }
-        public string vnp_ResponseCode { get; init; }
-        public string vnp_TransactionStatus { get; init; }
-        public string vnp_SecureHash { get; init; }
+        public string Vnp_TxnRef { get; init; }
+        public string Vnp_ResponseCode { get; init; }
+        public string Vnp_TransactionStatus { get; init; }
+        public string Vnp_SecureHash { get; init; }
     }
 
-    public sealed class GetPaymentResponseQueryHandler : IRequestHandler<GetPaymentResponseQuery, Response<PaymentDto>>
+    public sealed class CheckPaymentCommandHandler : IRequestHandler<CheckPaymentCommand, Response<PaymentDto>>
     {
         private readonly IConfiguration _config;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public GetPaymentResponseQueryHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
+        public CheckPaymentCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _config = configuration;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public async Task<Response<PaymentDto>> Handle(GetPaymentResponseQuery request, CancellationToken cancellationToken)
+        public async Task<Response<PaymentDto>> Handle(CheckPaymentCommand request, CancellationToken cancellationToken)
         {
-            string paymentId = request.vnp_TxnRef;
-            string responseCode = request.vnp_ResponseCode;
-            string transactionStatus = request.vnp_TransactionStatus;
+            string paymentId = request.Vnp_TxnRef;
+            string responseCode = request.Vnp_ResponseCode;
+            string transactionStatus = request.Vnp_TransactionStatus;
             string vnp_HashSecret = _config.GetSection("vnpay")["vnp_HashSecret"]; //Secret key
-            string vnp_SecureHash = request.vnp_SecureHash;
+            string vnp_SecureHash = request.Vnp_SecureHash;
 
             VnPayLibrary vnpay = new VnPayLibrary();
             if (responseCode == "00" && transactionStatus == "00")

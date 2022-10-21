@@ -53,7 +53,7 @@ namespace Application.Menus.Commands
 
         public async Task<Response<MenuDto>> Handle(AddNewFoodToMenuCommand request, CancellationToken cancellationToken)
         {
-            var menu = await _unitOfWork.MenuRepository.GetAsync(e => e.Id == request.Id);
+            var menu = await _unitOfWork.MenuRepository.GetAsync(e => e.Id == request.Id && !e.IsDeleted);
             if (menu is null)
             {
                 throw new NotFoundException(nameof(Menu), request.Id);

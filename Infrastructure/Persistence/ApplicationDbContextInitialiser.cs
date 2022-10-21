@@ -84,6 +84,12 @@ namespace Infrastructure.Persistence
                 await _userManager.CreateAsync(customer, "abc123");
                 await _userManager.AddToRolesAsync(customer, new[] { customerRole.Name });
             }
+
+            var restaurantOwnerRole = new IdentityRole("Restaurant Owner");
+            if (_roleManager.Roles.All(r => r.Name != customerRole.Name))
+            {
+                await _roleManager.CreateAsync(customerRole);
+            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Application.Common.Mappings;
+﻿using Application.Common.Exceptions;
+using Application.Common.Mappings;
 using Application.Models;
 using Application.Reservations.Response;
 using AutoMapper;
@@ -50,6 +51,11 @@ namespace Application.Reservations.Commands
 
         public async Task<Response<ReservationDto>> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
         {
+            var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == request.TableTypeId && !e.IsDeleted);
+            if (tableType is null)
+            {
+                throw new NotFoundException(nameof(TableType), request.TableTypeId);
+            }
             bool isValid = await validateStartEndTime(request);
             if (!isValid)
             {
@@ -70,6 +76,7 @@ namespace Application.Reservations.Commands
             }
             result.User = user;
             var mappedResult = _mapper.Map<ReservationDto>(result);
+            mappedResult.TableType = tableType.Name;
             return new Response<ReservationDto>(mappedResult)
             {
                 StatusCode = System.Net.HttpStatusCode.Created

@@ -1,4 +1,5 @@
-﻿using Application.Models;
+﻿using Application.Common.Exceptions;
+using Application.Models;
 using Application.Reservations.Response;
 using AutoMapper;
 using Core.Common;
@@ -44,7 +45,15 @@ namespace Application.Reservations.Queries
 
             var result = await _unitOfWork.ReservationRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, request.PageIndex, request.PageSize);
             var mappedResult = _mapper.Map<PaginatedList<Reservation>, PaginatedList<ReservationDto>>(result);
-
+            foreach (var item in mappedResult)
+            {
+                var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == item.TableTypeId);
+                if (tableType is null)
+                {
+                    throw new NotFoundException(nameof(Reservation), item.TableTypeId);
+                }
+                item.TableType = tableType.Name;
+            }
             return new Response<PaginatedList<ReservationDto>>(mappedResult);
         }
     }

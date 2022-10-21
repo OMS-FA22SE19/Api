@@ -11,20 +11,20 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace Application.Reservations.Queries
+namespace Application.Reservations.Commands
 {
-    public sealed class CheckinReservationQuery : IRequest<Response<ReservationDto>>
+    public sealed class CheckinReservationCommand : IRequest<Response<ReservationDto>>
     {
     }
 
-    public sealed class CheckinReservationQueryHandler : IRequestHandler<CheckinReservationQuery, Response<ReservationDto>>
+    public sealed class CheckinReservationCommandHandler : IRequestHandler<CheckinReservationCommand, Response<ReservationDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly IDateTime _dateTime;
 
-        public CheckinReservationQueryHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IDateTime dateTime)
+        public CheckinReservationCommandHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IDateTime dateTime)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
@@ -32,12 +32,13 @@ namespace Application.Reservations.Queries
             _dateTime = dateTime;
         }
 
-        public async Task<Response<ReservationDto>> Handle(CheckinReservationQuery request, CancellationToken cancellationToken)
+        public async Task<Response<ReservationDto>> Handle(CheckinReservationCommand request, CancellationToken cancellationToken)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
             var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.UserId.Equals(user.Id)
                 && _dateTime.Now >= e.StartTime.AddMinutes(-15) && _dateTime.Now <= e.EndTime
-                && e.Status == ReservationStatus.Reserved,
+                && e.Status == ReservationStatus.Reserved
+                && !e.IsDeleted,
                     $"{nameof(Reservation.ReservationTables)}");
             if (entity is null)
             {
@@ -73,7 +74,7 @@ namespace Application.Reservations.Queries
                 return new Response<ReservationDto>("error");
             }
             var mappedResult = _mapper.Map<ReservationDto>(result);
-
+            mappedResult.TableType = tableType.Name;
             return new Response<ReservationDto>(mappedResult);
         }
     }

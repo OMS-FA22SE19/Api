@@ -27,6 +27,7 @@ namespace Infrastructure.Persistence
             _auditableEntitySaveChangesInterceptor = auditableEntitySaveChangesInterceptor;
         }
 
+        public DbSet<ApplicationUser> Users => Set<ApplicationUser>();
         public DbSet<Core.Entities.Type> Types => Set<Core.Entities.Type>();
         public DbSet<Food> Foods => Set<Food>();
         public DbSet<FoodType> FoodTypes => Set<FoodType>();
