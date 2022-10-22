@@ -1,5 +1,5 @@
-﻿using Application.Types.Commands;
-using Application.Types.Response;
+﻿using Application.Menus.Commands;
+using Application.Menus.Response;
 using Application.Models;
 using AutoMapper;
 using Core.Entities;
@@ -9,23 +9,23 @@ using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Net;
 
-namespace Application.UnitTests.Types.Commands
+namespace Application.UnitTests.Menus.Commands
 {
     [TestFixture]
-    public class DeleteTypeCommandHandlerTest
+    public class DeleteMenuCommandHandlerTest
     {
-        private List<Core.Entities.Type> _Types;
-        private ITypeRepository _TypeRepository;
+        private List<Menu> _menus;
+        private IMenuRepository _MenuRepository;
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
 
         [SetUp]
         public void ReInitializeTest()
         {
-            _Types = DataSource.Types;
-            _TypeRepository = SetUpTypeRepository();
+            _menus = DataSource.Menus;
+            _MenuRepository = SetUpMenuRepository();
             var unitOfWork = new Mock<IUnitOfWork>();
-            unitOfWork.SetupGet(x => x.TypeRepository).Returns(_TypeRepository);
+            unitOfWork.SetupGet(x => x.MenuRepository).Returns(_MenuRepository);
             _unitOfWork = unitOfWork.Object;
             _mapper = SetUpMapper();
         }
@@ -33,22 +33,22 @@ namespace Application.UnitTests.Types.Commands
         [TearDown]
         public void DisposeTest()
         {
-            _TypeRepository = null;
+            _MenuRepository = null;
             _unitOfWork = null;
-            _Types = null;
+            _menus = null;
         }
 
         #region Unit Tests
         [TestCase(2)]
-        public async Task Should_Remove_Type(int id)
+        public async Task Should_Remove_Menu(int id)
         {
             //Arrange
-            var request = new DeleteTypeCommand()
+            var request = new DeleteMenuCommand()
             {
                 Id = id
             };
-            var handler = new DeleteTypeCommandHandler(_unitOfWork, _mapper);
-            var expected = new Response<TypeDto>()
+            var handler = new DeleteMenuCommandHandler(_unitOfWork, _mapper);
+            var expected = new Response<MenuDto>()
             {
                 StatusCode = HttpStatusCode.NoContent
             };
@@ -57,29 +57,29 @@ namespace Application.UnitTests.Types.Commands
 
             //Assert
             Assert.That(actual.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
-            var inDatabase = _Types.FirstOrDefault(e => e.Id == id);
+            var inDatabase = _menus.FirstOrDefault(e => e.Id == id);
             Assert.Null(inDatabase);
             Assert.Null(actual.Data);
         }
         #endregion Unit Tests
 
         #region Private member methods
-        private ITypeRepository SetUpTypeRepository()
+        private IMenuRepository SetUpMenuRepository()
         {
-            var mockTypeRepository = new Mock<ITypeRepository>();
-            mockTypeRepository.Setup(m => m.DeleteAsync(It.IsAny<Expression<Func<Core.Entities.Type, bool>>>()))
+            var mockMenuRepository = new Mock<IMenuRepository>();
+            mockMenuRepository.Setup(m => m.DeleteAsync(It.IsAny<Expression<Func<Menu, bool>>>()))
                 .ReturnsAsync(
-                (Expression<Func<Core.Entities.Type, bool>> expression)
+                (Expression<Func<Menu, bool>> expression)
                 =>
                 {
-                    var inDatabase = _Types.AsQueryable().FirstOrDefault(expression);
+                    var inDatabase = _menus.AsQueryable().FirstOrDefault(expression);
                     if (inDatabase is not null)
                     {
-                        _Types.Remove(inDatabase);
+                        _menus.Remove(inDatabase);
                     }
                     return true;
                 });
-            return mockTypeRepository.Object;
+            return mockMenuRepository.Object;
         }
 
         private IMapper SetUpMapper()

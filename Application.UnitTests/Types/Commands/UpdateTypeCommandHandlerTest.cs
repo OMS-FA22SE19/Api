@@ -14,7 +14,7 @@ namespace Application.UnitTests.Types.Commands
 {
     public class UpdateTypeCommandHandlerTest
     {
-        private List<Core.Entities.Type> _Types;
+        private List<Core.Entities.Type> _types;
         private ITypeRepository _TypeRepository;
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
@@ -22,7 +22,7 @@ namespace Application.UnitTests.Types.Commands
         [SetUp]
         public void ReInitializeTest()
         {
-            _Types = DataSource.Types;
+            _types = DataSource.Types;
             _TypeRepository = SetUpTypeRepository();
             var unitOfWork = new Mock<IUnitOfWork>();
             unitOfWork.SetupGet(x => x.TypeRepository).Returns(_TypeRepository);
@@ -35,7 +35,7 @@ namespace Application.UnitTests.Types.Commands
         {
             _TypeRepository = null;
             _unitOfWork = null;
-            _Types = null;
+            _types = null;
         }
 
         #region Unit Tests
@@ -62,7 +62,7 @@ namespace Application.UnitTests.Types.Commands
             Assert.That(actual.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
             Assert.That(actual, Is.TypeOf(typeof(Response<TypeDto>)));
             Assert.Null(actual.Data);
-            var inDatabase = _Types.FirstOrDefault(e => e.Id == id);
+            var inDatabase = _types.FirstOrDefault(e => e.Id == id);
             Assert.That(inDatabase, Is.EqualTo(expected));
         }
         [TestCase(10)]
@@ -93,14 +93,14 @@ namespace Application.UnitTests.Types.Commands
                 string includeProperties)
                 =>
                 {
-                    return _Types.AsQueryable().FirstOrDefault(expression);
+                    return _types.AsQueryable().FirstOrDefault(expression);
                 });
             mockTypeRepository.Setup(m => m.UpdateAsync(It.IsAny<Core.Entities.Type>()))
                 .ReturnsAsync(
                 (Core.Entities.Type updatedEntity)
                 =>
                 {
-                    var inDatabase = _Types.FirstOrDefault(e => e.Id == updatedEntity.Id);
+                    var inDatabase = _types.FirstOrDefault(e => e.Id == updatedEntity.Id);
                     inDatabase.Name = updatedEntity.Name;
                     return inDatabase;
                 });

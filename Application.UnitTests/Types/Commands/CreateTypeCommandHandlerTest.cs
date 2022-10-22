@@ -13,7 +13,7 @@ namespace Application.UnitTests.Types.Commands
     [TestFixture]
     public class CreateTypeCommandHandlerTest
     {
-        private List<Core.Entities.Type> _Types;
+        private List<Core.Entities.Type> _types;
         private ITypeRepository _TypeRepository;
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
@@ -21,7 +21,7 @@ namespace Application.UnitTests.Types.Commands
         [SetUp]
         public void ReInitializeTest()
         {
-            _Types = DataSource.Types;
+            _types = DataSource.Types;
             _TypeRepository = SetUpTypeRepository();
             var unitOfWork = new Mock<IUnitOfWork>();
             unitOfWork.SetupGet(x => x.TypeRepository).Returns(_TypeRepository);
@@ -34,7 +34,7 @@ namespace Application.UnitTests.Types.Commands
         {
             _TypeRepository = null;
             _unitOfWork = null;
-            _Types = null;
+            _types = null;
         }
 
         #region Unit Tests
@@ -47,18 +47,18 @@ namespace Application.UnitTests.Types.Commands
                 Name = name
             };
             var handler = new CreateTypeCommandHandler(_unitOfWork, _mapper);
-            var expected = new Response<TypeDto>(new TypeDto { Id = _Types.Max(e => e.Id) + 1, Name = name })
+            var expected = new Response<TypeDto>(new TypeDto { Id = _types.Max(e => e.Id) + 1, Name = name })
             {
                 StatusCode = HttpStatusCode.Created
             };
-            var count = _Types.Count + 1;
+            var count = _types.Count + 1;
             //Act
             var actual = await handler.Handle(request, CancellationToken.None);
 
             //Assert
             Assert.That(actual.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-            Assert.That(_Types.Count, Is.EqualTo(count));
-            var inDatabase = _Types.FirstOrDefault(e => e.Name.Equals(name));
+            Assert.That(_types.Count, Is.EqualTo(count));
+            var inDatabase = _types.FirstOrDefault(e => e.Name.Equals(name));
             Assert.NotNull(inDatabase);
             Assert.That(actual.Data, Is.EqualTo(expected.Data));
         }
@@ -73,8 +73,8 @@ namespace Application.UnitTests.Types.Commands
                 (Core.Entities.Type Type)
                 =>
                 {
-                    Type.Id = _Types.Max(e => e.Id) + 1;
-                    _Types.Add(Type);
+                    Type.Id = _types.Max(e => e.Id) + 1;
+                    _types.Add(Type);
                     return Type;
                 });
             return mockTypeRepository.Object;

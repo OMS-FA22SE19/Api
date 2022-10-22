@@ -16,7 +16,7 @@ namespace Application.UnitTests.Types.Queries
     [TestFixture]
     public class GetTypeWithPaginationQueryHandlerTest
     {
-        private List<Core.Entities.Type> _courseTypes;
+        private List<Core.Entities.Type> _types;
         private ITypeRepository _courseTypeRepository;
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
@@ -24,7 +24,7 @@ namespace Application.UnitTests.Types.Queries
         [OneTimeSetUp]
         public void SetUp()
         {
-            _courseTypes = DataSource.Types;
+            _types = DataSource.Types;
         }
 
         [SetUp]
@@ -47,7 +47,7 @@ namespace Application.UnitTests.Types.Queries
         [OneTimeTearDown]
         public void DisposeAllObjects()
         {
-            _courseTypes = null;
+            _types = null;
         }
 
         #region Unit Tests
@@ -79,7 +79,7 @@ namespace Application.UnitTests.Types.Queries
                 IsDescending = IsDescending
             };
             var handler = new GetTypeWithPaginationQueryHandler(_unitOfWork, _mapper);
-            var conditionedList = _courseTypes;
+            var conditionedList = _types;
             if (!string.IsNullOrWhiteSpace(searchValue))
             {
                 conditionedList = conditionedList.Where(e => e.Name.Contains(request.SearchValue) || request.SearchValue.Contains(e.Id.ToString())).ToList();
@@ -117,7 +117,7 @@ namespace Application.UnitTests.Types.Queries
                 });
             }
 
-            var expected = new Response<PaginatedList<TypeDto>>(new PaginatedList<TypeDto>(expectedList, _courseTypes.Count, pageIndex, pageSize));
+            var expected = new Response<PaginatedList<TypeDto>>(new PaginatedList<TypeDto>(expectedList, _types.Count, pageIndex, pageSize));
             //Act
             var actual = await handler.Handle(request, CancellationToken.None);
 
@@ -148,7 +148,7 @@ namespace Application.UnitTests.Types.Queries
                     int pageSize)
                 =>
                 {
-                    var query = _courseTypes.AsQueryable();
+                    var query = _types.AsQueryable();
 
                     if (filters is not null)
                     {

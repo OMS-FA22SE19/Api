@@ -130,5 +130,34 @@ namespace Application.UnitTests
                     Name = "Starchy food"
                 }
         };
+
+        public static List<Menu> Menus
+            => new List<Menu>()
+        {
+                new Menu()
+                {
+                    Id = 1,
+                    Name = "Main Menu",
+                    Description = "This is the main menu of the restaurant",
+                    IsHidden = false,
+                    IsDeleted = false
+                },
+                new Menu()
+                {
+                    Id = 2,
+                    Name = "Hidden Menu",
+                    Description = "This is the hidden menu of the restaurant",
+                    IsHidden = true,
+                    IsDeleted = false
+                },
+                new Menu()
+                {
+                    Id = 1,
+                    Name = "Deleted Menu",
+                    Description = "This is the deleted menu of the restaurant",
+                    IsHidden = false,
+                    IsDeleted = true
+                }
+        };
     }
 }
