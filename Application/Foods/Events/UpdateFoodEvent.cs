@@ -3,7 +3,7 @@ using Domain.Common;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Application.CourseTypes.Events
+namespace Application.Foods.Events
 {
     public sealed class UpdateFoodEvent : BaseEvent
     {

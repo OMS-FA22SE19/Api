@@ -1,4 +1,5 @@
 ﻿using Application.Common.Mappings;
+using Application.Menus.Events;
 using Application.Menus.Response;
 using Application.Models;
 using AutoMapper;
@@ -39,6 +40,10 @@ namespace Application.Menus.Commands
         {
             var entity = _mapper.Map<Menu>(request);
             var result = await _unitOfWork.MenuRepository.InsertAsync(entity);
+            entity.AddDomainEvent(new CreateMenuEvent
+            {
+                Name = request.Name
+            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {

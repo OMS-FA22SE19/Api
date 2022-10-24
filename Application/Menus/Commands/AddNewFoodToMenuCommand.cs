@@ -1,6 +1,8 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Mappings;
+using Application.Foods.Events;
+using Application.Menus.Events;
 using Application.Menus.Response;
 using Application.Models;
 using AutoMapper;
@@ -9,6 +11,7 @@ using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
+using System.Xml.Linq;
 
 namespace Application.Menus.Commands
 {
@@ -103,6 +106,16 @@ namespace Application.Menus.Commands
                 Price = request.Price
             });
 
+            await _unitOfWork.MenuRepository.UpdateAsync(menu);
+            food.AddDomainEvent(new CreateFoodEvent()
+            {
+                Name = request.Name
+            });
+            menu.AddDomainEvent(new AddExistingFoodToMenuEvent
+            {
+                foodName = food.Name,
+                menuName = menu.Name
+            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             return new Response<MenuDto>()
             {

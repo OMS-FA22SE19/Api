@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Menus.Events;
 using Application.Menus.Response;
 using Application.Models;
 using AutoMapper;
@@ -40,6 +41,8 @@ namespace Application.Menus.Commands
                 throw new NotFoundException(nameof(Menu), request.Id);
             }
 
+            var menuMapped = _mapper.Map<Menu>(menuInDatabase);
+
             var foodInDatabase = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.FoodId && !e.IsDeleted);
             if (foodInDatabase is null)
             {
@@ -57,6 +60,14 @@ namespace Application.Menus.Commands
                 FoodId = request.FoodId,
                 MenuId = request.Id,
                 Price = request.Price
+            });
+
+            await _unitOfWork.MenuRepository.UpdateAsync(menuInDatabase);
+
+            menuInDatabase.AddDomainEvent(new AddExistingFoodToMenuEvent
+            {
+                foodName = foodInDatabase.Name,
+                menuName = menuInDatabase.Name
             });
 
             await _unitOfWork.CompleteAsync(cancellationToken);
