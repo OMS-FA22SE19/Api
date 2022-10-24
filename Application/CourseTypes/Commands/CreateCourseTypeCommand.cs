@@ -1,4 +1,5 @@
 ﻿using Application.Common.Mappings;
+using Application.CourseTypes.Events;
 using Application.CourseTypes.Response;
 using Application.Models;
 using AutoMapper;
@@ -36,6 +37,10 @@ namespace Application.CourseTypes.Commands
         {
             var entity = _mapper.Map<CourseType>(request);
             var result = await _unitOfWork.CourseTypeRepository.InsertAsync(entity);
+            entity.AddDomainEvent(new CourseTypeAddEvent()
+            {
+                CourseType = entity
+            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
