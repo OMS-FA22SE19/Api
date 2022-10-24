@@ -1,6 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Mappings;
+using Application.CourseTypes.Events;
 using Application.Foods.Response;
 using Application.Models;
 using AutoMapper;
@@ -100,6 +101,7 @@ namespace Application.Foods.Commands
                 entity.PictureUrl = pictureUrl;
             }
             var result = await _unitOfWork.FoodRepository.UpdateAsync(entity);
+            entity.AddDomainEvent(new UpdateFoodEvent() { Id = request.Id });
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {

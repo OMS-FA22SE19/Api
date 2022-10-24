@@ -1,6 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Mappings;
+using Application.CourseTypes.Events;
 using Application.Foods.Response;
 using Application.Models;
 using AutoMapper;
@@ -84,6 +85,10 @@ namespace Application.Foods.Commands
             var pictureUrl = await _uploadService.UploadAsync(request.Picture, "Foods");
             entity.PictureUrl = pictureUrl;
             var result = await _unitOfWork.FoodRepository.InsertAsync(entity);
+            entity.AddDomainEvent(new CreateFoodEvent()
+            {
+                Name = request.Name
+            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
