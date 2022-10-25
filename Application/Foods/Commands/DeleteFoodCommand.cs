@@ -1,5 +1,4 @@
-﻿using Application.Foods.Events;
-using Application.Foods.Response;
+﻿using Application.Foods.Response;
 using Application.Models;
 using AutoMapper;
 using Core.Interfaces;

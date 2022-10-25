@@ -1,5 +1,4 @@
 ﻿using Application.Common.Exceptions;
-using Application.Menus.Events;
 using Application.Menus.Response;
 using Application.Models;
 using AutoMapper;

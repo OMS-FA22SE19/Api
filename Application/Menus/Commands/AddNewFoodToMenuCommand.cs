@@ -1,8 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Mappings;
-using Application.Foods.Events;
-using Application.Menus.Events;
 using Application.Menus.Response;
 using Application.Models;
 using AutoMapper;

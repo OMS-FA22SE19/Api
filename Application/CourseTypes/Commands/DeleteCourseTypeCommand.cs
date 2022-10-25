@@ -1,5 +1,4 @@
 ﻿using Application.Common.Exceptions;
-using Application.CourseTypes.Events;
 using Application.CourseTypes.Response;
 using Application.Models;
 using AutoMapper;
