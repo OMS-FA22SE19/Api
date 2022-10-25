@@ -17,7 +17,7 @@ namespace Application.VNPay.Commands
         [Required]
         public int Amount { get; init; }
         [Required]
-        public string OrderId { get; init; }
+        public int ReservationId { get; init; }
     }
 
     public sealed class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand, Response<PaymentUrlDto>>
@@ -34,26 +34,25 @@ namespace Application.VNPay.Commands
 
         public async Task<Response<PaymentUrlDto>> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.OrderId, $"{nameof(Order.OrderDetails)},{nameof(Order.User)}");
-            if (entity is null)
+            var reservation = await _unitOfWork.ReservationRepository.GetAsync(r => r.Id == request.ReservationId);
+            if (reservation is null)
             {
-                throw new NotFoundException(nameof(Order), request.OrderId);
+                return new Response<PaymentUrlDto>($"Reservation {request.ReservationId} cannot be found!");
             }
 
-            if (entity.OrderDetails.Any(e => e.Status != OrderDetailStatus.Served))
+            var order = await _unitOfWork.OrderRepository.GetAsync(e => e.ReservationId == request.ReservationId, $"{nameof(Order.OrderDetails)},{nameof(Order.User)}");
+            if (order is not null)
             {
-                return new Response<PaymentUrlDto>($"Order {entity.Id} cannot be confirmed. Make sure all dishes have been served!");
-            }
-
-            if (entity.Status == OrderStatus.Paid)
-            {
-                return new Response<PaymentUrlDto>($"Order {entity.Id} cannot be Paid again!");
+                if (order.Status == OrderStatus.Paid)
+                {
+                    return new Response<PaymentUrlDto>($"Order of Reservation {order.ReservationId} cannot be Paid again!");
+                }
             }
 
             Payment payment = new Payment
             {
                 Id = DateTime.Now.ToString("yyyyMMddHHmmss"),
-                OrderId = request.OrderId.ToString(),
+                ReservationId = request.ReservationId,
                 Status = PaymentStatus.Processing,
                 Amount = request.Amount
             };
@@ -63,6 +62,7 @@ namespace Application.VNPay.Commands
             {
                 return new Response<PaymentUrlDto>("error");
             }
+
 
             //Get Config Info
             string vnp_Returnurl = _config.GetSection("vnpay")["vnp_Returnurl"]; //URL nhan ket qua tra ve 
@@ -89,10 +89,17 @@ namespace Application.VNPay.Commands
 
 
             vnpay.AddRequestData("vnp_Locale", "vn");
-            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang: " + request.OrderId.ToString());
+            if (order is null)
+            {
+                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan cho reservation: " + request.ReservationId.ToString());
+            }
+            else
+            {
+                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang: " + order.Id.ToString());
+            }
             //vnpay.AddRequestData("vnp_OrderType", orderCategory.SelectedItem.Value); //default value: other
             vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-            vnpay.AddRequestData("vnp_TxnRef", payment.Id.ToString());//order.OrderId.ToString());
+            vnpay.AddRequestData("vnp_TxnRef", DateTime.Now.ToString("yyyyMMddHHmmss").ToString());//order.OrderId.ToString());
             //Add Params of 2.1.0 Version
             vnpay.AddRequestData("vnp_ExpireDate", DateTime.Now.AddMinutes(5).ToString("yyyyMMddHHmmss"));
 

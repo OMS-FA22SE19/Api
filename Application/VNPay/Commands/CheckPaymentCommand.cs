@@ -48,7 +48,7 @@ namespace Application.VNPay.Commands
                     throw new NotFoundException(nameof(Order), paymentId);
                 }
                 entity.Status = PaymentStatus.Paid;
-
+                var order = await _unitOfWork.OrderRepository.GetAsync(o => o.ReservationId == entity.ReservationId);
                 var result = await _unitOfWork.PaymentRepository.UpdateAsync(entity);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 if (result is null)
@@ -56,24 +56,20 @@ namespace Application.VNPay.Commands
                     return new Response<PaymentDto>("error");
                 }
                 var mappedResult = _mapper.Map<PaymentDto>(result);
+                if (order is not null)
+                {
+                    mappedResult.OrderId = order.Id;
+                }
                 return new Response<PaymentDto>(mappedResult);
             }
             else
             {
-                var entity = await _unitOfWork.PaymentRepository.GetAsync(e => e.Id == paymentId);
-                if (entity is null)
-                {
-                    throw new NotFoundException(nameof(Order), paymentId);
-                }
-                entity.Status = PaymentStatus.Failed;
-
-                var result = await _unitOfWork.PaymentRepository.UpdateAsync(entity);
+                var result = await _unitOfWork.PaymentRepository.DeleteAsync(p => p.Id == paymentId);
                 await _unitOfWork.CompleteAsync(cancellationToken);
-                if (result is null)
+                if (!result)
                 {
                     return new Response<PaymentDto>("error");
                 }
-                var mappedResult = _mapper.Map<PaymentDto>(result);
                 return new Response<PaymentDto>("Transaction failed")
                 {
                     Succeeded = false

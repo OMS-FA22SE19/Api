@@ -22,5 +22,6 @@ namespace Core.Entities
         public ApplicationUser User { get; set; }
 
         public IList<ReservationTable> ReservationTables { get; set; }
+        public IList<Payment> Payments { get; set; }
     }
 }

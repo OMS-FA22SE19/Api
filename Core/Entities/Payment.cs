@@ -9,9 +9,9 @@ namespace Core.Entities
         [Key]
         public new string Id { get; set; }
         [Required]
-        public string OrderId { get; set; }
+        public int ReservationId { get; set; }
         public PaymentStatus Status { get; set; }
         public double Amount { get; set; }
-        public Order Order { get; set; }
+        public Reservation reservation { get; set; }
     }
 }

@@ -4,6 +4,7 @@ using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20221025033714_Change_payment_table")]
+    partial class Change_payment_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -383,7 +385,8 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ReservationId");
+                    b.HasIndex("ReservationId")
+                        .IsUnique();
 
                     b.ToTable("Payments", (string)null);
                 });
@@ -950,9 +953,9 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Entities.Payment", b =>
                 {
                     b.HasOne("Core.Entities.Reservation", "reservation")
-                        .WithMany("Payments")
-                        .HasForeignKey("ReservationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .WithOne("payment")
+                        .HasForeignKey("Core.Entities.Payment", "ReservationId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("reservation");
@@ -1086,9 +1089,10 @@ namespace Infrastructure.Migrations
                     b.Navigation("Order")
                         .IsRequired();
 
-                    b.Navigation("Payments");
-
                     b.Navigation("ReservationTables");
+
+                    b.Navigation("payment")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Core.Entities.Table", b =>

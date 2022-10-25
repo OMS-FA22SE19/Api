@@ -58,11 +58,11 @@ namespace Api.Controllers.V1
         /// <returns>Payment.</returns>
         /// <remarks>
         /// </remarks>
-        [HttpPost("Check")]
+        [HttpGet("Check")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response<OrderDto>>> GetPaymentResponse(CheckPaymentCommand query)
+        public async Task<ActionResult<Response<OrderDto>>> GetPaymentResponse([FromQuery] CheckPaymentCommand query)
         {
             try
             {
@@ -74,14 +74,18 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(query);
                 if (result.Succeeded)
                 {
-                    ConfirmPaymentOrderCommand confirmQuery = new ConfirmPaymentOrderCommand()
+                    if (result.Data.OrderId is not null)
                     {
-                        Id = result.Data.OrderId
-                    };
-                    var billResult = await Mediator.Send(confirmQuery);
-                    return StatusCode((int)billResult.StatusCode, billResult);
+                        ConfirmPaymentOrderCommand confirmQuery = new ConfirmPaymentOrderCommand()
+                        {
+                            Id = result.Data.OrderId
+                        };
+                        var billResult = await Mediator.Send(confirmQuery);
+                        return StatusCode((int)billResult.StatusCode, billResult);
+                    }
+                    return StatusCode((int)result.StatusCode, result);
                 }
-                else return StatusCode((int)result.StatusCode, result);
+                return StatusCode((int)result.StatusCode, result);
             }
             catch (Exception ex)
             {

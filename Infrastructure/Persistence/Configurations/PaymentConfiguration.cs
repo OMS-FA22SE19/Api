@@ -11,9 +11,9 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property<string>("Id")
                 .HasColumnType("nvarchar(450)");
 
-            builder.Property<string>("OrderId")
+            builder.Property("ReservationId")
                 .IsRequired()
-                .HasColumnType("nvarchar(450)");
+                .HasColumnType("int");
 
             builder.Property(e => e.Status)
                 .HasColumnType("int");
@@ -21,13 +21,13 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property<double>("Amount")
                 .HasColumnType("float");
 
-            builder.HasOne(e => e.Order)
+            builder.HasOne(e => e.reservation)
                 .WithMany(e => e.Payments)
-                .HasForeignKey(e => e.OrderId);
+                .HasForeignKey(e => e.ReservationId);
 
             builder.HasKey(e => e.Id);
 
-            builder.HasIndex("OrderId");
+            builder.HasIndex("ReservationId");
 
             builder.ToTable("Payments");
         }
