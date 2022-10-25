@@ -17,11 +17,13 @@ namespace Application.Foods.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public DeleteFoodCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public DeleteFoodCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _mediator = mediator;
         }
 
         public async Task<Response<FoodDto>> Handle(DeleteFoodCommand request, CancellationToken cancellationToken)

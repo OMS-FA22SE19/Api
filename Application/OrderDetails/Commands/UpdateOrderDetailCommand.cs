@@ -1,6 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Mappings;
 using Application.Models;
+using Application.OrderDetails.Events;
 using Application.OrderDetails.Response;
 using AutoMapper;
 using Core.Entities;
@@ -76,6 +77,11 @@ namespace Application.OrderDetails.Commands
             MapToEntity(request, entity);
 
             var result = await _unitOfWork.OrderDetailRepository.UpdateAsync(entity);
+            entity.AddDomainEvent(new UpdateOrderDetailEvent
+            {
+                Id = request.Id,
+                Status = request.Status
+            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {

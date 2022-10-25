@@ -1,6 +1,8 @@
-﻿using Application.CourseTypes.Response;
+﻿using Application.Common.Exceptions;
+using Application.CourseTypes.Response;
 using Application.Models;
 using AutoMapper;
+using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
@@ -17,11 +19,13 @@ namespace Application.CourseTypes.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public DeleteCourseTypeCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public DeleteCourseTypeCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IMediator mediator)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _mediator = mediator;
         }
 
         public async Task<Response<CourseTypeDto>> Handle(DeleteCourseTypeCommand request, CancellationToken cancellationToken)

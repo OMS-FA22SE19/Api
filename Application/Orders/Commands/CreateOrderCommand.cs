@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Models;
 using Application.OrderDetails.Response;
+using Application.Orders.Events;
 using Application.Orders.Response;
 using AutoMapper;
 using Core.Entities;
@@ -92,6 +93,10 @@ namespace Application.Orders.Commands
                 }
             }
             var result = await _unitOfWork.OrderRepository.InsertAsync(entity);
+            entity.AddDomainEvent(new CreateOrderEvent
+            {
+                id = entity.Id
+            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
