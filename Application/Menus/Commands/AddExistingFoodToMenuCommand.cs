@@ -64,12 +64,6 @@ namespace Application.Menus.Commands
 
             await _unitOfWork.MenuRepository.UpdateAsync(menuInDatabase);
 
-            menuInDatabase.AddDomainEvent(new AddExistingFoodToMenuEvent
-            {
-                foodName = foodInDatabase.Name,
-                menuName = menuInDatabase.Name
-            });
-
             await _unitOfWork.CompleteAsync(cancellationToken);
             return new Response<MenuDto>()
             {

@@ -37,10 +37,6 @@ namespace Application.CourseTypes.Commands
         {
             var entity = _mapper.Map<CourseType>(request);
             var result = await _unitOfWork.CourseTypeRepository.InsertAsync(entity);
-            entity.AddDomainEvent(new CourseTypeAddEvent()
-            {
-                CourseType = entity
-            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {

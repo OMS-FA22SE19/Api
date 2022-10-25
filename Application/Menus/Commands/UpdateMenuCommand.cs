@@ -50,10 +50,6 @@ namespace Application.Menus.Commands
             MapToEntity(request, entity);
 
             var result = await _unitOfWork.MenuRepository.UpdateAsync(entity);
-            entity.AddDomainEvent(new UpdateMenuEvent
-            {
-                Id = request.Id,
-            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {

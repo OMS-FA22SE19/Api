@@ -107,15 +107,6 @@ namespace Application.Menus.Commands
             });
 
             await _unitOfWork.MenuRepository.UpdateAsync(menu);
-            food.AddDomainEvent(new CreateFoodEvent()
-            {
-                Name = request.Name
-            });
-            menu.AddDomainEvent(new AddExistingFoodToMenuEvent
-            {
-                foodName = food.Name,
-                menuName = menu.Name
-            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             return new Response<MenuDto>()
             {

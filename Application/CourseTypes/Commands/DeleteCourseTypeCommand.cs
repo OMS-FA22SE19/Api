@@ -32,10 +32,6 @@ namespace Application.CourseTypes.Commands
         public async Task<Response<CourseTypeDto>> Handle(DeleteCourseTypeCommand request, CancellationToken cancellationToken)
         {
             var result = await _unitOfWork.CourseTypeRepository.DeleteAsync(e => e.Id == request.Id);
-            await _mediator.Publish(new CourseTypeDeleteEvent()
-            {
-                id = request.Id,
-            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             return new Response<CourseTypeDto>()
             {

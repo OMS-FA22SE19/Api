@@ -47,10 +47,6 @@ namespace Application.CourseTypes.Commands
             MapToEntity(request, entity);
 
             var result = await _unitOfWork.CourseTypeRepository.UpdateAsync(entity);
-            entity.AddDomainEvent(new CourseTypeUpdateEvent()
-            {
-                CourseType = entity
-            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {

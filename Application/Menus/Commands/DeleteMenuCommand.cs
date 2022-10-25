@@ -30,10 +30,6 @@ namespace Application.Menus.Commands
         public async Task<Response<MenuDto>> Handle(DeleteMenuCommand request, CancellationToken cancellationToken)
         {
             var result = await _unitOfWork.MenuRepository.DeleteAsync(e => e.Id == request.Id);
-            await _mediator.Publish(new DeleteFoodEvent()
-            {
-                id = request.Id
-            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             return new Response<MenuDto>()
             {

@@ -101,7 +101,6 @@ namespace Application.Foods.Commands
                 entity.PictureUrl = pictureUrl;
             }
             var result = await _unitOfWork.FoodRepository.UpdateAsync(entity);
-            entity.AddDomainEvent(new UpdateFoodEvent() { Id = request.Id });
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
