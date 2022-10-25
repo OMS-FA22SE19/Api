@@ -3,8 +3,10 @@ using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Models;
 using Application.OrderDetails.Response;
+using Application.Orders.Events;
 using Application.Orders.Response;
 using AutoMapper;
+using Core.Common;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
@@ -73,6 +75,10 @@ namespace Application.Orders.Commands
                 }
             }
             var result = await _unitOfWork.OrderRepository.UpdateAsync(order);
+            order.AddDomainEvent(new AddNewDishesToOrderEvent
+            {
+                id = order.Id
+            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
