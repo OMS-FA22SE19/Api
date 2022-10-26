@@ -36,7 +36,7 @@ namespace Application.TableTypes.Queries
             }
             var filters = new List<Expression<Func<Table, bool>>>();
             filters.Add(e => e.TableTypeId == request.Id && !e.IsDeleted);
-            var tablesInType = await _unitOfWork.TableRepository.GetAllAsync(filters);
+            var tablesInType = await _unitOfWork.TableRepository.GetAllAsync(filters, null, null);
             var mappedResult = _mapper.Map<TableTypeDto>(result);
             mappedResult.Quantity = tablesInType.Count;
             return new Response<TableTypeDto>(mappedResult);
