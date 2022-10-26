@@ -6,6 +6,7 @@ using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 
 namespace Application.TableTypes.Queries
 {
@@ -33,7 +34,11 @@ namespace Application.TableTypes.Queries
             {
                 throw new NotFoundException(nameof(TableType), request.Id);
             }
+            var filters = new List<Expression<Func<Table, bool>>>();
+            filters.Add(e => e.TableTypeId == request.Id && !e.IsDeleted);
+            var tablesInType = await _unitOfWork.TableRepository.GetAllAsync(filters);
             var mappedResult = _mapper.Map<TableTypeDto>(result);
+            mappedResult.Quantity = tablesInType.Count;
             return new Response<TableTypeDto>(mappedResult);
         }
     }

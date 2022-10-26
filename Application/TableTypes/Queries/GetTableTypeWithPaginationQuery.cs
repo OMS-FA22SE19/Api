@@ -70,7 +70,15 @@ namespace Application.TableTypes.Queries
             }
 
             var result = await _unitOfWork.TableTypeRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, request.PageIndex, request.PageSize);
+
             var mappedResult = _mapper.Map<PaginatedList<TableType>, PaginatedList<TableTypeDto>>(result);
+            foreach (var item in mappedResult)
+            {
+                var tableFilters = new List<Expression<Func<Table, bool>>>();
+                tableFilters.Add(e => e.TableTypeId == item.Id && !e.IsDeleted);
+                var tablesInType = await _unitOfWork.TableRepository.GetAllAsync(tableFilters);
+                item.Quantity = tablesInType.Count;
+            }
             return new Response<PaginatedList<TableTypeDto>>(mappedResult);
         }
     }
