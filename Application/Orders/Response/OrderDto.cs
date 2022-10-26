@@ -10,11 +10,13 @@ namespace Application.Orders.Response
     {
         public string Id { get; set; }
         public string UserId { get; set; }
+        public int TableId { get; set; }
         public string FullName { get; set; }
         public string PhoneNumber { get; set; }
         public string Date { get; set; }
         public OrderStatus Status { get; set; }
         public double PrePaid { get; set; } = 0;
+        public double Amount { get; set; }
         public double Total { get; set; }
 
         public IList<OrderDetailDto> OrderDetails { get; set; }

@@ -105,6 +105,9 @@ namespace Application.Orders.Queries
                     PrePaid = order.PrePaid
                 };
 
+                var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => order.ReservationId == e.Id, $"{nameof(Reservation.ReservationTables)}");
+                orderDto.TableId = reservation.ReservationTables[0].TableId;
+
                 foreach (var detail in order.OrderDetails)
                 {
                     var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted);
@@ -114,7 +117,7 @@ namespace Application.Orders.Queries
                         {
                             OrderId = order.Id,
                             UserId = order.UserId,
-                            Date = order.Date.ToString("dd/MM/yyyy HH:mm:ss"),
+                            Date = order.Date,
                             FoodId = detail.FoodId,
                             FoodName = detail.Food.Name,
                             Status = OrderDetailStatus.Served,
@@ -131,6 +134,7 @@ namespace Application.Orders.Queries
                     total += detail.Price;
                 }
 
+                orderDto.Amount = total;
                 total -= order.PrePaid;
                 orderDto.Total = total;
                 orderDto.OrderDetails = orderDetails;
