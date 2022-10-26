@@ -3,7 +3,6 @@ using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Response;
 using AutoMapper;
-using Core.Common;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
@@ -34,7 +33,7 @@ namespace Application.Orders.Queries
         {
             List<Expression<Func<Order, bool>>> filters = new();
             Func<IQueryable<Order>, IOrderedQueryable<Order>> orderBy = null;
-            
+
             filters.Add(o => o.Status.Equals(OrderStatus.Processing));
             orderBy = o => o.OrderBy(or => or.Date);
 
@@ -45,7 +44,7 @@ namespace Application.Orders.Queries
             }
 
             Order? tableOrder = null;
-            foreach(var order in result.ToList())
+            foreach (var order in result.ToList())
             {
                 var reservation = await _unitOfWork.ReservationRepository.GetAsync(r => r.Id == order.ReservationId, $"{nameof(Reservation.ReservationTables)}");
                 if (reservation.ReservationTables.Any(rt => rt.TableId == request.TableId))
@@ -75,7 +74,7 @@ namespace Application.Orders.Queries
                     {
                         OrderId = tableOrder.Id,
                         UserId = tableOrder.UserId,
-                        Date = tableOrder.Date.ToString("dd/MM/yyyy HH:mm:ss"),
+                        Date = tableOrder.Date,
                         FoodId = detail.FoodId,
                         FoodName = detail.Food.Name,
                         Status = OrderDetailStatus.Served,

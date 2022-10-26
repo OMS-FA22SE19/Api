@@ -52,7 +52,7 @@ namespace Application.Orders.Queries
                     {
                         OrderId = result.Id,
                         UserId = result.UserId,
-                        Date = result.Date.ToString("dd/MM/yyyy HH:mm:ss"),
+                        Date = result.Date,
                         FoodId = detail.FoodId,
                         FoodName = detail.Food.Name,
                         Status = OrderDetailStatus.Served,

@@ -33,7 +33,7 @@ namespace Application.OrderDetails.Queries
         {
             List<Expression<Func<OrderDetail, bool>>> filters = new();
             Func<IQueryable<OrderDetail>, IOrderedQueryable<OrderDetail>> orderBy = null;
-            string includeProperties = $"{nameof(OrderDetail.Order)},{nameof(OrderDetail.Food)}";
+            string includeProperties = $"{nameof(OrderDetail.Order)}.{nameof(Order.User)},{nameof(OrderDetail.Food)}";
 
             //filters.Add(e => e.Order.Date <= _dateTime.Now.AddHours(-3));
 
@@ -81,8 +81,15 @@ namespace Application.OrderDetails.Queries
                     break;
             }
 
+            var mappedResult = new PaginatedList<DishDto>();
             var result = await _unitOfWork.OrderDetailRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, request.PageIndex, request.PageSize);
-            var mappedResult = _mapper.Map<PaginatedList<OrderDetail>, PaginatedList<DishDto>>(result);
+            foreach (var orderDetail in result)
+            {
+                var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => orderDetail.Order.ReservationId == e.Id, $"{nameof(Reservation.ReservationTables)}");
+                var mappedEntity = _mapper.Map<DishDto>(orderDetail);
+                mappedEntity.TableId = reservation.ReservationTables[0].TableId;
+                mappedResult.Add(mappedEntity);
+            }
             return new Response<PaginatedList<DishDto>>(mappedResult);
         }
     }
