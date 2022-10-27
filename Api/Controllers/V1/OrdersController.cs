@@ -148,7 +148,7 @@ namespace Api.Controllers.V1
         ///
         ///     POST /Orders
         ///     {
-        ///        "tableId": "9",
+        ///        "reservationId": "9",
         ///        "orderDetails": {
         ///             "2": 3 (FoodId: quantity),
         ///             "8": 2

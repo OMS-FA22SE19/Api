@@ -1,6 +1,6 @@
-﻿using Application.TableTypes.Queries;
+﻿using Application.Models;
+using Application.TableTypes.Queries;
 using Application.TableTypes.Response;
-using Application.Models;
 using AutoMapper;
 using Core.Common;
 using Core.Entities;
@@ -17,7 +17,9 @@ namespace Application.UnitTests.TableTypes.Queries
     public class GetTableTypeWithPaginationQueryHandlerTest
     {
         private List<TableType> _tableTypes;
+        private List<Table> _tables;
         private ITableTypeRepository _tableTypeRepository;
+        private ITableRepository _tableRepository;
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
 
@@ -25,14 +27,17 @@ namespace Application.UnitTests.TableTypes.Queries
         public void SetUp()
         {
             _tableTypes = DataSource.TableTypes;
+            _tables = DataSource.Tables;
         }
 
         [SetUp]
         public void ReInitializeTest()
         {
             _tableTypeRepository = SetUpTableTypeRepository();
+            _tableRepository = SetUpTableRepository();
             var unitOfWork = new Mock<IUnitOfWork>();
             unitOfWork.SetupGet(x => x.TableTypeRepository).Returns(_tableTypeRepository);
+            unitOfWork.SetupGet(x => x.TableRepository).Returns(_tableRepository);
             _unitOfWork = unitOfWork.Object;
             _mapper = SetUpMapper();
         }
@@ -177,6 +182,29 @@ namespace Application.UnitTests.TableTypes.Queries
                             : new PaginatedList<TableType>(query.ToList(), query.Count(), pageIndex, pageSize);
                 });
             return mockTableTypeRepository.Object;
+        }
+
+        private ITableRepository SetUpTableRepository()
+        {
+            var mockTableRepository = new Mock<ITableRepository>();
+            mockTableRepository.Setup(m => m.GetAllAsync(
+                It.IsAny<List<Expression<Func<Table, bool>>>>(),
+                It.IsAny<Func<IQueryable<Table>, IOrderedQueryable<Table>>>(),
+                It.IsAny<string>()))
+                .ReturnsAsync(
+                (List<Expression<Func<Table, bool>>> filters,
+                Func<IQueryable<Table>, IOrderedQueryable<Table>> orderBy,
+                string includeString)
+                =>
+                {
+                    var query = _tables.AsQueryable();
+                    foreach (var filter in filters)
+                    {
+                        query = query.Where(filter);
+                    }
+                    return query.ToList();
+                });
+            return mockTableRepository.Object;
         }
 
         private IMapper SetUpMapper()

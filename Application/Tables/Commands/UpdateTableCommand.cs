@@ -7,9 +7,7 @@ using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
-using Newtonsoft.Json.Converters;
 using System.ComponentModel.DataAnnotations;
-using System.Text.Json.Serialization;
 
 namespace Application.Tables.Commands
 {
@@ -19,8 +17,6 @@ namespace Application.Tables.Commands
         public int Id { get; set; }
         [Required]
         public int NumOfSeats { get; set; }
-        [EnumDataType(typeof(TableStatus))]
-        [JsonConverter(typeof(StringEnumConverter))]
         public TableStatus Status { get; set; }
         public int TableTypeId { get; set; }
 
