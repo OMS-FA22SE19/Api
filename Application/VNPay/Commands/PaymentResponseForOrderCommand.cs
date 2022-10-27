@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Application.VNPay.Commands
 {
-    public sealed class CheckPaymentCommand : IRequest<Response<PaymentDto>>
+    public sealed class PaymentResponseForOrderCommand : IRequest<Response<PaymentDto>>
     {
         public string Vnp_TxnRef { get; init; }
         public string Vnp_ResponseCode { get; init; }
@@ -19,19 +19,19 @@ namespace Application.VNPay.Commands
         public string Vnp_SecureHash { get; init; }
     }
 
-    public sealed class CheckPaymentCommandHandler : IRequestHandler<CheckPaymentCommand, Response<PaymentDto>>
+    public sealed class PaymentResponseForOrderCommandHandler : IRequestHandler<PaymentResponseForOrderCommand, Response<PaymentDto>>
     {
         private readonly IConfiguration _config;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public CheckPaymentCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
+        public PaymentResponseForOrderCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _config = configuration;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public async Task<Response<PaymentDto>> Handle(CheckPaymentCommand request, CancellationToken cancellationToken)
+        public async Task<Response<PaymentDto>> Handle(PaymentResponseForOrderCommand request, CancellationToken cancellationToken)
         {
             string paymentId = request.Vnp_TxnRef;
             string responseCode = request.Vnp_ResponseCode;
@@ -45,9 +45,10 @@ namespace Application.VNPay.Commands
                 var entity = await _unitOfWork.PaymentRepository.GetAsync(e => e.Id == paymentId);
                 if (entity is null)
                 {
-                    throw new NotFoundException(nameof(Order), paymentId);
+                    throw new NotFoundException(nameof(Payment), paymentId);
                 }
                 entity.Status = PaymentStatus.Paid;
+                var order = await _unitOfWork.OrderRepository.GetAsync(o => o.Id.Equals(entity.ObjectId));
 
                 var result = await _unitOfWork.PaymentRepository.UpdateAsync(entity);
                 await _unitOfWork.CompleteAsync(cancellationToken);
@@ -56,24 +57,17 @@ namespace Application.VNPay.Commands
                     return new Response<PaymentDto>("error");
                 }
                 var mappedResult = _mapper.Map<PaymentDto>(result);
+                mappedResult.OrderId = order.Id;
                 return new Response<PaymentDto>(mappedResult);
             }
             else
             {
-                var entity = await _unitOfWork.PaymentRepository.GetAsync(e => e.Id == paymentId);
-                if (entity is null)
-                {
-                    throw new NotFoundException(nameof(Order), paymentId);
-                }
-                entity.Status = PaymentStatus.Failed;
-
-                var result = await _unitOfWork.PaymentRepository.UpdateAsync(entity);
+                var result = await _unitOfWork.PaymentRepository.DeleteAsync(p => p.Id == paymentId);
                 await _unitOfWork.CompleteAsync(cancellationToken);
-                if (result is null)
+                if (!result)
                 {
                     return new Response<PaymentDto>("error");
                 }
-                var mappedResult = _mapper.Map<PaymentDto>(result);
                 return new Response<PaymentDto>("Transaction failed")
                 {
                     Succeeded = false
