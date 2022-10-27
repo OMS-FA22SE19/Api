@@ -4,7 +4,7 @@
 
 namespace Infrastructure.Migrations
 {
-    public partial class Change_payment_table : Migration
+    public partial class Fix_Payment_Database : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -16,51 +16,29 @@ namespace Infrastructure.Migrations
                 name: "IX_Payments_OrderId",
                 table: "Payments");
 
-            migrationBuilder.DropColumn(
+            migrationBuilder.RenameColumn(
                 name: "OrderId",
-                table: "Payments");
+                table: "Payments",
+                newName: "ObjectId");
 
             migrationBuilder.AddColumn<int>(
-                name: "ReservationId",
+                name: "ObjectType",
                 table: "Payments",
                 type: "int",
                 nullable: false,
                 defaultValue: 0);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Payments_ReservationId",
-                table: "Payments",
-                column: "ReservationId",
-                unique: true);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Payments_Reservations_ReservationId",
-                table: "Payments",
-                column: "ReservationId",
-                principalTable: "Reservations",
-                principalColumn: "Id");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Payments_Reservations_ReservationId",
-                table: "Payments");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Payments_ReservationId",
-                table: "Payments");
-
             migrationBuilder.DropColumn(
-                name: "ReservationId",
+                name: "ObjectType",
                 table: "Payments");
 
-            migrationBuilder.AddColumn<string>(
-                name: "OrderId",
+            migrationBuilder.RenameColumn(
+                name: "ObjectId",
                 table: "Payments",
-                type: "nvarchar(450)",
-                nullable: false,
-                defaultValue: "");
+                newName: "OrderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Payments_OrderId",

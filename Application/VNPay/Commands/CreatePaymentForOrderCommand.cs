@@ -49,8 +49,8 @@ namespace Application.VNPay.Commands
             Payment payment = new Payment
             {
                 Id = id,
-                OrderId = request.OrderId,
-                ReservationId = order.ReservationId,
+                ObjectId = request.OrderId,
+                ObjectType = ObjectType.Order,
                 Status = PaymentStatus.Processing,
                 Amount = request.Amount
             };

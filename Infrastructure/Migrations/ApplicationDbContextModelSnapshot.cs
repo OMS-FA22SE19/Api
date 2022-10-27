@@ -375,22 +375,17 @@ namespace Infrastructure.Migrations
                     b.Property<double>("Amount")
                         .HasColumnType("float");
 
-                    b.Property<string>("OrderId")
+                    b.Property<string>("ObjectId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("ReservationId")
+                    b.Property<int>("ObjectType")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OrderId")
-                        .IsUnique()
-                        .HasFilter("[OrderId] IS NOT NULL");
-
-                    b.HasIndex("ReservationId");
 
                     b.ToTable("Payments", (string)null);
                 });
@@ -954,24 +949,6 @@ namespace Infrastructure.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("Core.Entities.Payment", b =>
-                {
-                    b.HasOne("Core.Entities.Order", "order")
-                        .WithOne("Payment")
-                        .HasForeignKey("Core.Entities.Payment", "OrderId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Core.Entities.Reservation", "reservation")
-                        .WithMany("Payments")
-                        .HasForeignKey("ReservationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("order");
-
-                    b.Navigation("reservation");
-                });
-
             modelBuilder.Entity("Core.Entities.Reservation", b =>
                 {
                     b.HasOne("Core.Entities.ApplicationUser", "User")
@@ -1093,17 +1070,12 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Entities.Order", b =>
                 {
                     b.Navigation("OrderDetails");
-
-                    b.Navigation("Payment")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Core.Entities.Reservation", b =>
                 {
                     b.Navigation("Order")
                         .IsRequired();
-
-                    b.Navigation("Payments");
 
                     b.Navigation("ReservationTables");
                 });

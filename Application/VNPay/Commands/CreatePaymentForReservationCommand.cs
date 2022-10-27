@@ -45,7 +45,8 @@ namespace Application.VNPay.Commands
             Payment payment = new Payment
             {
                 Id = id,
-                ReservationId = request.ReservationId,
+                ObjectId = request.ReservationId.ToString(),
+                ObjectType = ObjectType.Reservation,
                 Status = PaymentStatus.Processing,
                 Amount = request.Amount
             };

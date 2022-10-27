@@ -11,11 +11,11 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property<string>("Id")
                 .HasColumnType("nvarchar(450)");
 
-            builder.Property("ReservationId")
-                .HasColumnType("int");
-
-            builder.Property<string>("OrderId")
+            builder.Property<string>("ObjectId")
                 .HasColumnType("nvarchar(450)");
+
+            builder.Property("ObjectType")
+                .HasColumnType("int");
 
             builder.Property(e => e.Status)
                 .HasColumnType("int");
@@ -23,20 +23,7 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property<double>("Amount")
                 .HasColumnType("float");
 
-            builder.HasOne(e => e.reservation)
-                .WithMany(e => e.Payments)
-                .HasForeignKey(e => e.ReservationId);
-
-            builder.HasOne(e => e.order)
-                .WithOne(e => e.Payment)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.NoAction);
-
             builder.HasKey(e => e.Id);
-
-            builder.HasIndex("ReservationId");
-
-            builder.HasIndex("OrderId");
 
             builder.ToTable("Payments");
         }

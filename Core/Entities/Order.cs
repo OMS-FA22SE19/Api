@@ -20,7 +20,6 @@ namespace Core.Entities
 
         public ApplicationUser User { get; set; }
         public Reservation Reservation { get; set; }
-        public Payment Payment { get; set; }
         public IList<OrderDetail> OrderDetails { get; set; }
     }
 }

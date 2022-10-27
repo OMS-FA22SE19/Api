@@ -19,12 +19,12 @@ namespace Application.VNPay.Commands
         public string Vnp_SecureHash { get; init; }
     }
 
-    public sealed class CheckPaymentForReservationCommandHandler : IRequestHandler<PaymentResponseForReservationCommand, Response<PaymentDto>>
+    public sealed class PaymentResponseForReservationCommandHandler : IRequestHandler<PaymentResponseForReservationCommand, Response<PaymentDto>>
     {
         private readonly IConfiguration _config;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public CheckPaymentForReservationCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
+        public PaymentResponseForReservationCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _config = configuration;
             _unitOfWork = unitOfWork;
@@ -49,7 +49,7 @@ namespace Application.VNPay.Commands
                 }
                 entity.Status = PaymentStatus.Paid;
 
-                var reservation = await _unitOfWork.ReservationRepository.GetAsync(r => r.Id == entity.ReservationId);
+                var reservation = await _unitOfWork.ReservationRepository.GetAsync(r => r.Id.ToString() == entity.ObjectId);
                 reservation.Status = ReservationStatus.Reserved;
                 await _unitOfWork.ReservationRepository.UpdateAsync(reservation);
 
@@ -60,6 +60,7 @@ namespace Application.VNPay.Commands
                     return new Response<PaymentDto>("error");
                 }
                 var mappedResult = _mapper.Map<PaymentDto>(result);
+                mappedResult.ReservationId = reservation.Id;
                 return new Response<PaymentDto>(mappedResult);
             }
             else
