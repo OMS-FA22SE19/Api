@@ -12,47 +12,45 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.VNPay.Commands
 {
-    public sealed class CreatePaymentCommand : IRequest<Response<PaymentUrlDto>>
+    public sealed class CreatePaymentForOrderCommand : IRequest<Response<PaymentUrlDto>>
     {
         [Required]
         public int Amount { get; init; }
         [Required]
-        public int ReservationId { get; init; }
+        public string OrderId { get; init; }
     }
 
-    public sealed class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand, Response<PaymentUrlDto>>
+    public sealed class CreatePaymentForOrderCommandHandler : IRequestHandler<CreatePaymentForOrderCommand, Response<PaymentUrlDto>>
     {
         private readonly IConfiguration _config;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public CreatePaymentCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
+        public CreatePaymentForOrderCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _config = configuration;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public async Task<Response<PaymentUrlDto>> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
+        public async Task<Response<PaymentUrlDto>> Handle(CreatePaymentForOrderCommand request, CancellationToken cancellationToken)
         {
-            var reservation = await _unitOfWork.ReservationRepository.GetAsync(r => r.Id == request.ReservationId);
-            if (reservation is null)
+            var order = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.OrderId, $"{nameof(Order.OrderDetails)},{nameof(Order.User)}");
+            if (order is null)
             {
-                return new Response<PaymentUrlDto>($"Reservation {request.ReservationId} cannot be found!");
+                throw new NotFoundException(nameof(Order), request.OrderId);
+            }
+            if (order.Status == OrderStatus.Paid)
+            {
+                return new Response<PaymentUrlDto>($"Order {request.OrderId} cannot be Paid again!");
             }
 
-            var order = await _unitOfWork.OrderRepository.GetAsync(e => e.ReservationId == request.ReservationId, $"{nameof(Order.OrderDetails)},{nameof(Order.User)}");
-            if (order is not null)
-            {
-                if (order.Status == OrderStatus.Paid)
-                {
-                    return new Response<PaymentUrlDto>($"Order of Reservation {order.ReservationId} cannot be Paid again!");
-                }
-            }
+            string id = DateTime.Now.ToString("yyyyMMddHHmmss");
 
             Payment payment = new Payment
             {
-                Id = DateTime.Now.ToString("yyyyMMddHHmmss"),
-                ReservationId = request.ReservationId,
+                Id = id,
+                OrderId = request.OrderId,
+                ReservationId = order.ReservationId,
                 Status = PaymentStatus.Processing,
                 Amount = request.Amount
             };
@@ -65,7 +63,7 @@ namespace Application.VNPay.Commands
 
 
             //Get Config Info
-            string vnp_Returnurl = _config.GetSection("vnpay")["vnp_Returnurl"]; //URL nhan ket qua tra ve 
+            string vnp_Returnurl = _config.GetSection("vnpay")["vnp_Returnurl"] + "/Order/Response"; //URL nhan ket qua tra ve
             string vnp_Url = _config.GetSection("vnpay")["vnp_Url"]; //URL thanh toan cua VNPAY 
             string vnp_TmnCode = _config.GetSection("vnpay")["vnp_TmnCode"]; //Ma website
             string vnp_HashSecret = _config.GetSection("vnpay")["vnp_HashSecret"]; //Chuoi bi mat
@@ -89,19 +87,13 @@ namespace Application.VNPay.Commands
 
 
             vnpay.AddRequestData("vnp_Locale", "vn");
-            if (order is null)
-            {
-                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan cho reservation: " + request.ReservationId.ToString());
-            }
-            else
-            {
-                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang: " + order.Id.ToString());
-            }
+            
+            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang: " + request.OrderId.ToString());
             //vnpay.AddRequestData("vnp_OrderType", orderCategory.SelectedItem.Value); //default value: other
             vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
-            vnpay.AddRequestData("vnp_TxnRef", DateTime.Now.ToString("yyyyMMddHHmmss").ToString());//order.OrderId.ToString());
+            vnpay.AddRequestData("vnp_TxnRef", id.ToString());//order.OrderId.ToString());
             //Add Params of 2.1.0 Version
-            vnpay.AddRequestData("vnp_ExpireDate", DateTime.Now.AddMinutes(5).ToString("yyyyMMddHHmmss"));
+            vnpay.AddRequestData("vnp_ExpireDate", DateTime.Now.AddMinutes(15).ToString("yyyyMMddHHmmss"));
 
             string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
             Console.WriteLine("VNPAY URL: {0}", paymentUrl);

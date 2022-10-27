@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Application.VNPay.Commands
 {
-    public sealed class CheckPaymentCommand : IRequest<Response<PaymentDto>>
+    public sealed class PaymentResponseForReservationCommand : IRequest<Response<PaymentDto>>
     {
         public string Vnp_TxnRef { get; init; }
         public string Vnp_ResponseCode { get; init; }
@@ -19,19 +19,19 @@ namespace Application.VNPay.Commands
         public string Vnp_SecureHash { get; init; }
     }
 
-    public sealed class CheckPaymentCommandHandler : IRequestHandler<CheckPaymentCommand, Response<PaymentDto>>
+    public sealed class CheckPaymentForReservationCommandHandler : IRequestHandler<PaymentResponseForReservationCommand, Response<PaymentDto>>
     {
         private readonly IConfiguration _config;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public CheckPaymentCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
+        public CheckPaymentForReservationCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _config = configuration;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public async Task<Response<PaymentDto>> Handle(CheckPaymentCommand request, CancellationToken cancellationToken)
+        public async Task<Response<PaymentDto>> Handle(PaymentResponseForReservationCommand request, CancellationToken cancellationToken)
         {
             string paymentId = request.Vnp_TxnRef;
             string responseCode = request.Vnp_ResponseCode;
@@ -48,7 +48,11 @@ namespace Application.VNPay.Commands
                     throw new NotFoundException(nameof(Order), paymentId);
                 }
                 entity.Status = PaymentStatus.Paid;
-                var order = await _unitOfWork.OrderRepository.GetAsync(o => o.ReservationId == entity.ReservationId);
+
+                var reservation = await _unitOfWork.ReservationRepository.GetAsync(r => r.Id == entity.ReservationId);
+                reservation.Status = ReservationStatus.Reserved;
+                await _unitOfWork.ReservationRepository.UpdateAsync(reservation);
+
                 var result = await _unitOfWork.PaymentRepository.UpdateAsync(entity);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 if (result is null)
@@ -56,10 +60,6 @@ namespace Application.VNPay.Commands
                     return new Response<PaymentDto>("error");
                 }
                 var mappedResult = _mapper.Map<PaymentDto>(result);
-                if (order is not null)
-                {
-                    mappedResult.OrderId = order.Id;
-                }
                 return new Response<PaymentDto>(mappedResult);
             }
             else

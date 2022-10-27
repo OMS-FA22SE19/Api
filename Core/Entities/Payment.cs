@@ -10,8 +10,10 @@ namespace Core.Entities
         public new string Id { get; set; }
         [Required]
         public int ReservationId { get; set; }
+        public string OrderId { get; set; }
         public PaymentStatus Status { get; set; }
         public double Amount { get; set; }
         public Reservation reservation { get; set; }
+        public Order order { get; set; }
     }
 }

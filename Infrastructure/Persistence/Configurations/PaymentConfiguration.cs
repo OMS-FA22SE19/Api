@@ -12,8 +12,10 @@ namespace Infrastructure.Persistence.Configurations
                 .HasColumnType("nvarchar(450)");
 
             builder.Property("ReservationId")
-                .IsRequired()
                 .HasColumnType("int");
+
+            builder.Property<string>("OrderId")
+                .HasColumnType("nvarchar(450)");
 
             builder.Property(e => e.Status)
                 .HasColumnType("int");
@@ -25,9 +27,16 @@ namespace Infrastructure.Persistence.Configurations
                 .WithMany(e => e.Payments)
                 .HasForeignKey(e => e.ReservationId);
 
+            builder.HasOne(e => e.order)
+                .WithOne(e => e.Payment)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.NoAction);
+
             builder.HasKey(e => e.Id);
 
             builder.HasIndex("ReservationId");
+
+            builder.HasIndex("OrderId");
 
             builder.ToTable("Payments");
         }
