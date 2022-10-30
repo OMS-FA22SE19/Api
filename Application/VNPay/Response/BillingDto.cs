@@ -3,7 +3,7 @@ using AutoMapper;
 
 namespace Application.Types.Response
 {
-    public sealed class PaymentDto : IMapFrom<Core.Entities.Payment>
+    public sealed class BillingDto : IMapFrom<Core.Entities.Billing>
     {
         public string Id { get; set; }
         public int ReservationId { get; set; }
@@ -13,7 +13,7 @@ namespace Application.Types.Response
 
         public void Mapping(Profile profile)
         {
-            profile.CreateMap<Core.Entities.Payment, PaymentDto>();
+            profile.CreateMap<Core.Entities.Billing, BillingDto>();
         }
     }
 }
