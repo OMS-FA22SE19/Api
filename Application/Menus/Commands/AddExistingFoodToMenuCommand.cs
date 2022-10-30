@@ -40,6 +40,8 @@ namespace Application.Menus.Commands
                 throw new NotFoundException(nameof(Menu), request.Id);
             }
 
+            var menuMapped = _mapper.Map<Menu>(menuInDatabase);
+
             var foodInDatabase = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == request.FoodId && !e.IsDeleted);
             if (foodInDatabase is null)
             {
@@ -58,6 +60,8 @@ namespace Application.Menus.Commands
                 MenuId = request.Id,
                 Price = request.Price
             });
+
+            await _unitOfWork.MenuRepository.UpdateAsync(menuInDatabase);
 
             await _unitOfWork.CompleteAsync(cancellationToken);
             return new Response<MenuDto>()

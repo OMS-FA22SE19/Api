@@ -96,6 +96,41 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Core.Entities.Billing", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<double>("OrderAmount")
+                        .HasColumnType("float");
+
+                    b.Property<string>("OrderEBillingId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("OrderId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<double>("ReservationAmount")
+                        .HasColumnType("float");
+
+                    b.Property<string>("ReservationEBillingId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("ReservationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique()
+                        .HasFilter("[OrderId] IS NOT NULL");
+
+                    b.HasIndex("ReservationId")
+                        .IsUnique();
+
+                    b.ToTable("Billings", (string)null);
+                });
+
             modelBuilder.Entity("Core.Entities.CourseType", b =>
                 {
                     b.Property<int>("Id")
@@ -365,28 +400,6 @@ namespace Infrastructure.Migrations
                     b.HasIndex("OrderId");
 
                     b.ToTable("OrderDetails", (string)null);
-                });
-
-            modelBuilder.Entity("Core.Entities.Payment", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<double>("Amount")
-                        .HasColumnType("float");
-
-                    b.Property<string>("OrderId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.Reservation", b =>
@@ -861,6 +874,24 @@ namespace Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Core.Entities.Billing", b =>
+                {
+                    b.HasOne("Core.Entities.Order", "Order")
+                        .WithOne("Billing")
+                        .HasForeignKey("Core.Entities.Billing", "OrderId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Core.Entities.Reservation", "Reservation")
+                        .WithOne("Billing")
+                        .HasForeignKey("Core.Entities.Billing", "ReservationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Reservation");
+                });
+
             modelBuilder.Entity("Core.Entities.Food", b =>
                 {
                     b.HasOne("Core.Entities.CourseType", "CourseType")
@@ -944,17 +975,6 @@ namespace Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Food");
-
-                    b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("Core.Entities.Payment", b =>
-                {
-                    b.HasOne("Core.Entities.Order", "Order")
-                        .WithMany("Payments")
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("Order");
                 });
@@ -1079,13 +1099,17 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Entities.Order", b =>
                 {
-                    b.Navigation("OrderDetails");
+                    b.Navigation("Billing")
+                        .IsRequired();
 
-                    b.Navigation("Payments");
+                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("Core.Entities.Reservation", b =>
                 {
+                    b.Navigation("Billing")
+                        .IsRequired();
+
                     b.Navigation("Order")
                         .IsRequired();
 

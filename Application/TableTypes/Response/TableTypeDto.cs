@@ -10,6 +10,7 @@ namespace Application.TableTypes.Response
         public string Name { get; set; }
         public double ChargePerSeat { get; set; }
         public bool CanBeCombined { get; set; }
+        public int Quantity { get; set; }
         public bool IsDeleted { get; set; }
 
         public bool Equals(TableTypeDto? other)

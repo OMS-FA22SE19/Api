@@ -100,5 +100,64 @@ namespace Application.UnitTests
                     TableTypeId = 1
                 }
         };
+
+        public static List<Core.Entities.Type> Types
+            => new List<Core.Entities.Type>()
+        {
+                new Core.Entities.Type()
+                {
+                    Id = 1,
+                    Name = "Diary"
+                },
+                new Core.Entities.Type()
+                {
+                    Id = 2,
+                    Name = "Fruit and vegetables"
+                },
+                new Core.Entities.Type()
+                {
+                    Id = 3,
+                    Name = "Protein"
+                },
+                new Core.Entities.Type()
+                {
+                    Id = 4,
+                    Name = "Fat"
+                },
+                new Core.Entities.Type()
+                {
+                    Id = 5,
+                    Name = "Starchy food"
+                }
+        };
+
+        public static List<Menu> Menus
+            => new List<Menu>()
+        {
+                new Menu()
+                {
+                    Id = 1,
+                    Name = "Main Menu",
+                    Description = "This is the main menu of the restaurant",
+                    IsHidden = false,
+                    IsDeleted = false
+                },
+                new Menu()
+                {
+                    Id = 2,
+                    Name = "Hidden Menu",
+                    Description = "This is the hidden menu of the restaurant",
+                    IsHidden = true,
+                    IsDeleted = false
+                },
+                new Menu()
+                {
+                    Id = 1,
+                    Name = "Deleted Menu",
+                    Description = "This is the deleted menu of the restaurant",
+                    IsHidden = false,
+                    IsDeleted = true
+                }
+        };
     }
 }

@@ -11,29 +11,31 @@ using Microsoft.Extensions.Configuration;
 
 namespace Application.VNPay.Commands
 {
-    public sealed class CheckPaymentCommand : IRequest<Response<PaymentDto>>
+    public sealed class PaymentResponseForOrderCommand : IRequest<Response<BillingDto>>
     {
         public string Vnp_TxnRef { get; init; }
+        public string Vnp_Amount { get; init; }
         public string Vnp_ResponseCode { get; init; }
         public string Vnp_TransactionStatus { get; init; }
         public string Vnp_SecureHash { get; init; }
     }
 
-    public sealed class CheckPaymentCommandHandler : IRequestHandler<CheckPaymentCommand, Response<PaymentDto>>
+    public sealed class PaymentResponseForOrderCommandHandler : IRequestHandler<PaymentResponseForOrderCommand, Response<BillingDto>>
     {
         private readonly IConfiguration _config;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        public CheckPaymentCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
+        public PaymentResponseForOrderCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _config = configuration;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public async Task<Response<PaymentDto>> Handle(CheckPaymentCommand request, CancellationToken cancellationToken)
+        public async Task<Response<BillingDto>> Handle(PaymentResponseForOrderCommand request, CancellationToken cancellationToken)
         {
             string paymentId = request.Vnp_TxnRef;
+            string amount = request.Vnp_Amount;
             string responseCode = request.Vnp_ResponseCode;
             string transactionStatus = request.Vnp_TransactionStatus;
             string vnp_HashSecret = _config.GetSection("vnpay")["vnp_HashSecret"]; //Secret key
@@ -42,39 +44,34 @@ namespace Application.VNPay.Commands
             VnPayLibrary vnpay = new VnPayLibrary();
             if (responseCode == "00" && transactionStatus == "00")
             {
-                var entity = await _unitOfWork.PaymentRepository.GetAsync(e => e.Id == paymentId);
+                var entity = await _unitOfWork.BillingRepository.GetAsync(e => e.OrderEBillingId == paymentId);
                 if (entity is null)
                 {
-                    throw new NotFoundException(nameof(Order), paymentId);
+                    throw new NotFoundException(nameof(Billing), paymentId);
                 }
-                entity.Status = PaymentStatus.Paid;
+                var order = await _unitOfWork.OrderRepository.GetAsync(o => o.Id.Equals(entity.OrderId));
 
-                var result = await _unitOfWork.PaymentRepository.UpdateAsync(entity);
+                entity.OrderAmount = Convert.ToDouble(amount) / 100;
+
+                var result = await _unitOfWork.BillingRepository.UpdateAsync(entity);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 if (result is null)
                 {
-                    return new Response<PaymentDto>("error");
+                    return new Response<BillingDto>("error");
                 }
-                var mappedResult = _mapper.Map<PaymentDto>(result);
-                return new Response<PaymentDto>(mappedResult);
+                var mappedResult = _mapper.Map<BillingDto>(result);
+                mappedResult.OrderId = order.Id;
+                return new Response<BillingDto>(mappedResult);
             }
             else
             {
-                var entity = await _unitOfWork.PaymentRepository.GetAsync(e => e.Id == paymentId);
-                if (entity is null)
-                {
-                    throw new NotFoundException(nameof(Order), paymentId);
-                }
-                entity.Status = PaymentStatus.Failed;
-
-                var result = await _unitOfWork.PaymentRepository.UpdateAsync(entity);
+                var result = await _unitOfWork.BillingRepository.DeleteAsync(p => p.Id == paymentId);
                 await _unitOfWork.CompleteAsync(cancellationToken);
-                if (result is null)
+                if (!result)
                 {
-                    return new Response<PaymentDto>("error");
+                    return new Response<BillingDto>("error");
                 }
-                var mappedResult = _mapper.Map<PaymentDto>(result);
-                return new Response<PaymentDto>("Transaction failed")
+                return new Response<BillingDto>("Transaction failed")
                 {
                     Succeeded = false
                 };

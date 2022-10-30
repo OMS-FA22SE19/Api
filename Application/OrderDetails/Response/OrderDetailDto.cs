@@ -9,7 +9,7 @@ namespace Application.OrderDetails.Response
     {
         public string OrderId { get; set; }
         public string UserId { get; set; }
-        public string Date { get; set; }
+        public DateTime Date { get; set; }
         public int FoodId { get; set; }
         public string FoodName { get; set; }
         public OrderDetailStatus Status { get; set; }

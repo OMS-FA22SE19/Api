@@ -4,6 +4,7 @@ using Application.Models;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
+using MediatR;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
@@ -18,6 +19,7 @@ namespace Application.UnitTests.CourseTypes.Commands
         private ICourseTypeRepository _courseTypeRepository;
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
+        private IMediator _mediator;
 
         [SetUp]
         public void ReInitializeTest()
@@ -28,6 +30,7 @@ namespace Application.UnitTests.CourseTypes.Commands
             unitOfWork.SetupGet(x => x.CourseTypeRepository).Returns(_courseTypeRepository);
             _unitOfWork = unitOfWork.Object;
             _mapper = SetUpMapper();
+            _mediator = SetUpMediator();
         }
 
         [TearDown]
@@ -47,7 +50,7 @@ namespace Application.UnitTests.CourseTypes.Commands
             {
                 Id = id
             };
-            var handler = new DeleteCourseTypeCommandHandler(_unitOfWork, _mapper);
+            var handler = new DeleteCourseTypeCommandHandler(_unitOfWork, _mapper, _mediator);
             var expected = new Response<CourseTypeDto>()
             {
                 StatusCode = HttpStatusCode.NoContent
@@ -85,6 +88,12 @@ namespace Application.UnitTests.CourseTypes.Commands
         private IMapper SetUpMapper()
         {
             var mapperMock = new Mock<IMapper>();
+            return mapperMock.Object;
+        }
+
+        private IMediator SetUpMediator()
+        {
+            var mapperMock = new Mock<IMediator>();
             return mapperMock.Object;
         }
         #endregion

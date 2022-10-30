@@ -189,7 +189,7 @@ namespace Api.Controllers.V1
         }
 
         /// <summary>
-        /// Update a specific Course Type.
+        /// Update a specific Table.
         /// </summary>
         /// <returns></returns>
         /// <remarks>

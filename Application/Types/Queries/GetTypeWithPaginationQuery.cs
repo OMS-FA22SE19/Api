@@ -33,7 +33,7 @@ namespace Application.Types.Queries
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
-                filters.Add(e => e.Name.Contains(request.SearchValue) || request.SearchValue.Equals(e.Id));
+                filters.Add(e => e.Name.Contains(request.SearchValue) || request.SearchValue.Equals(e.Id.ToString()));
             }
 
             switch (request.OrderBy)

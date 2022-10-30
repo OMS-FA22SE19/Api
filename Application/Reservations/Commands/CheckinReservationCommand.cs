@@ -1,6 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Models;
+using Application.Orders.Events;
 using Application.Reservations.Response;
 using AutoMapper;
 using Core.Entities;
@@ -53,6 +54,8 @@ namespace Application.Reservations.Commands
 
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => !e.IsDeleted && e.Id == entity.TableTypeId);
 
+            var tableIds = new List<int>();
+
             foreach (var table in tables)
             {
                 table.Status = TableStatus.Occupied;
@@ -63,11 +66,18 @@ namespace Application.Reservations.Commands
                     TableId = table.Id
                 });
 
+                tableIds.Add(table.Id);
+
                 await _unitOfWork.TableRepository.UpdateAsync(table);
                 table.TableType = tableType;
             }
 
             var result = await _unitOfWork.ReservationRepository.UpdateAsync(entity);
+            entity.AddDomainEvent(new CheckInReservationEvent
+            {
+                ReservationId = entity.Id,
+                tableIds = tableIds,
+            });
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {

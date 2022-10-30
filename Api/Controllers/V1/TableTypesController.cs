@@ -159,7 +159,7 @@ namespace Api.Controllers.V1
         ///
         /// </remarks>
         /// <param name="id">The id of updated Table Type</param>
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -214,7 +214,7 @@ namespace Api.Controllers.V1
         ///
         /// </remarks>
         /// <param name="id">The id of deleted Table Type</param>
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
