@@ -13,7 +13,7 @@
         IMenuFoodRepository MenuFoodRepository { get; }
         IOrderRepository OrderRepository { get; }
         IOrderDetailRepository OrderDetailRepository { get; }
-        IPaymentRepository PaymentRepository { get; }
+        IBillingRepository BillingRepository { get; }
         ITableTypeRepository TableTypeRepository { get; }
         IReservationTableRepository ReservationTableRepository { get; }
         Task CompleteAsync(CancellationToken cancellationToken);

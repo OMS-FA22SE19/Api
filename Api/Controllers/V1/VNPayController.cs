@@ -64,7 +64,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response<PaymentDto>>> GetPaymentForReservationResponse([FromQuery] PaymentResponseForReservationCommand query)
+        public async Task<ActionResult<Response<BillingDto>>> GetPaymentForReservationResponse([FromQuery] PaymentResponseForReservationCommand query)
         {
             try
             {

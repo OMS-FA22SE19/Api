@@ -18,7 +18,7 @@ namespace Infrastructure.Common
         private IMenuFoodRepository _menuFoodRepository;
         private IOrderRepository _orderRepository;
         private IOrderDetailRepository _orderDetailRepository;
-        private IPaymentRepository _paymentRepository;
+        private IBillingRepository _billingRepository;
         private ITableTypeRepository _tableTypeRepository;
         private IReservationTableRepository _reservationTableRepository;
 
@@ -153,15 +153,15 @@ namespace Infrastructure.Common
             }
         }
 
-        public IPaymentRepository PaymentRepository
+        public IBillingRepository BillingRepository
         {
             get
             {
-                if (_paymentRepository is null)
+                if (_billingRepository is null)
                 {
-                    _paymentRepository = new PaymentRepository(_context);
+                    _billingRepository = new BillingRepository(_context);
                 }
-                return _paymentRepository;
+                return _billingRepository;
             }
         }
 

@@ -20,6 +20,7 @@ namespace Core.Entities
 
         public Order Order { get; set; }
         public ApplicationUser User { get; set; }
+        public Billing Billing { get; set; }
 
         public IList<ReservationTable> ReservationTables { get; set; }
     }

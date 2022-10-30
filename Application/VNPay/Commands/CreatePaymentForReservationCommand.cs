@@ -41,16 +41,31 @@ namespace Application.VNPay.Commands
             }
 
             string id = DateTime.Now.ToString("yyyyMMddHHmmss");
-
-            Payment payment = new Payment
+            var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == request.ReservationId);
+            var result = new Billing();
+            if (billing is null)
             {
-                Id = id,
-                ObjectId = request.ReservationId.ToString(),
-                ObjectType = ObjectType.Reservation,
-                Status = PaymentStatus.Processing,
-                Amount = request.Amount
-            };
-            var result = await _unitOfWork.PaymentRepository.InsertAsync(payment);
+                Billing bill = new Billing
+                {
+                    Id = id,
+                    ReservationId = request.ReservationId,
+                    ReservationEBillingId = id
+                };
+                result = await _unitOfWork.BillingRepository.InsertAsync(bill);
+            }
+            else
+            {
+                if (billing.ReservationAmount == 0)
+                {
+                    billing.ReservationEBillingId = id;
+                    result = await _unitOfWork.BillingRepository.UpdateAsync(billing);
+                }
+                else
+                {
+                    return new Response<PaymentUrlDto>($"Reservation {request.ReservationId} has been payed");
+                }
+            }
+            
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
