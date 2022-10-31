@@ -34,7 +34,7 @@ namespace Application.Foods.Queries
 
         public async Task<Response<List<MenuFoodDto>>> Handle(GetFoodWithMenuIdQuery request, CancellationToken cancellationToken)
         {
-            var menu = await _unitOfWork.MenuRepository.GetAsync(e => e.Id == request.MenuId && !e.IsDeleted && !e.IsHidden);
+            var menu = await _unitOfWork.MenuRepository.GetAsync(e => e.Id == request.MenuId && !e.IsDeleted);
             if (menu is null)
             {
                 throw new NotFoundException(nameof(Menu), request.MenuId);

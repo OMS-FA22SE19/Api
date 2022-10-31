@@ -100,7 +100,7 @@ namespace Application.Orders.Queries
                     UserId = order.UserId,
                     FullName = order.User.FullName,
                     PhoneNumber = order.User.PhoneNumber,
-                    Date = order.Date.ToString("dd/MM/yyyy HH:mm:ss"),
+                    Date = order.Date,
                     Status = order.Status,
                     PrePaid = order.PrePaid
                 };

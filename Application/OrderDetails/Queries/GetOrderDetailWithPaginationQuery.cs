@@ -13,7 +13,7 @@ namespace Application.OrderDetails.Queries
 {
     public sealed class GetOrderDetailWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<DishDto>>>
     {
-        public OrderDetailProperty OrderBy { get; set; }
+        public OrderDetailProperty? OrderBy { get; set; }
     }
 
     public sealed class GetOrderDetailWithPaginationQueryHandler : IRequestHandler<GetOrderDetailWithPaginationQuery, Response<PaginatedList<DishDto>>>
