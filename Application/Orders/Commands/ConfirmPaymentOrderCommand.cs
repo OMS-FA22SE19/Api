@@ -97,7 +97,7 @@ namespace Application.Orders.Commands
             var bill = new OrderDto()
             {
                 Id = entity.Id,
-                Date = entity.Date.ToString(),
+                Date = entity.Date,
                 PhoneNumber = entity.User.PhoneNumber,
                 Status = OrderStatus.Paid,
                 OrderDetails = orderDetails,

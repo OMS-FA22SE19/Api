@@ -8,7 +8,7 @@ using MediatR;
 using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 
-namespace Application.Menus.Commands
+namespace Application.MenuFoods.Commands
 {
     public sealed class AddExistingFoodToMenuCommand : IRequest<Response<MenuDto>>
     {
