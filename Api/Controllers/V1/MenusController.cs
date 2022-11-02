@@ -1,6 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Foods.Queries;
 using Application.Foods.Response;
+using Application.MenuFoods.Commands;
 using Application.Menus.Commands;
 using Application.Menus.Queries;
 using Application.Menus.Response;
@@ -291,7 +292,7 @@ namespace Api.Controllers.V1
         /// <remarks>
         /// Sample request:
         ///
-        ///     POST /Menus/1/4
+        ///     POST /Menus/1/Food/4
         ///     {
         ///        "price": 100000
         ///     }
@@ -300,7 +301,7 @@ namespace Api.Controllers.V1
         /// <param name="id">The desired id of Menu</param>
         /// <param name="foodId">The desired id of Food</param>
         /// <param name="price">The price of Food in selected Menu</param>
-        [HttpPost("{id}/{foodId}")]
+        [HttpPost("{id}/Food/{foodId}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -322,6 +323,53 @@ namespace Api.Controllers.V1
                     FoodId = foodId,
                     Price = price
                 };
+                var result = await Mediator.Send(command);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<MenuDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
+        /// Update food to menu with price
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /Menus/1/Food/4
+        ///     {
+        ///        "price": 100000
+        ///     }
+        ///     
+        /// </remarks>
+        /// <param name="id">The desired id of Menu</param>
+        /// <param name="foodId">The desired id of Food</param>
+        /// <param name="price">The price of Food in selected Menu</param>
+        [HttpPut("{id}/Food/{foodId}")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> UpdateFoodInMenuAsync(int id, int foodId, [FromBody] UpdateFoodOfMenuCommand command)
+        {
+            try
+            {
+                if (id < 0 || foodId < 0)
+                {
+                    return BadRequest();
+                }
+                command.Id = id;
+                command.FoodId = foodId;
                 var result = await Mediator.Send(command);
                 return StatusCode((int)result.StatusCode, result);
             }
@@ -433,6 +481,61 @@ namespace Api.Controllers.V1
                     TypeId = typeId
                 };
                 var result = await Mediator.Send(query);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<List<MenuFoodDto>>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
+        /// Retrieve a list of Food in Menu with Id.
+        /// </summary>
+        /// <returns>List of Foods.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Menus/Food
+        ///     
+        /// </remarks>
+        /// <param name="menuId">The desired id of Menu</param>
+        /// <param name="foodId">The desired id of Food</param>
+        [HttpDelete("{menuId}/Food/{foodId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Response<List<MenuDto>>>> RemoveFoodFromMenuAsync(int menuId, int foodId)
+        {
+            try
+            {
+                if (menuId < 0 || foodId < 0)
+                {
+                    return BadRequest();
+                }
+
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+                var query = new RemoveFoodFromMenuCommand()
+                {
+                    MenuId = menuId,
+                    FoodId = foodId
+                };
+                var result = await Mediator.Send(query);
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (NotFoundException)

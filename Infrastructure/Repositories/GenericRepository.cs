@@ -2,7 +2,6 @@
 using Core.Common;
 using Core.Common.Interfaces;
 using Core.Interfaces;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -35,10 +34,13 @@ namespace Infrastructure.Repositories
                 }
             }
 
-            foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            if (!string.IsNullOrWhiteSpace(includeProperties))
             {
-                query = query.Include(includeProperty);
+                foreach (var includeProperty in includeProperties.Split
+                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty);
+                }
             }
 
             if (orderBy != null)
@@ -67,10 +69,13 @@ namespace Infrastructure.Repositories
                 }
             }
 
-            foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            if (!string.IsNullOrWhiteSpace(includeProperties))
             {
-                query = query.Include(includeProperty);
+                foreach (var includeProperty in includeProperties.Split
+                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty);
+                }
             }
 
             if (orderBy != null)
@@ -86,10 +91,13 @@ namespace Infrastructure.Repositories
         public virtual async Task<TEntity> GetAsync(Expression<Func<TEntity, bool>> expression, string includeProperties = "")
         {
             IQueryable<TEntity> query = _dbSet.AsNoTracking();
-            foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            if (!string.IsNullOrWhiteSpace(includeProperties))
             {
-                query = query.Include(includeProperty);
+                foreach (var includeProperty in includeProperties.Split
+                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty);
+                }
             }
             return await query.FirstOrDefaultAsync(expression);
         }
@@ -104,10 +112,13 @@ namespace Infrastructure.Repositories
                     query = query.Where(filter);
                 }
             }
-            foreach (var includeProperty in includeProperties.Split
-                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+            if (!string.IsNullOrWhiteSpace(includeProperties))
             {
-                query = query.Include(includeProperty);
+                foreach (var includeProperty in includeProperties.Split
+                (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty);
+                }
             }
             return await query.FirstOrDefaultAsync();
         }

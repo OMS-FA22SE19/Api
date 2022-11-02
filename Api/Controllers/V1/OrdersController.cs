@@ -150,8 +150,10 @@ namespace Api.Controllers.V1
         ///     {
         ///        "reservationId": "9",
         ///        "orderDetails": {
-        ///             "2": 3 (FoodId: quantity),
-        ///             "8": 2
+        ///             "2": {
+        ///             quantity: 2,
+        ///             note: null
+        ///             }
         ///         }
         ///     }
         ///     
@@ -198,10 +200,13 @@ namespace Api.Controllers.V1
         ///     {
         ///        "orderId": "9",
         ///        "orderDetails": {
-        ///             "2": 3 (FoodId: quantity),
-        ///             "8": 2
+        ///             "2": {
+        ///             quantity: 2,
+        ///             note: null
+        ///             }
         ///         }
         ///     }
+        ///  
         ///     
         /// </remarks>
         [HttpPut("AddDishes")]

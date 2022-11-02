@@ -4,9 +4,9 @@ using Application.Common.Mappings;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Events;
+using Application.Orders.Helpers;
 using Application.Orders.Response;
 using AutoMapper;
-using Core.Common;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
@@ -19,7 +19,7 @@ namespace Application.Orders.Commands
     public sealed class AddNewDishesToOrderCommand : IMapFrom<Order>, IRequest<Response<OrderDto>>
     {
         public string OrderId { get; set; }
-        public Dictionary<int, int> OrderDetails { get; set; }
+        public Dictionary<int, FoodInfo> OrderDetails { get; set; }
 
         public void Mapping(Profile profile)
         {
@@ -59,7 +59,7 @@ namespace Application.Orders.Commands
 
             foreach (var dish in request.OrderDetails)
             {
-                for (int i = 0; i < dish.Value; i++)
+                for (int i = 0; i < dish.Value.Quantity; i++)
                 {
                     var food = await _unitOfWork.MenuFoodRepository.GetAsync(e => e.FoodId == dish.Key && e.MenuId == availableMenu.Id);
                     if (food is null)
@@ -70,6 +70,7 @@ namespace Application.Orders.Commands
                     {
                         FoodId = dish.Key,
                         Price = food.Price,
+                        Note = string.IsNullOrWhiteSpace(dish.Value.Note) ? string.Empty : dish.Value.Note,
                         Status = OrderDetailStatus.Received
                     });
                 }
