@@ -2,6 +2,7 @@
 {
     public interface IUnitOfWork
     {
+        IAdminSettingRepository AdminSettingRepository { get; }
         IUserRepository UserRepository { get; }
         ITableRepository TableRepository { get; }
         IReservationRepository ReservationRepository { get; }
