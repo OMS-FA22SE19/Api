@@ -31,7 +31,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response<AdminSettingDto>>> GetAdminSettingAsync([FromQuery] GetAdminSettingQuery query)
+        public async Task<ActionResult<Response<List<AdminSettingDto>>>> GetAdminSettingAsync([FromQuery] GetAdminSettingQuery query)
         {
             try
             {
@@ -44,7 +44,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<AdminSettingDto>(ex.Message)
+                var response = new Response<List<AdminSettingDto>>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

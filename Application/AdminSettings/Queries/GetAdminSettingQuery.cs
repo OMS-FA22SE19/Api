@@ -6,14 +6,16 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Configuration;
 using Core.Interfaces;
 using Application.AdminSettings.Responses;
+using Application.CourseTypes.Response;
+using Core.Common;
 
 namespace Application.AdminSettings.Queries
 {
-    public sealed class GetAdminSettingQuery : IRequest<Response<ListOfAdminSettingDto>>
+    public sealed class GetAdminSettingQuery : IRequest<Response<List<AdminSettingDto>>>
     {
     }
 
-    public sealed class GetAdminSettingQueryHandler : IRequestHandler<GetAdminSettingQuery, Response<ListOfAdminSettingDto>>
+    public sealed class GetAdminSettingQueryHandler : IRequestHandler<GetAdminSettingQuery, Response<List<AdminSettingDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -24,21 +26,17 @@ namespace Application.AdminSettings.Queries
             _mapper = mapper;
         }
 
-        public async Task<Response<ListOfAdminSettingDto>> Handle(GetAdminSettingQuery request, CancellationToken cancellationToken)
+        public async Task<Response<List<AdminSettingDto>>> Handle(GetAdminSettingQuery request, CancellationToken cancellationToken)
         {
             var settings = await _unitOfWork.AdminSettingRepository.GetAllAsync();
-            settings.Remove(settings.Single(s => s.Name.Equals("json")));
 
-            ListOfAdminSettingDto adminSettings = new ListOfAdminSettingDto() 
-            { 
-                adminSettings = new List<AdminSettingDto>()
-            };
+            List<AdminSettingDto> list = new List<AdminSettingDto>();
             foreach(var setting in settings)
             {
                 var mappedSetting = _mapper.Map<AdminSettingDto>(setting);
-                adminSettings.adminSettings.Add(mappedSetting);
+                list.Add(mappedSetting);
             }
-            return new Response<ListOfAdminSettingDto>(adminSettings);
+            return new Response<List<AdminSettingDto>>(list);
         }
     }
 }

@@ -46,41 +46,13 @@ namespace Application.AdminSettings.Commands
 
             var result = await _unitOfWork.AdminSettingRepository.UpdateAsync(updateSetting);
 
-            var settings = await _unitOfWork.AdminSettingRepository.GetAllAsync();
-            settings.Remove(settings.Single(s => s.Name.Equals("json")));
-
-            var jsonString = @"
-                {
-                    ""AdminSettings"":{
-                    }
-                }
-                ";
-
-            var jsonDoc = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonString);
-
-            var adminSettingsDict = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonDoc["AdminSettings"].ToString());
-            foreach (var setting in settings)
-            {
-                adminSettingsDict.Add(setting.Name, setting.Value);
-            }
-            jsonDoc["AdminSettings"] = adminSettingsDict;
-
-            var json = await _unitOfWork.AdminSettingRepository.GetAsync(a => a.Name.Equals("json"));
-            json.Value = JsonSerializer.Serialize(jsonDoc);
-
-            var jsonResult = await _unitOfWork.AdminSettingRepository.UpdateAsync(json);
-
             await _unitOfWork.CompleteAsync(cancellationToken);
 
             if (result is null)
             {
                 return new Response<AdminSettingDto>("error");
             }
-            if (jsonResult is null)
-            {
-                return new Response<AdminSettingDto>("json error");
-            }
-
+            
             return new Response<AdminSettingDto>()
             {
                 StatusCode = System.Net.HttpStatusCode.NoContent
