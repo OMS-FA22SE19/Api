@@ -61,9 +61,8 @@ namespace Api.Controllers.V1
         ///
         ///     PUT /AdminSettings
         ///     {
-        ///        "openingTime": "10AM",
-        ///        "endingTime": "11PM",
-        ///        "maximumHourOfReservation": "1"
+        ///        "name": "OpeningTime",
+        ///        "value": "11AM"
         ///     }
         ///
         /// </remarks>

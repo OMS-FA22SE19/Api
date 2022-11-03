@@ -5,7 +5,6 @@ using MediatR;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Configuration;
 using Core.Interfaces;
-using Application.AdminSettings.Responses;
 using Application.CourseTypes.Response;
 using Core.Common;
 
@@ -30,13 +29,8 @@ namespace Application.AdminSettings.Queries
         {
             var settings = await _unitOfWork.AdminSettingRepository.GetAllAsync();
 
-            List<AdminSettingDto> list = new List<AdminSettingDto>();
-            foreach(var setting in settings)
-            {
-                var mappedSetting = _mapper.Map<AdminSettingDto>(setting);
-                list.Add(mappedSetting);
-            }
-            return new Response<List<AdminSettingDto>>(list);
+            var mappedResult = _mapper.Map<List<AdminSettingDto>>(settings);
+            return new Response<List<AdminSettingDto>>(mappedResult);
         }
     }
 }

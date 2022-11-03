@@ -2,16 +2,10 @@
 using Application.AdminSettings.Response;
 using AutoMapper;
 using MediatR;
-using Microsoft.Extensions.Configuration;
 using Core.Interfaces;
 using System.ComponentModel.DataAnnotations;
 using Application.Common.Exceptions;
 using Core.Entities;
-using System.Text.Json;
-using Application.Tables.Response;
-using System.Text.Json.Nodes;
-using Application.AdminSettings.Responses;
-using System.Dynamic;
 
 namespace Application.AdminSettings.Commands
 {
