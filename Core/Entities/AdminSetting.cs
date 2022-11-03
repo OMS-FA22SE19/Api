@@ -8,7 +8,7 @@ namespace Core.Entities
     public sealed class AdminSetting : Entity
     {
         [Key]
-        public new string Name { get; set; }
+        public string Name { get; set; }
         public string Value { get; set; }
     }
 }
