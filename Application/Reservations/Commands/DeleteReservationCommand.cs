@@ -35,7 +35,7 @@ namespace Application.Reservations.Commands
                 throw new NotFoundException(nameof(Reservation), request.Id);
             }
             var updatedEntity = _mapper.Map<Reservation>(entity);
-            updatedEntity.Status = ReservationStatus.Available;
+            updatedEntity.Status = ReservationStatus.Cancelled;
             var result = await _unitOfWork.ReservationRepository.UpdateAsync(updatedEntity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
