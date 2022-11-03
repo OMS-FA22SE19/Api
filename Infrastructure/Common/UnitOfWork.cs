@@ -7,6 +7,7 @@ namespace Infrastructure.Common
     public sealed class UnitOfWork : IUnitOfWork, IDisposable
     {
         private readonly IApplicationDbContext _context;
+        private IAdminSettingRepository _adminSettingRepository;
         private IUserRepository _userRepository;
         private ITableRepository _tableRepository;
         private IReservationRepository _reservationRepository;
@@ -25,6 +26,17 @@ namespace Infrastructure.Common
         public UnitOfWork(IApplicationDbContext context)
         {
             _context = context;
+        }
+        public IAdminSettingRepository AdminSettingRepository
+        {
+            get
+            {
+                if (_adminSettingRepository is null)
+                {
+                    _adminSettingRepository = new AdminSettingRepository(_context);
+                }
+                return _adminSettingRepository;
+            }
         }
         public IUserRepository UserRepository
         {
