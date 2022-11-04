@@ -14,6 +14,7 @@ namespace Application.OrderDetails.Response
         public string FoodName { get; set; }
         public OrderDetailStatus Status { get; set; }
         public double Price { get; set; }
+        public string Note { get; set; }
         public int Quantity { get; set; }
         public double Amount { get; set; }
 

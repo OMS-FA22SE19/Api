@@ -50,8 +50,9 @@ namespace Application.Reservations.Queries
                 var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == item.TableTypeId);
                 if (tableType is null)
                 {
-                    throw new NotFoundException(nameof(Reservation), item.TableTypeId);
+                    throw new NotFoundException(nameof(TableType), item.TableTypeId);
                 }
+                item.PrePaid = item.NumOfPeople * tableType.ChargePerSeat;
                 item.TableType = tableType.Name;
             }
             return new Response<PaginatedList<ReservationDto>>(mappedResult);
