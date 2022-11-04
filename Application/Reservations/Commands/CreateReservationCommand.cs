@@ -76,6 +76,7 @@ namespace Application.Reservations.Commands
             }
             result.User = user;
             var mappedResult = _mapper.Map<ReservationDto>(result);
+            mappedResult.PrePaid = entity.NumOfPeople * tableType.ChargePerSeat;
             mappedResult.TableType = tableType.Name;
             return new Response<ReservationDto>(mappedResult)
             {
