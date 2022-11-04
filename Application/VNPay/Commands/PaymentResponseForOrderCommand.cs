@@ -47,7 +47,7 @@ namespace Application.VNPay.Commands
                 var entity = await _unitOfWork.BillingRepository.GetAsync(e => e.OrderEBillingId == paymentId);
                 if (entity is null)
                 {
-                    throw new NotFoundException(nameof(Billing), paymentId);
+                    throw new NotFoundException($"Can not find billing with Order EBilling Id: {paymentId}");
                 }
                 var order = await _unitOfWork.OrderRepository.GetAsync(o => o.Id.Equals(entity.OrderId));
 
