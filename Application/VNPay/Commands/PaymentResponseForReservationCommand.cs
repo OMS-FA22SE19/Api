@@ -44,10 +44,10 @@ namespace Application.VNPay.Commands
             VnPayLibrary vnpay = new VnPayLibrary();
             if (responseCode == "00" && transactionStatus == "00")
             {
-                var entity = await _unitOfWork.BillingRepository.GetAsync(e => e.Id == paymentId);
+                var entity = await _unitOfWork.BillingRepository.GetAsync(e => e.ReservationEBillingId == paymentId);
                 if (entity is null)
                 {
-                    throw new NotFoundException(nameof(Order), paymentId);
+                    throw new NotFoundException($"Can not find billing with Reservation EBilling Id: {paymentId}");
                 }
 
                 entity.ReservationAmount = Convert.ToDouble(amount) / 100;
