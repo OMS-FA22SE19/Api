@@ -84,6 +84,7 @@ namespace Application.Reservations.Commands
                 return new Response<ReservationDto>("error");
             }
             var mappedResult = _mapper.Map<ReservationDto>(result);
+            mappedResult.PrePaid = entity.NumOfPeople * tableType.ChargePerSeat;
             mappedResult.TableType = tableType.Name;
             return new Response<ReservationDto>(mappedResult);
         }

@@ -2,6 +2,7 @@
 using Application.Models;
 using Application.Reservations.Response;
 using AutoMapper;
+using Core.Common;
 using Core.Entities;
 using Core.Interfaces;
 using MediatR;
@@ -36,9 +37,10 @@ namespace Application.Reservations.Queries
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == result.TableTypeId);
             if (tableType is null)
             {
-                throw new NotFoundException(nameof(Reservation), result.TableTypeId);
+                throw new NotFoundException(nameof(TableType), result.TableTypeId);
             }
             var mappedResult = _mapper.Map<ReservationDto>(result);
+            mappedResult.PrePaid = result.NumOfPeople * tableType.ChargePerSeat;
             mappedResult.TableType = tableType.Name;
             return new Response<ReservationDto>(mappedResult);
         }

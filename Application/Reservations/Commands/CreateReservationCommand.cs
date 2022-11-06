@@ -67,7 +67,7 @@ namespace Application.Reservations.Commands
             var entity = _mapper.Map<Reservation>(request);
             var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
             entity.UserId = user.Id;
-            entity.Status = ReservationStatus.Reserved;
+            entity.Status = ReservationStatus.Available;
             var result = await _unitOfWork.ReservationRepository.InsertAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
@@ -76,6 +76,7 @@ namespace Application.Reservations.Commands
             }
             result.User = user;
             var mappedResult = _mapper.Map<ReservationDto>(result);
+            mappedResult.PrePaid = entity.NumOfPeople * tableType.ChargePerSeat;
             mappedResult.TableType = tableType.Name;
             return new Response<ReservationDto>(mappedResult)
             {

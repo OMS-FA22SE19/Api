@@ -24,6 +24,11 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property<double>("Price")
                 .HasColumnType("float");
 
+            builder.Property<string>("Note")
+                .IsRequired(false)
+                .HasColumnType("nvarchar(500)")
+                .HasMaxLength(500);
+
             builder.Property(e => e.Status)
                 .HasColumnType("int");
 
