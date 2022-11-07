@@ -1,5 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Models;
+using Application.Orders.Commands;
+using Application.Orders.Response;
 using Application.Reservations.Commands;
 using Application.Reservations.Queries;
 using Application.Reservations.Response;
@@ -316,6 +318,56 @@ namespace Api.Controllers.V1
             catch (Exception ex)
             {
                 var response = new Response<ReservationDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
+        /// Create an Order.
+        /// </summary>
+        /// <returns>New Order.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Orders
+        ///     {
+        ///        "reservationId": "9",
+        ///        "orderDetails": {
+        ///             "2": {
+        ///             quantity: 2,
+        ///             note: null
+        ///             }
+        ///         }
+        ///     }
+        ///     
+        /// </remarks>
+        [HttpPost("PreOrder")]
+        [Consumes("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> PreOrderFood([FromBody] CreatePreOrderFoodForReservationCommand command)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await Mediator.Send(command);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<OrderDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
