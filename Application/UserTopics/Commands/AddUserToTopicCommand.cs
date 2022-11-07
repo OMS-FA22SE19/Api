@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Menus.Response;
 using Application.Models;
 using Application.Topics.Response;
@@ -23,11 +24,13 @@ namespace Application.UserTopics.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IFirebaseMessagingService _firebaseMessagingService;
 
-        public AddUserToTopicCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public AddUserToTopicCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IFirebaseMessagingService firebaseMessagingService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _firebaseMessagingService = firebaseMessagingService;
         }
 
         public async Task<Response<TopicDto>> Handle(AddUserToTopicCommand request, CancellationToken cancellationToken)
@@ -61,6 +64,12 @@ namespace Application.UserTopics.Commands
             await _unitOfWork.TopicRepository.UpdateAsync(topicInDatabase);
 
             await _unitOfWork.CompleteAsync(cancellationToken);
+
+            var device = await _unitOfWork.UserDeviceTokenRepository.GetAsync(u => u.userId.Equals(request.UserId));
+            List<string> tokens = new List<string>();
+            tokens.Add(device.deviceToken);
+            await _firebaseMessagingService.SubcribeFromTopic(tokens, topicInDatabase.Name);
+
             return new Response<TopicDto>()
             {
                 Succeeded = true,

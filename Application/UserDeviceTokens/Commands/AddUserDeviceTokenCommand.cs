@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Models;
 using Application.UserDeviceTokens.Responses;
@@ -27,11 +28,13 @@ namespace Application.UserDeviceTokens.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IFirebaseMessagingService _firebaseMessagingService;
 
-        public CreateUserDeviceTokenCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public CreateUserDeviceTokenCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, IFirebaseMessagingService firebaseMessagingService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _firebaseMessagingService = firebaseMessagingService;
         }
 
         public async Task<Response<UserDeviceTokenDto>> Handle(AddUserDeviceTokenCommand request, CancellationToken cancellationToken)
@@ -45,9 +48,22 @@ namespace Application.UserDeviceTokens.Commands
             var userDeviceToken = await _unitOfWork.UserDeviceTokenRepository.GetAsync(d => d.userId.Equals(request.userId));
             if (userDeviceToken is not null)
             {
+                var userTopics = await _unitOfWork.UserTopicRepository.GetAllAsync(null, null, $"{nameof(UserTopic.Topic)}");
+                userTopics.RemoveAll(x => !x.UserId.Equals(request.userId));
+                foreach (var topic in userTopics)
+                {
+                    List<string> oldTokens = new List<string>();
+                    oldTokens.Add(userDeviceToken.deviceToken);
+                    await _firebaseMessagingService.UnsubcribeFromTopic(oldTokens, topic.Topic.Name);
+                }
                 userDeviceToken.deviceToken = request.deviceToken;
                 result = await _unitOfWork.UserDeviceTokenRepository.UpdateAsync(userDeviceToken);
-
+                foreach (var topic in userTopics)
+                {
+                    List<string> newTokens = new List<string>();
+                    newTokens.Add(request.deviceToken);
+                    await _firebaseMessagingService.SubcribeFromTopic(newTokens, topic.Topic.Name);
+                }
             }
             else
             {

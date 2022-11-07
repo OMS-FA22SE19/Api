@@ -63,11 +63,10 @@ namespace Api.Controllers.V1
         /// <remarks>
         /// Sample request:
         ///
-        ///     DELETE /UserTopics/1
+        ///     DELETE /UserTopics
         ///
         /// </remarks>
-        /// <param name="id">The id of deleted User Topic</param>
-        [HttpDelete("{id}")]
+        [HttpDelete]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

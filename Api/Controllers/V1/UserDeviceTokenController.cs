@@ -14,6 +14,44 @@ namespace Api.Controllers.V1
     public sealed class UserDeviceTokensController : ApiControllerBase
     {
         /// <summary>
+        /// Retrieve a All User Device Token.
+        /// </summary>
+        /// <returns>A List of User Device Token.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /UserDeviceTokens
+        ///
+        /// </remarks>
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Response<UserDeviceTokenDto>>> GetAllAsync()
+        {
+            try
+            {
+                var query = new GetAllUserDeviceTokenQuery();
+
+                var result = await Mediator.Send(query);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<UserDeviceTokenDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
         /// Retrieve a specific UserDeviceToken by Id.
         /// </summary>
         /// <returns>A UserDeviceToken.</returns>
