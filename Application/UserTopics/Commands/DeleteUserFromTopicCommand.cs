@@ -38,7 +38,7 @@ namespace Application.UserTopics.Commands
             var device = await _unitOfWork.UserDeviceTokenRepository.GetAsync(u => u.userId.Equals(request.UserId));
             List<string> tokens = new List<string>();
             tokens.Add(device.deviceToken);
-            await _firebaseMessagingService.SubcribeFromTopic(tokens, topic.Name);
+            await _firebaseMessagingService.UnsubcribeFromTopic(tokens, topic.Name);
 
             return new Response<TopicDto>()
             {
