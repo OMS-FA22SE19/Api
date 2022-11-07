@@ -3,6 +3,9 @@
     public interface IUnitOfWork
     {
         IAdminSettingRepository AdminSettingRepository { get; }
+        ITopicRepository TopicRepository { get; }
+        IUserTopicRepository UserTopicRepository { get; }
+        IUserDeviceTokenRepository UserDeviceTokenRepository { get; }
         IUserRepository UserRepository { get; }
         ITableRepository TableRepository { get; }
         IReservationRepository ReservationRepository { get; }

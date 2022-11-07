@@ -7,6 +7,9 @@ namespace Core.Common.Interfaces
     public interface IApplicationDbContext : IDisposable
     {
         DbSet<AdminSetting> AdminSettings { get; }
+        DbSet<Topic> Topics { get; }
+        DbSet<UserTopic> UserTopics { get; }
+        DbSet<UserDeviceToken> UserDeviceTokens { get; }
         DbSet<ApplicationUser> Users { get; }
         DbSet<Entities.Type> Types { get; }
         DbSet<Food> Foods { get; }
