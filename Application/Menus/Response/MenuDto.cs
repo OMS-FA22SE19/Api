@@ -9,7 +9,7 @@ namespace Application.Menus.Response
         public int Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
-        public bool IsHidden { get; set; }
+        public bool Available { get; set; }
         public bool IsDeleted { get; set; }
 
         public bool Equals(MenuDto? other)
@@ -21,7 +21,7 @@ namespace Application.Menus.Response
             return this.Id == other.Id
                 && this.Name == other.Name
                 && this.Description == other.Description
-                && this.IsHidden == other.IsHidden
+                && this.Available == other.Available
                 && this.IsDeleted == other.IsDeleted;
         }
         public void Mapping(Profile profile) => profile.CreateMap<Menu, MenuDto>().ReverseMap();
@@ -39,7 +39,7 @@ namespace Application.Menus.Response
             return x.Id == y.Id
                 && x.Name == y.Name
                 && x.Description == y.Description
-                && x.IsHidden == y.IsHidden
+                && x.Available == y.Available
                 && x.IsDeleted == y.IsDeleted;
         }
 
@@ -51,13 +51,13 @@ namespace Application.Menus.Response
 
             int hashMenuDtoDescription = menuDto.Description == null ? 0 : menuDto.Description.GetHashCode();
 
-            int hashMenuDtoIsHidden = menuDto.IsHidden == null ? 0 : menuDto.IsHidden.GetHashCode();
+            int hashMenuDtoAvailable = menuDto.Available == null ? 0 : menuDto.Available.GetHashCode();
 
             int hashMenuDtoIsDeleted = menuDto.IsDeleted == null ? 0 : menuDto.IsDeleted.GetHashCode();
 
             int hashMenuId = menuDto.Id.GetHashCode();
 
-            return hashMenuDtoName ^ hashMenuDtoDescription ^ hashMenuDtoIsHidden ^ hashMenuDtoIsDeleted ^ hashMenuId;
+            return hashMenuDtoName ^ hashMenuDtoDescription ^ hashMenuDtoAvailable ^ hashMenuDtoIsDeleted ^ hashMenuId;
         }
     }
 }

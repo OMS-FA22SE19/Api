@@ -10,7 +10,7 @@ namespace Core.Entities
         public string Name { get; set; }
         [StringLength(1000, MinimumLength = 2)]
         public string Description { get; set; }
-        public bool IsHidden { get; set; } = true;
+        public bool Available { get; set; } = true;
         public IList<MenuFood> MenuFoods { get; set; }
 
         public bool Equals(Menu? other)
@@ -22,7 +22,7 @@ namespace Core.Entities
             return this.Id == other.Id
                 && this.Name == other.Name
                 && this.Description == other.Description
-                && this.IsHidden == other.IsHidden;
+                && this.Available == other.Available;
         }
     }
 
@@ -38,7 +38,7 @@ namespace Core.Entities
             return x.Id == y.Id
                 && x.Name == y.Name
                 && x.Description == y.Description
-                && x.IsHidden == y.IsHidden
+                && x.Available == y.Available
                 && x.IsDeleted == y.IsDeleted;
         }
 
@@ -50,11 +50,11 @@ namespace Core.Entities
 
             int hashMenuDtoDescription = menu.Description == null ? 0 : menu.Description.GetHashCode();
 
-            int hashMenuDtoIsHidden = menu.IsHidden == null ? 0 : menu.IsHidden.GetHashCode();
+            int hashMenuDtoAvailable = menu.Available == null ? 0 : menu.Available.GetHashCode();
 
             int hashMenuId = menu.Id.GetHashCode();
 
-            return hashMenuDtoName ^ hashMenuDtoDescription ^ hashMenuDtoIsHidden ^ hashMenuId;
+            return hashMenuDtoName ^ hashMenuDtoDescription ^ hashMenuDtoAvailable ^ hashMenuId;
         }
     }
 }

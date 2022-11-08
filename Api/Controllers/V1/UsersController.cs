@@ -1,11 +1,11 @@
 ﻿using Application.Common.Exceptions;
 using Application.Models;
+using Application.Users.Commands;
 using Application.Users.Queries;
 using Application.Users.Response;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using Application.Users.Commands;
 
 namespace Api.Controllers.V1
 {

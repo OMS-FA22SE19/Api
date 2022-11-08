@@ -48,8 +48,6 @@ namespace Application.Orders.Queries
                 filters.Add(e => e.Status == request.Status);
             }
 
-            filters.Add(e => e.Date > _dateTime.Now.AddHours(-3));
-
             switch (request.OrderBy)
             {
                 case (OrderProperty.Id):
@@ -110,7 +108,7 @@ namespace Application.Orders.Queries
 
                 foreach (var detail in order.OrderDetails)
                 {
-                    var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted);
+                    var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted && e.Status == detail.Status);
                     if (element is null)
                     {
                         orderDetails.Add(new OrderDetailDto
@@ -120,7 +118,7 @@ namespace Application.Orders.Queries
                             Date = order.Date,
                             FoodId = detail.FoodId,
                             FoodName = detail.Food.Name,
-                            Status = OrderDetailStatus.Served,
+                            Status = detail.Status,
                             Quantity = 1,
                             Price = detail.Price,
                             Amount = detail.Price

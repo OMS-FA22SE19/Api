@@ -4,7 +4,6 @@ using Application.Users.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
-using Firebase.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;

@@ -2,7 +2,7 @@
 
 namespace Core.Interfaces
 {
-    public interface ITableRepository : IGenericRepository<Table>
+    public interface ITableRepository : IAuditableEntityRepository<Table>
     {
         Task<int> GetClosestNumOfSeatTable(int NumOfPeople);
         Task<int> GetTableAvailableForReservation(List<int> tableIds, DateTime StartTime, DateTime EndTime);

@@ -1,6 +1,7 @@
-﻿using Application.Tables.Queries;
+﻿using Application.Models;
+using Application.Tables.Queries;
 using Application.Tables.Response;
-using Application.Models;
+using Application.TableTypes.Response;
 using AutoMapper;
 using Core.Common;
 using Core.Entities;
@@ -10,7 +11,6 @@ using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Net;
-using Application.TableTypes.Response;
 
 namespace Application.UnitTests.Tables.Queries
 {
@@ -97,7 +97,7 @@ namespace Application.UnitTests.Tables.Queries
             var conditionedList = _tables;
             if (!string.IsNullOrWhiteSpace(searchValue))
             {
-                conditionedList = conditionedList.Where(e => e.TableTypeId.ToString().Contains(request.SearchValue) 
+                conditionedList = conditionedList.Where(e => e.TableTypeId.ToString().Contains(request.SearchValue)
                 || request.SearchValue.Contains(e.Id.ToString())
                 || e.NumOfSeats.ToString().Contains(request.SearchValue)).ToList();
             }

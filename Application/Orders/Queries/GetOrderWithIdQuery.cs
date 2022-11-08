@@ -4,7 +4,6 @@ using Application.OrderDetails.Response;
 using Application.Orders.Response;
 using AutoMapper;
 using Core.Entities;
-using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
@@ -55,7 +54,7 @@ namespace Application.Orders.Queries
                         Date = result.Date,
                         FoodId = detail.FoodId,
                         FoodName = detail.Food.Name,
-                        Status = OrderDetailStatus.Served,
+                        Status = detail.Status,
                         Quantity = 1,
                         Price = detail.Price,
                         Amount = detail.Price

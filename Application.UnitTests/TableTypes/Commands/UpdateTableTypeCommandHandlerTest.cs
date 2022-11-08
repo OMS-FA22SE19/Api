@@ -1,7 +1,7 @@
 ﻿using Application.Common.Exceptions;
+using Application.Models;
 using Application.TableTypes.Commands;
 using Application.TableTypes.Response;
-using Application.Models;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;

@@ -1,9 +1,8 @@
-﻿using Application.Types.Queries;
+﻿using Application.Models;
+using Application.Types.Queries;
 using Application.Types.Response;
-using Application.Models;
 using AutoMapper;
 using Core.Common;
-using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using Moq;

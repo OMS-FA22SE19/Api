@@ -21,6 +21,7 @@ namespace Application.OrderDetails.Response
 
         public void Mapping(Profile profile) => profile.CreateMap<OrderDetail, DishDto>()
                 .ForMember(e => e.UserId, opt => opt.MapFrom(e => e.Order.UserId))
+                .ForMember(e => e.Date, opt => opt.MapFrom(e => e.Created))
                 .ForMember(e => e.FoodName, opt => opt.MapFrom(e => e.Food.Name))
                 .ForMember(e => e.PhoneNumber, opt => opt.MapFrom(e => e.Order.User.PhoneNumber))
                 .ReverseMap();

@@ -1,10 +1,6 @@
 ﻿using Domain.Common;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Core.Entities;
-using Domain.Common;
-using MediatR;
-using Microsoft.Extensions.Logging;
 
 namespace Application.Orders.Events
 {

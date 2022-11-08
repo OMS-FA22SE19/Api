@@ -2,7 +2,7 @@
 
 namespace Core.Interfaces
 {
-    public interface ITableTypeRepository : IGenericRepository<TableType>
+    public interface ITableTypeRepository : IAuditableEntityRepository<TableType>
     {
     }
 }

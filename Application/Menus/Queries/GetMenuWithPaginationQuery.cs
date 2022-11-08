@@ -13,7 +13,7 @@ namespace Application.Menus.Queries
     public sealed class GetMenuWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<MenuDto>>>
     {
         public MenuProperty? OrderBy { get; init; }
-        public bool? IsHidden { get; init; }
+        public bool? Available { get; init; }
     }
 
     public sealed class GetMenuWithPaginationQueryHandler : IRequestHandler<GetMenuWithPaginationQuery, Response<PaginatedList<MenuDto>>>
@@ -39,9 +39,9 @@ namespace Application.Menus.Queries
                     || e.Description.Contains(request.SearchValue)
                     || request.SearchValue.Equals(e.Id.ToString()));
             }
-            if (request.IsHidden != null)
+            if (request.Available != null)
             {
-                filters.Add(e => e.IsHidden == request.IsHidden);
+                filters.Add(e => e.Available == request.Available);
             }
 
             switch (request.OrderBy)
@@ -62,13 +62,13 @@ namespace Application.Menus.Queries
                     }
                     orderBy = e => e.OrderBy(x => x.Description);
                     break;
-                case (MenuProperty.IsHidden):
+                case (MenuProperty.Available):
                     if (request.IsDescending)
                     {
-                        orderBy = e => e.OrderByDescending(x => x.IsHidden);
+                        orderBy = e => e.OrderByDescending(x => x.Available);
                         break;
                     }
-                    orderBy = e => e.OrderBy(x => x.IsHidden);
+                    orderBy = e => e.OrderBy(x => x.Available);
                     break;
                 default:
                     break;

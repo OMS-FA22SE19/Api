@@ -4,11 +4,10 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public class AdminSettingRepository : GenericRepository<AdminSetting>, IAdminSettingRepository
+    public class AdminSettingRepository : EntityRepository<AdminSetting>, IAdminSettingRepository
     {
-        public AdminSettingRepository(IApplicationDbContext context) : base(context)
+        public AdminSettingRepository(IApplicationDbContext context) : base(context, context.AdminSettings)
         {
-            _dbSet = context.AdminSettings;
         }
     }
 }

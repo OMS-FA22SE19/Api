@@ -1,6 +1,6 @@
 ﻿namespace Core.Interfaces
 {
-    public interface ITypeRepository : IGenericRepository<Entities.Type>
+    public interface ITypeRepository : IAuditableEntityRepository<Entities.Type>
     {
     }
 }

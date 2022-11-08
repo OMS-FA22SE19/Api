@@ -1,5 +1,4 @@
-﻿using Core.Entities;
-using Core.Enums;
+﻿using Core.Enums;
 using Domain.Common;
 using MediatR;
 using Microsoft.Extensions.Logging;
