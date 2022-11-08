@@ -2,7 +2,7 @@
 
 namespace Core.Interfaces
 {
-    public interface IOrderDetailRepository : IGenericRepository<OrderDetail>
+    public interface IOrderDetailRepository : IAuditableEntityRepository<OrderDetail>
     {
     }
 }

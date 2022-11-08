@@ -4,11 +4,10 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public class BillingRepository : GenericRepository<Billing>, IBillingRepository
+    public class BillingRepository : EntityRepository<Billing>, IBillingRepository
     {
-        public BillingRepository(IApplicationDbContext context) : base(context)
+        public BillingRepository(IApplicationDbContext context) : base(context, context.Billings)
         {
-            _dbSet = context.Billings;
         }
     }
 }

@@ -4,7 +4,6 @@ using Application.Models;
 using Application.VNPay.Response;
 using AutoMapper;
 using Core.Entities;
-using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -65,7 +64,7 @@ namespace Application.VNPay.Commands
                     return new Response<PaymentUrlDto>($"Reservation {request.ReservationId} has been payed");
                 }
             }
-            
+
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
@@ -100,7 +99,7 @@ namespace Application.VNPay.Commands
             vnpay.AddRequestData("vnp_Locale", "vn");
             //if (order is null)
             //{
-                vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan cho reservation: " + request.ReservationId.ToString());
+            vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan cho reservation: " + request.ReservationId.ToString());
             //}
             //else
             //{

@@ -160,6 +160,10 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -263,6 +267,9 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<bool>("Available")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
@@ -278,7 +285,7 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsHidden")
+                    b.Property<bool>("Available")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastModified")
@@ -593,6 +600,10 @@ namespace Infrastructure.Migrations
                     b.Property<string>("CreatedBy")
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");

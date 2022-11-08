@@ -205,6 +205,7 @@ namespace Api.Controllers.V1
         ///
         /// </remarks>
         /// <param name="id">The id of updated Table</param>
+        /// <param name="command"></param>
         [HttpPut("{id}")]
         [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -234,6 +235,10 @@ namespace Api.Controllers.V1
                 }
 
                 var result = await Mediator.Send(command);
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (Exception ex)
@@ -271,6 +276,10 @@ namespace Api.Controllers.V1
                 }
 
                 var result = await Mediator.Send(new DeleteTableCommand { Id = id });
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (Exception ex)

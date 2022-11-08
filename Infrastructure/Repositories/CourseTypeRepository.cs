@@ -4,11 +4,10 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public class CourseTypeRepository : GenericRepository<CourseType>, ICourseTypeRepository
+    public class CourseTypeRepository : AuditableEntityRepository<CourseType>, ICourseTypeRepository
     {
-        public CourseTypeRepository(IApplicationDbContext context) : base(context)
+        public CourseTypeRepository(IApplicationDbContext context) : base(context, context.CourseTypes)
         {
-            _dbSet = context.CourseTypes;
         }
     }
 }

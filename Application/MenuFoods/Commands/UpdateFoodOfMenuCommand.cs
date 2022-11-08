@@ -50,6 +50,6 @@ namespace Application.MenuFoods.Commands
             };
         }
 
-        private static void MapToEntity(UpdateFoodOfMenuCommand request, MenuFood? entity) => entity.Price = request.Price;
+        private void MapToEntity(UpdateFoodOfMenuCommand request, MenuFood? entity) => entity.Price = request.Price;
     }
 }

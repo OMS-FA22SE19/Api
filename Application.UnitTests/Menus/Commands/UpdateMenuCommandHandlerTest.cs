@@ -40,7 +40,7 @@ namespace Application.UnitTests.Menus.Commands
 
         #region Unit Tests
         [TestCase(2, "abcdef", "Test Update", false)]
-        public async Task Should_Update_Menu(int id, string name, string description, bool isHidden)
+        public async Task Should_Update_Menu(int id, string name, string description, bool available)
         {
             //Arrange
             var request = new UpdateMenuCommand()
@@ -48,7 +48,7 @@ namespace Application.UnitTests.Menus.Commands
                 Id = id,
                 Name = name,
                 Description = description,
-                IsHidden = isHidden
+                Available = available
             };
             var handler = new UpdateMenuCommandHandler(_unitOfWork, _mapper);
             var expected = new Menu()
@@ -56,7 +56,7 @@ namespace Application.UnitTests.Menus.Commands
                 Id = id,
                 Name = name,
                 Description = description,
-                IsHidden = isHidden
+                Available = available
             };
             //Act
             var actual = await handler.Handle(request, CancellationToken.None);
@@ -106,7 +106,7 @@ namespace Application.UnitTests.Menus.Commands
                     var inDatabase = _menu.FirstOrDefault(e => e.Id == updatedEntity.Id);
                     inDatabase.Name = updatedEntity.Name;
                     inDatabase.Description = updatedEntity.Description;
-                    inDatabase.IsHidden = updatedEntity.IsHidden;
+                    inDatabase.Available = updatedEntity.Available;
                     return inDatabase;
                 });
             return mockMenuRepository.Object;
@@ -121,7 +121,7 @@ namespace Application.UnitTests.Menus.Commands
                     Id = command.Id,
                     Name = command.Name,
                     Description = command.Description,
-                    IsHidden = command.IsHidden
+                    Available = command.Available
                 });
             return mapperMock.Object;
         }

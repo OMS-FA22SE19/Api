@@ -2,7 +2,6 @@
 using Application.Models;
 using Application.Types.Response;
 using AutoMapper;
-using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;

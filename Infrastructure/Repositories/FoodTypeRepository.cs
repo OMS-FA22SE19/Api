@@ -4,11 +4,10 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public sealed class FoodTypeRepository : GenericRepository<FoodType>, IFoodTypeRepository
+    public sealed class FoodTypeRepository : EntityRepository<FoodType>, IFoodTypeRepository
     {
-        public FoodTypeRepository(IApplicationDbContext context) : base(context)
+        public FoodTypeRepository(IApplicationDbContext context) : base(context, context.FoodTypes)
         {
-            _dbSet = context.FoodTypes;
         }
     }
 }

@@ -4,6 +4,6 @@
     {
         Name,
         Description,
-        IsHidden
+        Available
     }
 }

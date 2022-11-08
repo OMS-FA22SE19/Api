@@ -2,7 +2,7 @@
 
 namespace Core.Interfaces
 {
-    public interface ICourseTypeRepository : IGenericRepository<CourseType>
+    public interface ICourseTypeRepository : IAuditableEntityRepository<CourseType>
     {
     }
 }

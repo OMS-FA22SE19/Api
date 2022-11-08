@@ -13,7 +13,7 @@ namespace Application.Menus.Queries
     {
         [Required]
         public int Id { get; init; }
-        public bool? IsHidden { get; set; }
+        public bool? Available { get; set; }
     }
 
     public sealed class GetMenuWithIdQueryHandler : IRequestHandler<GetMenuWithIdQuery, Response<MenuDto>>
@@ -30,9 +30,9 @@ namespace Application.Menus.Queries
         public async Task<Response<MenuDto>> Handle(GetMenuWithIdQuery request, CancellationToken cancellationToken)
         {
             Menu result = new();
-            if (request.IsHidden != null)
+            if (request.Available != null)
             {
-                result = await _unitOfWork.MenuRepository.GetAsync(e => e.Id == request.Id && e.IsHidden == request.IsHidden);
+                result = await _unitOfWork.MenuRepository.GetAsync(e => e.Id == request.Id && e.Available == request.Available);
             }
             else
             {

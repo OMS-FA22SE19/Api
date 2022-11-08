@@ -16,7 +16,6 @@ namespace Application.Menus.Commands
         public string Name { get; set; }
         [StringLength(1000, MinimumLength = 2)]
         public string Description { get; set; }
-        public bool IsHidden { get; set; } = false;
 
         public void Mapping(Profile profile)
         {
@@ -37,7 +36,9 @@ namespace Application.Menus.Commands
 
         public async Task<Response<MenuDto>> Handle(CreateMenuCommand request, CancellationToken cancellationToken)
         {
+            var available = (await _unitOfWork.MenuRepository.GetAsync(e => e.Available)) is null;
             var entity = _mapper.Map<Menu>(request);
+            entity.Available = available;
             var result = await _unitOfWork.MenuRepository.InsertAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)

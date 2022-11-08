@@ -3,7 +3,6 @@ using Core.Common;
 using Core.Common.Interfaces;
 using Core.Entities;
 using Core.Interfaces;
-using Firebase.Auth;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 

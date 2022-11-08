@@ -1,5 +1,4 @@
-﻿using Core.Entities;
-using Domain.Common;
+﻿using Domain.Common;
 using MediatR;
 using Microsoft.Extensions.Logging;
 

@@ -39,14 +39,13 @@ namespace Application.UnitTests.Menus.Commands
 
         #region Unit Tests
         [TestCase("abcdef", "test description", false)]
-        public async Task Should_Create_Menu(string name, string description, bool isHidden)
+        public async Task Should_Create_Menu(string name, string description, bool available)
         {
             //Arrange
             var request = new CreateMenuCommand()
             {
                 Name = name,
-                Description = description,
-                IsHidden = false
+                Description = description
             };
             var handler = new CreateMenuCommandHandler(_unitOfWork, _mapper);
             var expected = new Response<MenuDto>(new MenuDto { Id = _Menus.Max(e => e.Id) + 1, Name = name })

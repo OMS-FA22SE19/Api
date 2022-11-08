@@ -1,15 +1,15 @@
 ﻿using Application.Common.Exceptions;
+using Application.Models;
 using Application.Tables.Commands;
 using Application.Tables.Response;
-using Application.Models;
 using AutoMapper;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Net;
-using Core.Enums;
 
 namespace Application.UnitTests.Tables.Commands
 {
