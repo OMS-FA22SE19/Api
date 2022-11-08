@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20221108131626_ChangeName_Available_Available")]
-    partial class ChangeName_IsHidden_Available
+    [Migration("20221106094405_Add_User_Device_Token")]
+    partial class Add_User_Device_Token
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -162,10 +162,6 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -284,7 +280,7 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("Available")
+                    b.Property<bool>("IsHidden")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastModified")
@@ -600,10 +596,6 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
-                    b.Property<string>("Description")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -622,6 +614,22 @@ namespace Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Types", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.UserDeviceToken", b =>
+                {
+                    b.Property<string>("userId")
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("deviceToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("userId");
+
+                    b.HasIndex("userId");
+
+                    b.ToTable("UserDeviceToken", (string)null);
                 });
 
             modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.DeviceFlowCodes", b =>
@@ -1048,6 +1056,17 @@ namespace Infrastructure.Migrations
                     b.Navigation("TableType");
                 });
 
+            modelBuilder.Entity("Core.Entities.UserDeviceToken", b =>
+                {
+                    b.HasOne("Core.Entities.ApplicationUser", "User")
+                        .WithMany("UserDeviceTokens")
+                        .HasForeignKey("userId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -1104,6 +1123,8 @@ namespace Infrastructure.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Reservations");
+
+                    b.Navigation("UserDeviceTokens");
                 });
 
             modelBuilder.Entity("Core.Entities.CourseType", b =>
