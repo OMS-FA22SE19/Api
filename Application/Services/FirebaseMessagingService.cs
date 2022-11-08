@@ -12,6 +12,8 @@ using Firebase.Auth;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using static Google.Apis.Requests.BatchRequest;
+using Application.Foods.Response;
+using System.Net;
 
 namespace Application.Services
 {
@@ -44,11 +46,19 @@ namespace Application.Services
 
         public async Task<string> SendNotification(string token, string title, string body)
         {
-            var result = await messaging.SendAsync(CreateNotification(title, body, token));
-            //do something with result
-            Console.WriteLine("success: " + result);
-            return result;
+            try
+            {
+                var result = await messaging.SendAsync(CreateNotification(title, body, token));
+                //do something with result
+                Console.WriteLine("success: " + result);
+                return result;
             }
+            catch (FirebaseException ex)
+            {
+                var errorMessage = $"error code: {ex.ErrorCode} was found please fix";
+                return null;
+            }
+        }
 
         private MulticastMessage CreateNotificationToMultipleDevice(string title, string notificationBody, List<string> tokens)
         {
