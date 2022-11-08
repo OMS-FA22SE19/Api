@@ -80,13 +80,27 @@ namespace Application.OrderDetails.Commands
             var food = await _unitOfWork.FoodRepository.GetAsync(f => f.Id == entity.FoodId);
             var order = await _unitOfWork.OrderRepository.GetAsync(o => o.Id.Equals(entity.OrderId));
             var token = await _unitOfWork.UserDeviceTokenRepository.GetAsync(t => t.userId.Equals(order.UserId));
-            entity.AddDomainEvent(new UpdateOrderDetailEvent
+            if (token is not null)
             {
-                Id = request.Id,
-                name = food.Name,
-                Status = request.Status,
-                token = token.deviceToken
-            });
+                entity.AddDomainEvent(new UpdateOrderDetailEvent
+                {
+                    Id = request.Id,
+                    name = food.Name,
+                    Status = request.Status,
+                    token = token.deviceToken
+                });
+            } 
+            else
+            {
+                entity.AddDomainEvent(new UpdateOrderDetailEvent
+                {
+                    Id = request.Id,
+                    name = food.Name,
+                    Status = request.Status,
+                    token = ""
+                });
+            }
+            
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {

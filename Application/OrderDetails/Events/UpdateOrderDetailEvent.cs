@@ -44,7 +44,10 @@ namespace Application.OrderDetails.Events
             }
             _logger.LogInformation("Order Detail id: {0} was changed to status {1}", notification.Id, status);
             
-            var result = await _firebaseMessagingService.SendNotification(notification.token, "Order updated", $"Your {notification.name} was changed to {status}");
+            if (!notification.token.Equals(""))
+            {
+                var result = await _firebaseMessagingService.SendNotification(notification.token, "Order updated", $"Your {notification.name} was changed to {status}");
+            }
         }
     }
 }
