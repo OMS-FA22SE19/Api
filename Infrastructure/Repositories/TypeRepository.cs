@@ -3,11 +3,10 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public sealed class TypeRepository : GenericRepository<Core.Entities.Type>, ITypeRepository
+    public sealed class TypeRepository : AuditableEntityRepository<Core.Entities.Type>, ITypeRepository
     {
-        public TypeRepository(IApplicationDbContext context) : base(context)
+        public TypeRepository(IApplicationDbContext context) : base(context, context.Types)
         {
-            _dbSet = context.Types;
         }
     }
 }

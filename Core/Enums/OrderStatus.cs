@@ -3,6 +3,7 @@
     public enum OrderStatus
     {
         Processing = 0,
-        Paid = 1
+        Checking = 1,
+        Paid = 2
     }
 }

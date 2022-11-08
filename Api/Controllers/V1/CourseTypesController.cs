@@ -155,7 +155,7 @@ namespace Api.Controllers.V1
         ///
         /// </remarks>
         /// <param name="id">The id of updated Course Type</param>
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -224,6 +224,51 @@ namespace Api.Controllers.V1
                 }
 
                 var command = new DeleteCourseTypeCommand
+                {
+                    Id = id
+                };
+                var result = await Mediator.Send(command);
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<CourseTypeDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
+        /// Recover a deleted Course Type.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /CourseTypes/1/Recover
+        ///
+        /// </remarks>
+        /// <param name="id">The id of deleted Course Type</param>
+        [HttpPut("{id}/Recover")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> RestoreAsync(int id)
+        {
+            try
+            {
+                if (id < 0)
+                {
+                    return BadRequest();
+                }
+
+                var command = new RecoverCourseTypeCommand
                 {
                     Id = id
                 };

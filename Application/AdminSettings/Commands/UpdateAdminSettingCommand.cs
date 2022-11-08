@@ -1,11 +1,11 @@
-﻿using Application.Models;
-using Application.AdminSettings.Response;
-using AutoMapper;
-using MediatR;
-using Core.Interfaces;
-using System.ComponentModel.DataAnnotations;
+﻿using Application.AdminSettings.Response;
 using Application.Common.Exceptions;
+using Application.Models;
+using AutoMapper;
 using Core.Entities;
+using Core.Interfaces;
+using MediatR;
+using System.ComponentModel.DataAnnotations;
 
 namespace Application.AdminSettings.Commands
 {
@@ -46,7 +46,7 @@ namespace Application.AdminSettings.Commands
             {
                 return new Response<AdminSettingDto>("error");
             }
-            
+
             return new Response<AdminSettingDto>()
             {
                 StatusCode = System.Net.HttpStatusCode.NoContent

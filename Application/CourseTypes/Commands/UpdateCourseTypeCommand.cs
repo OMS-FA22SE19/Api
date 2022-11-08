@@ -17,6 +17,7 @@ namespace Application.CourseTypes.Commands
         [Required]
         [StringLength(1000, MinimumLength = 2)]
         public string Name { get; init; }
+        public string Description { get; init; }
 
         public void Mapping(Profile profile)
         {
@@ -59,6 +60,10 @@ namespace Application.CourseTypes.Commands
             };
         }
 
-        private static void MapToEntity(UpdateCourseTypeCommand request, CourseType entity) => entity.Name = request.Name;
+        private void MapToEntity(UpdateCourseTypeCommand request, CourseType entity)
+        {
+            entity.Name = request.Name;
+            entity.Description = request.Description;
+        }
     }
 }

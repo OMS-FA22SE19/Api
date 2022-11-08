@@ -1,7 +1,8 @@
 ﻿using Application.Common.Exceptions;
+using Application.Models;
 using Application.Tables.Queries;
 using Application.Tables.Response;
-using Application.Models;
+using Application.TableTypes.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
@@ -9,8 +10,6 @@ using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Net;
-using Application.TableTypes.Response;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.UnitTests.Tables.Queries
 {

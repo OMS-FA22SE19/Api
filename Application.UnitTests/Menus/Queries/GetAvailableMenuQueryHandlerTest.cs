@@ -1,5 +1,4 @@
-﻿using Application.Common.Exceptions;
-using Application.Menus.Queries;
+﻿using Application.Menus.Queries;
 using Application.Menus.Response;
 using Application.Models;
 using AutoMapper;
@@ -63,14 +62,14 @@ namespace Application.UnitTests.Menus.Queries
             var actual = await handler.Handle(request, CancellationToken.None);
 
             //Assert
-            var inDatabase = _menus.FirstOrDefault(x => !x.IsHidden && !x.IsDeleted);
+            var inDatabase = _menus.FirstOrDefault(x => !x.Available && !x.IsDeleted);
             Assert.NotNull(inDatabase);
             var expected = new Response<MenuDto>(new MenuDto
             {
                 Id = inDatabase.Id,
                 Name = inDatabase.Name,
                 Description = inDatabase.Description,
-                IsHidden = inDatabase.IsHidden
+                Available = inDatabase.Available
             });
             Assert.That(actual.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(expected.Data, Is.EqualTo(actual.Data));
@@ -101,7 +100,7 @@ namespace Application.UnitTests.Menus.Queries
                     Id = menu.Id,
                     Name = menu.Name,
                     Description = menu.Description,
-                    IsHidden = menu.IsHidden
+                    Available = menu.Available
                 });
             return mapperMock.Object;
         }

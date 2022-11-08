@@ -60,8 +60,8 @@ namespace Application.UnitTests.Menus.Queries
         [TestCase(1, 50, "", MenuProperty.Name, true)]
         [TestCase(1, 50, "", MenuProperty.Description, false)]
         [TestCase(1, 50, "", MenuProperty.Description, true)]
-        [TestCase(1, 50, "", MenuProperty.IsHidden, false)]
-        [TestCase(1, 50, "", MenuProperty.IsHidden, true)]
+        [TestCase(1, 50, "", MenuProperty.Available, false)]
+        [TestCase(1, 50, "", MenuProperty.Available, true)]
         [TestCase(1, 50, "2", null, false)]
         [TestCase(1, 50, "Main", null, false)]
         public async Task Should_Return_With_Condition(
@@ -89,9 +89,9 @@ namespace Application.UnitTests.Menus.Queries
                 || request.SearchValue.Contains(e.Id.ToString())).ToList();
             }
 
-            if (request.IsHidden != null)
+            if (request.Available != null)
             {
-                conditionedList = conditionedList.Where(e => e.IsHidden == request.IsHidden).ToList();
+                conditionedList = conditionedList.Where(e => e.Available == request.Available).ToList();
             }
 
             conditionedList = conditionedList.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
@@ -113,13 +113,13 @@ namespace Application.UnitTests.Menus.Queries
                     }
                     conditionedList = conditionedList.OrderBy(x => x.Description).ToList();
                     break;
-                case (MenuProperty.IsHidden):
+                case (MenuProperty.Available):
                     if (request.IsDescending)
                     {
-                        conditionedList = conditionedList.OrderByDescending(x => x.IsHidden).ToList();
+                        conditionedList = conditionedList.OrderByDescending(x => x.Available).ToList();
                         break;
                     }
-                    conditionedList = conditionedList.OrderBy(x => x.IsHidden).ToList();
+                    conditionedList = conditionedList.OrderBy(x => x.Available).ToList();
                     break;
                 default:
                     break;
@@ -132,7 +132,7 @@ namespace Application.UnitTests.Menus.Queries
                     Id = menuDto.Id,
                     Name = menuDto.Name,
                     Description = menuDto.Description,
-                    IsHidden = menuDto.IsHidden,
+                    Available = menuDto.Available,
                     IsDeleted = menuDto.IsDeleted
                 });
             }
@@ -201,7 +201,7 @@ namespace Application.UnitTests.Menus.Queries
                             Id = entity.Id,
                             Name = entity.Name,
                             Description = entity.Description,
-                            IsHidden = entity.IsHidden,
+                            Available = entity.Available,
                             IsDeleted = entity.IsDeleted
                         });
                     }

@@ -1,12 +1,8 @@
 ﻿using Application.AdminSettings.Response;
 using Application.Models;
 using AutoMapper;
-using MediatR;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.Extensions.Configuration;
 using Core.Interfaces;
-using Application.CourseTypes.Response;
-using Core.Common;
+using MediatR;
 
 namespace Application.AdminSettings.Queries
 {

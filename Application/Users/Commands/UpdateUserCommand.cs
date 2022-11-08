@@ -1,5 +1,4 @@
-﻿using Application.Common.Exceptions;
-using Application.Common.Mappings;
+﻿using Application.Common.Mappings;
 using Application.Models;
 using Application.Users.Response;
 using AutoMapper;
@@ -70,7 +69,7 @@ namespace Application.Users.Commands
             };
         }
 
-        private static void MapToEntity(UpdateUserCommand request, ApplicationUser? entity)
+        private void MapToEntity(UpdateUserCommand request, ApplicationUser? entity)
         {
             entity.FullName = request.FullName;
             entity.PhoneNumber = request.PhoneNumber;

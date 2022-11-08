@@ -25,7 +25,7 @@ namespace Application.Menus.Queries
 
         public async Task<Response<MenuDto>> Handle(GetAvailableMenuQuery request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.MenuRepository.GetAsync(e => !e.IsHidden && !e.IsDeleted);
+            var result = await _unitOfWork.MenuRepository.GetAsync(e => !e.Available && !e.IsDeleted);
             if (result is null)
             {
                 throw new NotFoundException($"No available {nameof(Menu)}");

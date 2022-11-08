@@ -1,9 +1,6 @@
 ﻿using Application.Common.Mappings;
-using Application.OrderDetails.Response;
-using Application.Orders.Response;
 using AutoMapper;
 using Core.Entities;
-using Core.Enums;
 
 namespace Application.AdminSettings.Response
 {

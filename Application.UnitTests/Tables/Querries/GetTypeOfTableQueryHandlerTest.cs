@@ -1,18 +1,15 @@
-﻿using Application.Tables.Queries;
+﻿using Application.Models;
+using Application.Tables.Queries;
 using Application.Tables.Response;
-using Application.Models;
+using Application.TableTypes.Response;
 using AutoMapper;
 using Core.Common;
 using Core.Entities;
-using Core.Enums;
 using Core.Interfaces;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Net;
-using Application.TableTypes.Response;
-using Microsoft.EntityFrameworkCore;
-using Application.Common.Models;
 
 namespace Application.UnitTests.Tables.Queries
 {
@@ -129,7 +126,7 @@ namespace Application.UnitTests.Tables.Queries
         {
             var mockTableRepository = new Mock<ITableRepository>();
             mockTableRepository
-                .Setup(m => m.GetAllAsync(It.IsAny<List<Expression<Func<Table, bool>>>>(), 
+                .Setup(m => m.GetAllAsync(It.IsAny<List<Expression<Func<Table, bool>>>>(),
                     It.IsAny<Func<IQueryable<Table>, IOrderedQueryable<Table>>>(),
                     It.IsAny<string>()))
                 .ReturnsAsync(

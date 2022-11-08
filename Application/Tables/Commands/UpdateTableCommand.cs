@@ -66,7 +66,7 @@ namespace Application.Tables.Commands
             };
         }
 
-        private static void MapToEntity(UpdateTableCommand request, Table? entity)
+        private void MapToEntity(UpdateTableCommand request, Table? entity)
         {
             entity.NumOfSeats = request.NumOfSeats;
             entity.Status = request.Status;

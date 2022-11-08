@@ -2,7 +2,7 @@
 
 namespace Core.Interfaces
 {
-    public interface IMenuRepository : IGenericRepository<Menu>
+    public interface IMenuRepository : IAuditableEntityRepository<Menu>
     {
     }
 }

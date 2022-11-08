@@ -139,7 +139,7 @@ namespace Application.UnitTests
                     Id = 1,
                     Name = "Main Menu",
                     Description = "This is the main menu of the restaurant",
-                    IsHidden = false,
+                    Available = false,
                     IsDeleted = false
                 },
                 new Menu()
@@ -147,7 +147,7 @@ namespace Application.UnitTests
                     Id = 2,
                     Name = "Hidden Menu",
                     Description = "This is the hidden menu of the restaurant",
-                    IsHidden = true,
+                    Available = true,
                     IsDeleted = false
                 },
                 new Menu()
@@ -155,7 +155,7 @@ namespace Application.UnitTests
                     Id = 1,
                     Name = "Deleted Menu",
                     Description = "This is the deleted menu of the restaurant",
-                    IsHidden = false,
+                    Available = false,
                     IsDeleted = true
                 }
         };

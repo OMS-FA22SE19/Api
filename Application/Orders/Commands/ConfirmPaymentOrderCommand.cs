@@ -40,9 +40,10 @@ namespace Application.Orders.Commands
                 throw new NotFoundException(nameof(Order), request.Id);
             }
 
-            if (entity.OrderDetails.Any(e => e.Status != OrderDetailStatus.Served))
+            foreach (var detail in entity.OrderDetails)
             {
-                return new Response<OrderDto>($"Order {entity.Id} cannot be confirmed. Make sure all dishes have been served!");
+                detail.Status = OrderDetailStatus.Overcharged;
+                await _unitOfWork.OrderDetailRepository.UpdateAsync(detail);
             }
 
             var reservation = await _unitOfWork.ReservationRepository.GetAsync(r => r.Id == entity.ReservationId, $"{nameof(Reservation.ReservationTables)}");
@@ -107,7 +108,7 @@ namespace Application.Orders.Commands
             return new Response<OrderDto>(bill);
         }
 
-        private static void MapToEntity(Order entity)
+        private void MapToEntity(Order entity)
         {
             entity.Status = OrderStatus.Paid;
         }

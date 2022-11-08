@@ -62,7 +62,7 @@ namespace Application.TableTypes.Commands
             };
         }
 
-        private static void MapToEntity(UpdateTableTypeCommand request, TableType? entity)
+        private void MapToEntity(UpdateTableTypeCommand request, TableType? entity)
         {
             entity.Name = request.Name;
             entity.ChargePerSeat = request.ChargePerSeat;
