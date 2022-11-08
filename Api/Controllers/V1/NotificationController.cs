@@ -149,6 +149,52 @@ namespace Api.Controllers.V1
                 return StatusCode((int)response.StatusCode, response);
             }
         }
+
+        /// <summary>
+        /// Create a Notification for topic.
+        /// </summary>
+        /// <returns>New Notification for topic.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Notification
+        ///     {
+        ///        "topic": "Some_Topic",
+        ///        "title": "title",
+        ///        "body": "This is a body"
+        ///     }
+        ///     
+        /// </remarks>
+        [HttpPost("Staff")]
+        [Consumes("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Response<NotificationDto>>> CallStaff([FromBody] CallStaffCommand command)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await Mediator.Send(command);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<MenuDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
     }
 
 }
