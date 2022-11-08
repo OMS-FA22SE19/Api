@@ -4,11 +4,10 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public sealed class TopicRepository : GenericRepository<Topic>, ITopicRepository
+    public sealed class TopicRepository : AuditableEntityRepository<Topic>, ITopicRepository
     {
-        public TopicRepository(IApplicationDbContext context) : base(context)
+        public TopicRepository(IApplicationDbContext context) : base(context, context.Topics)
         {
-            _dbSet = context.Topics;
         }
     }
 }

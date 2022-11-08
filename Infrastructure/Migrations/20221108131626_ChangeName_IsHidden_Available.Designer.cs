@@ -13,7 +13,7 @@ namespace Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     [Migration("20221108131626_ChangeName_Available_Available")]
-    partial class ChangeName_Available_Available
+    partial class ChangeName_IsHidden_Available
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -268,9 +268,6 @@ namespace Infrastructure.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<bool>("Available")
-                        .HasColumnType("bit");
 
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");

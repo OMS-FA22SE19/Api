@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Core.Interfaces
 {
-    public interface ITopicRepository: IGenericRepository<Topic>
+    public interface ITopicRepository: IAuditableEntityRepository<Topic>
     {
     }
 }

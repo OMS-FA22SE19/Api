@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Core.Interfaces
 {
-    public interface IUserTopicRepository: IGenericRepository<UserTopic>
+    public interface IUserTopicRepository: IEntityRepository<UserTopic>
     {
     }
 }

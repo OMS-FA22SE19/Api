@@ -4,11 +4,10 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public sealed class UserDeviceTokenRepository : GenericRepository<UserDeviceToken>, IUserDeviceTokenRepository
+    public sealed class UserDeviceTokenRepository : EntityRepository<UserDeviceToken>, IUserDeviceTokenRepository
     {
-        public UserDeviceTokenRepository(IApplicationDbContext context) : base(context)
+        public UserDeviceTokenRepository(IApplicationDbContext context) : base(context, context.UserDeviceTokens)
         {
-            _dbSet = context.UserDeviceTokens;
         }
     }
 }

@@ -4,11 +4,10 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public sealed class UserTopicRepository : GenericRepository<UserTopic>, IUserTopicRepository
+    public sealed class UserTopicRepository : EntityRepository<UserTopic>, IUserTopicRepository
     {
-        public UserTopicRepository(IApplicationDbContext context) : base(context)
+        public UserTopicRepository(IApplicationDbContext context) : base(context, context.UserTopics)
         {
-            _dbSet = context.UserTopics;
         }
     }
 }

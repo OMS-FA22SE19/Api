@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Core.Interfaces
 {
-    public interface IUserDeviceTokenRepository: IGenericRepository<UserDeviceToken>
+    public interface IUserDeviceTokenRepository: IEntityRepository<UserDeviceToken>
     {
     }
 }
