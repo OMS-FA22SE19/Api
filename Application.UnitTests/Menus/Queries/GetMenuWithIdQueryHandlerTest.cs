@@ -71,7 +71,7 @@ namespace Application.UnitTests.Menus.Queries
                 Id = inDatabase.Id,
                 Name = inDatabase.Name,
                 Description = inDatabase.Description,
-                IsHidden = inDatabase.IsHidden
+                Available = inDatabase.Available
             });
             Assert.That(actual.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(expected.Data, Is.EqualTo(actual.Data));
@@ -119,7 +119,7 @@ namespace Application.UnitTests.Menus.Queries
                     Id = menu.Id,
                     Name = menu.Name,
                     Description = menu.Description,
-                    IsHidden = menu.IsHidden
+                    Available = menu.Available
                 });
             return mapperMock.Object;
         }

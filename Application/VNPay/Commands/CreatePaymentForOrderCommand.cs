@@ -105,7 +105,7 @@ namespace Application.VNPay.Commands
 
 
             vnpay.AddRequestData("vnp_Locale", "vn");
-            
+
             vnpay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang: " + request.OrderId.ToString());
             //vnpay.AddRequestData("vnp_OrderType", orderCategory.SelectedItem.Value); //default value: other
             vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);

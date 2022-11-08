@@ -4,11 +4,10 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public class TableTypeRepository : GenericRepository<TableType>, ITableTypeRepository
+    public class TableTypeRepository : AuditableEntityRepository<TableType>, ITableTypeRepository
     {
-        public TableTypeRepository(IApplicationDbContext context) : base(context)
+        public TableTypeRepository(IApplicationDbContext context) : base(context, context.TableTypes)
         {
-            _dbSet = context.TableTypes;
         }
     }
 }

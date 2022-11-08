@@ -1,6 +1,5 @@
 ﻿using Application.Common.Mappings;
 using AutoMapper;
-using Core.Entities;
 
 namespace Application.Types.Response
 {
@@ -8,6 +7,7 @@ namespace Application.Types.Response
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
         public bool IsDeleted { get; set; }
 
         public bool Equals(TypeDto? other)

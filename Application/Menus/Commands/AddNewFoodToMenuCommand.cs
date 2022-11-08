@@ -9,7 +9,6 @@ using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
-using System.Xml.Linq;
 
 namespace Application.Menus.Commands
 {

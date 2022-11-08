@@ -8,6 +8,9 @@ namespace Infrastructure.Common
     {
         private readonly IApplicationDbContext _context;
         private IAdminSettingRepository _adminSettingRepository;
+        private ITopicRepository _topicRepository;
+        private IUserTopicRepository _userTopicRepository;
+        private IUserDeviceTokenRepository _userDeviceTokenRepository;
         private IUserRepository _userRepository;
         private ITableRepository _tableRepository;
         private IReservationRepository _reservationRepository;
@@ -36,6 +39,39 @@ namespace Infrastructure.Common
                     _adminSettingRepository = new AdminSettingRepository(_context);
                 }
                 return _adminSettingRepository;
+            }
+        }
+        public ITopicRepository TopicRepository
+        {
+            get
+            {
+                if (_topicRepository is null)
+                {
+                    _topicRepository = new TopicRepository(_context);
+                }
+                return _topicRepository;
+            }
+        }
+        public IUserTopicRepository UserTopicRepository
+        {
+            get
+            {
+                if (_userTopicRepository is null)
+                {
+                    _userTopicRepository = new UserTopicRepository(_context);
+                }
+                return _userTopicRepository;
+            }
+        }
+        public IUserDeviceTokenRepository UserDeviceTokenRepository
+        {
+            get
+            {
+                if (_userDeviceTokenRepository is null)
+                {
+                    _userDeviceTokenRepository = new UserDeviceTokenRepository(_context);
+                }
+                return _userDeviceTokenRepository;
             }
         }
         public IUserRepository UserRepository

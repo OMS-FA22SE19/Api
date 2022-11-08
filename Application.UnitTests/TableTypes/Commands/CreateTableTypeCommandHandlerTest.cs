@@ -1,13 +1,12 @@
-﻿using Application.TableTypes.Commands;
+﻿using Application.Models;
+using Application.TableTypes.Commands;
 using Application.TableTypes.Response;
-using Application.Models;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
 using Moq;
 using NUnit.Framework;
 using System.Net;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace Application.UnitTests.TableTypes.Commands
 {

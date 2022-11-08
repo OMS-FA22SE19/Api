@@ -3,8 +3,6 @@ using Application.Helpers;
 using Application.Models;
 using Application.Types.Response;
 using AutoMapper;
-using Core.Entities;
-using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.Extensions.Configuration;

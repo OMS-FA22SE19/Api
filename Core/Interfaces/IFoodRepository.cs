@@ -2,7 +2,7 @@
 
 namespace Core.Interfaces
 {
-    public interface IFoodRepository : IGenericRepository<Food>
+    public interface IFoodRepository : IAuditableEntityRepository<Food>
     {
     }
 }

@@ -1,6 +1,6 @@
-﻿using Application.Tables.Commands;
+﻿using Application.Models;
+using Application.Tables.Commands;
 using Application.Tables.Response;
-using Application.Models;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;

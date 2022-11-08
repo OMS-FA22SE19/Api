@@ -2,7 +2,7 @@
 
 namespace Core.Interfaces
 {
-    public interface IReservationTableRepository : IGenericRepository<ReservationTable>
+    public interface IReservationTableRepository : IEntityRepository<ReservationTable>
     {
     }
 }

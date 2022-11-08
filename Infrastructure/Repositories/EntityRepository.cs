@@ -2,18 +2,21 @@
 using Core.Common;
 using Core.Common.Interfaces;
 using Core.Interfaces;
+using Domain.Common;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories
 {
-    public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : Entity
+    public class EntityRepository<TEntity> : IEntityRepository<TEntity> where TEntity : Entity
     {
         internal IApplicationDbContext _context;
         internal DbSet<TEntity> _dbSet;
-        public GenericRepository(IApplicationDbContext context)
+
+        public EntityRepository(IApplicationDbContext context, DbSet<TEntity> dbSet)
         {
             _context = context;
+            _dbSet = dbSet;
         }
 
         public virtual async Task<PaginatedList<TEntity>> GetPaginatedListAsync(
@@ -125,8 +128,14 @@ namespace Infrastructure.Repositories
 
         public virtual async Task<TEntity> InsertAsync(TEntity entity)
         {
-            _dbSet.Add(entity);
+            await _dbSet.AddAsync(entity);
             return await Task.FromResult(entity);
+        }
+
+        public virtual async Task<IList<TEntity>> InsertAsync(IList<TEntity> entities)
+        {
+            await _dbSet.AddRangeAsync(entities);
+            return await Task.FromResult(entities);
         }
 
         public virtual async Task<bool> DeleteAsync(Expression<Func<TEntity, bool>> expression)
@@ -157,6 +166,26 @@ namespace Infrastructure.Repositories
             _dbSet.Attach(entityToUpdate);
             _context.Entry(entityToUpdate).State = EntityState.Modified;
             return await Task.FromResult(entityToUpdate);
+        }
+    }
+
+    public class AuditableEntityRepository<TEntity> : EntityRepository<TEntity>, IAuditableEntityRepository<TEntity> where TEntity : BaseAuditableEntity
+    {
+        public AuditableEntityRepository(IApplicationDbContext context, DbSet<TEntity> dbSet) : base(context, dbSet)
+        {
+            _context = context;
+            _dbSet = dbSet;
+        }
+
+        public virtual async Task<TEntity> RestoreAsync(TEntity entityToRecover)
+        {
+            if (entityToRecover.IsDeleted)
+            {
+                entityToRecover.IsDeleted = false;
+            }
+            _dbSet.Attach(entityToRecover);
+            _context.Entry(entityToRecover).State = EntityState.Modified;
+            return await Task.FromResult(entityToRecover);
         }
     }
 }

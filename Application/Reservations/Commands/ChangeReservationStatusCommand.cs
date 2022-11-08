@@ -62,6 +62,6 @@ namespace Application.Reservations.Commands
             };
         }
 
-        private static void MapToEntity(ChangeReservationStatusCommand request, Reservation updatedEntity) => updatedEntity.Status = request.Status;
+        private void MapToEntity(ChangeReservationStatusCommand request, Reservation updatedEntity) => updatedEntity.Status = request.Status;
     }
 }

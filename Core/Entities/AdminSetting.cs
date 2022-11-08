@@ -1,6 +1,4 @@
 ﻿using Core.Common;
-using Core.Enums;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace Core.Entities

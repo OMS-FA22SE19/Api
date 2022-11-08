@@ -160,6 +160,10 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -263,6 +267,9 @@ namespace Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
+                    b.Property<bool>("Available")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
@@ -278,7 +285,7 @@ namespace Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsHidden")
+                    b.Property<bool>("Available")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastModified")
@@ -579,7 +586,7 @@ namespace Infrastructure.Migrations
                     b.ToTable("TableTypes", (string)null);
                 });
 
-            modelBuilder.Entity("Core.Entities.Type", b =>
+            modelBuilder.Entity("Core.Entities.Topic", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -611,7 +618,79 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.ToTable("Topics", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.Type", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModified")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.HasKey("Id");
+
                     b.ToTable("Types", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.UserDeviceToken", b =>
+                {
+                    b.Property<string>("userId")
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<string>("deviceToken")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("userId");
+
+                    b.HasIndex("userId");
+
+                    b.ToTable("UserDeviceToken", (string)null);
+                });
+
+            modelBuilder.Entity("Core.Entities.UserTopic", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<int>("TopicId")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "TopicId");
+
+                    b.HasIndex("TopicId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserTopic", (string)null);
                 });
 
             modelBuilder.Entity("Duende.IdentityServer.EntityFramework.Entities.DeviceFlowCodes", b =>
@@ -1038,6 +1117,36 @@ namespace Infrastructure.Migrations
                     b.Navigation("TableType");
                 });
 
+            modelBuilder.Entity("Core.Entities.UserDeviceToken", b =>
+                {
+                    b.HasOne("Core.Entities.ApplicationUser", "User")
+                        .WithMany("UserDeviceTokens")
+                        .HasForeignKey("userId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Core.Entities.UserTopic", b =>
+                {
+                    b.HasOne("Core.Entities.Topic", "Topic")
+                        .WithMany("UserTopics")
+                        .HasForeignKey("TopicId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.ApplicationUser", "User")
+                        .WithMany("UserTopics")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Topic");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -1094,6 +1203,10 @@ namespace Infrastructure.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("Reservations");
+
+                    b.Navigation("UserDeviceTokens");
+
+                    b.Navigation("UserTopics");
                 });
 
             modelBuilder.Entity("Core.Entities.CourseType", b =>
@@ -1142,6 +1255,11 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Core.Entities.TableType", b =>
                 {
                     b.Navigation("Tables");
+                });
+
+            modelBuilder.Entity("Core.Entities.Topic", b =>
+                {
+                    b.Navigation("UserTopics");
                 });
 
             modelBuilder.Entity("Core.Entities.Type", b =>

@@ -1,6 +1,4 @@
 ﻿using Core.Common;
-using Core.Enums;
-using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace Core.Entities
@@ -8,7 +6,7 @@ namespace Core.Entities
     public sealed class Billing : Entity
     {
         [Key]
-        public new string Id { get; set; }
+        public string Id { get; set; }
         public int ReservationId { get; set; }
         public double ReservationAmount { get; set; }
         public string ReservationEBillingId { get; set; }

@@ -2,7 +2,7 @@
 
 namespace Core.Interfaces
 {
-    public interface IBillingRepository : IGenericRepository<Billing>
+    public interface IBillingRepository : IEntityRepository<Billing>
     {
     }
 }

@@ -3,7 +3,6 @@ using Application.Models;
 using Application.Reservations.Commands;
 using Application.Reservations.Queries;
 using Application.Reservations.Response;
-using Application.Tables.Response;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -227,6 +226,10 @@ namespace Api.Controllers.V1
                 }
 
                 var result = await Mediator.Send(command);
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (NotFoundException)
@@ -268,6 +271,10 @@ namespace Api.Controllers.V1
                 }
 
                 var result = await Mediator.Send(new DeleteReservationCommand { Id = id });
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (Exception ex)

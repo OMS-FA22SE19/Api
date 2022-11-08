@@ -255,5 +255,51 @@ namespace Api.Controllers.V1
                 return StatusCode((int)response.StatusCode, response);
             }
         }
+
+        /// <summary>
+        /// Recover a deleted Food.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /Foods/1/Recover
+        ///
+        /// </remarks>
+        /// <param name="id">The id of deleted Food</param>
+        [HttpPut("{id}/Recover")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> RestoreAsync(int id)
+        {
+            try
+            {
+                if (id < 0)
+                {
+                    return BadRequest();
+                }
+
+                var command = new RecoverFoodCommand
+                {
+                    Id = id
+                };
+                var result = await Mediator.Send(command);
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<FoodDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
     }
 }
+

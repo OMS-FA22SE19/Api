@@ -77,11 +77,30 @@ namespace Application.OrderDetails.Commands
             MapToEntity(request, entity);
 
             var result = await _unitOfWork.OrderDetailRepository.UpdateAsync(entity);
-            entity.AddDomainEvent(new UpdateOrderDetailEvent
+            var food = await _unitOfWork.FoodRepository.GetAsync(f => f.Id == entity.FoodId);
+            var order = await _unitOfWork.OrderRepository.GetAsync(o => o.Id.Equals(entity.OrderId));
+            var token = await _unitOfWork.UserDeviceTokenRepository.GetAsync(t => t.userId.Equals(order.UserId));
+            if (token is not null)
             {
-                Id = request.Id,
-                Status = request.Status
-            });
+                entity.AddDomainEvent(new UpdateOrderDetailEvent
+                {
+                    Id = request.Id,
+                    name = food.Name,
+                    Status = request.Status,
+                    token = token.deviceToken
+                });
+            } 
+            else
+            {
+                entity.AddDomainEvent(new UpdateOrderDetailEvent
+                {
+                    Id = request.Id,
+                    name = food.Name,
+                    Status = request.Status,
+                    token = ""
+                });
+            }
+            
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
@@ -95,6 +114,6 @@ namespace Application.OrderDetails.Commands
             };
         }
 
-        private static void MapToEntity(UpdateOrderDetailCommand request, OrderDetail entity) => entity.Status = request.Status;
+        private void MapToEntity(UpdateOrderDetailCommand request, OrderDetail entity) => entity.Status = request.Status;
     }
 }

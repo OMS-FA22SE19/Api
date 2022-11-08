@@ -34,6 +34,11 @@ namespace Infrastructure.Persistence.Configurations
                 .HasMaxLength(1000)
                 .HasColumnType("nvarchar(1000)");
 
+            builder.Property<string>("Description")
+                .IsRequired(false)
+                .HasMaxLength(1000)
+                .HasColumnType("nvarchar(1000)");
+
             builder.HasMany(e => e.Foods)
                 .WithOne(e => e.CourseType)
                 .HasForeignKey(e => e.CourseTypeId);
