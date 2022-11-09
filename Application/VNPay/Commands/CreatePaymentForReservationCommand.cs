@@ -39,7 +39,7 @@ namespace Application.VNPay.Commands
                 return new Response<PaymentUrlDto>($"Reservation {request.ReservationId} cannot be found!");
             }
 
-            string id = DateTime.Now.ToString("yyyyMMddHHmmss");
+            string id = DateTime.UtcNow.AddHours(7).ToString("yyyyMMddHHmmss");
             var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == request.ReservationId);
             var result = new Billing();
             if (billing is null)
@@ -91,7 +91,7 @@ namespace Application.VNPay.Commands
             vnpay.AddRequestData("vnp_TmnCode", vnp_TmnCode);
             vnpay.AddRequestData("vnp_Amount", (request.Amount * 100).ToString());
 
-            vnpay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));//yyyyMMddHHmmss
+            vnpay.AddRequestData("vnp_CreateDate", DateTime.UtcNow.AddHours(7).ToString("yyyyMMddHHmmss"));//yyyyMMddHHmmss
             vnpay.AddRequestData("vnp_CurrCode", "VND");
             vnpay.AddRequestData("vnp_IpAddr", "http://localhost:5246");
 
@@ -109,7 +109,7 @@ namespace Application.VNPay.Commands
             vnpay.AddRequestData("vnp_ReturnUrl", vnp_Returnurl);
             vnpay.AddRequestData("vnp_TxnRef", id.ToString());//order.OrderId.ToString());
             //Add Params of 2.1.0 Version
-            vnpay.AddRequestData("vnp_ExpireDate", DateTime.Now.AddMinutes(15).ToString("yyyyMMddHHmmss"));
+            vnpay.AddRequestData("vnp_ExpireDate", DateTime.UtcNow.AddHours(7).AddMinutes(15).ToString("yyyyMMddHHmmss"));
 
             string paymentUrl = vnpay.CreateRequestUrl(vnp_Url, vnp_HashSecret);
             Console.WriteLine("VNPAY URL: {0}", paymentUrl);
