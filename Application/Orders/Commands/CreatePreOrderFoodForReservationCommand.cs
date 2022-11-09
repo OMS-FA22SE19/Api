@@ -46,13 +46,13 @@ namespace Application.Orders.Commands
         public async Task<Response<OrderDto>> Handle(CreatePreOrderFoodForReservationCommand request, CancellationToken cancellationToken)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
-            var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => !e.IsHidden);
+            var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => !e.Available);
             if (availableMenu is null)
             {
                 throw new NotFoundException($"No available {nameof(Menu)}");
             }
 
-            var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.ReservationId && e.Status == ReservationStatus.CheckIn, includeProperties: $"{nameof(Reservation.ReservationTables)}");
+            var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.ReservationId, includeProperties: $"{nameof(Reservation.ReservationTables)}");
             if (reservation is null)
             {
                 throw new NotFoundException(nameof(Reservation), $"with reservation {request.ReservationId}");
@@ -64,7 +64,7 @@ namespace Application.Orders.Commands
                 UserId = user.Id,
                 ReservationId = reservation.Id,
                 Date = _dateTime.Now,
-                Status = OrderStatus.Processing,
+                Status = OrderStatus.Reserved,
                 OrderDetails = new List<OrderDetail>(),
             };
 
@@ -90,7 +90,7 @@ namespace Application.Orders.Commands
                         FoodId = dish.Key,
                         Price = food.Price,
                         Note = string.IsNullOrWhiteSpace(dish.Value.Note) ? string.Empty : dish.Value.Note,
-                        Status = OrderDetailStatus.Received
+                        Status = OrderDetailStatus.Served
                     });
                 }
             }
@@ -99,6 +99,8 @@ namespace Application.Orders.Commands
             {
                 id = entity.Id
             });
+            reservation.IsPriorFoodOrder = true;
+            await _unitOfWork.ReservationRepository.UpdateAsync(reservation);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
@@ -122,7 +124,7 @@ namespace Application.Orders.Commands
                         OrderId = result.Id,
                         FoodId = detail.FoodId,
                         FoodName = food.Name,
-                        Status = OrderDetailStatus.Received,
+                        Status = OrderDetailStatus.Served,
                         Quantity = 1,
                         Price = detail.Price,
                         Amount = detail.Price
