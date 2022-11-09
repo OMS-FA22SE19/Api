@@ -10,13 +10,14 @@ using Type = Core.Entities.Type;
 
 namespace Application.Types.Commands
 {
-    public sealed class UpdateTypeCommand : IMapFrom<Core.Entities.Type>, IRequest<Response<TypeDto>>
+    public sealed class UpdateTypeCommand : IMapFrom<Type>, IRequest<Response<TypeDto>>
     {
         [Required]
         public int Id { get; init; }
         [Required]
         [StringLength(1000, MinimumLength = 2)]
         public string Name { get; init; }
+        public string Description { get; init; }
 
         public void Mapping(Profile profile)
         {
@@ -59,6 +60,10 @@ namespace Application.Types.Commands
             };
         }
 
-        private static void MapToEntity(UpdateTypeCommand request, Type? entity) => entity.Name = request.Name;
+        private void MapToEntity(UpdateTypeCommand request, Type? entity)
+        {
+            entity.Name = request.Name;
+            entity.Description = request.Description;
+        }
     }
 }

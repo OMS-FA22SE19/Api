@@ -282,5 +282,52 @@ namespace Api.Controllers.V1
                 return StatusCode((int)response.StatusCode, response);
             }
         }
+
+        /// Check a processing Order.
+        /// 
+        /// </summary>
+        /// <returns>An Orders.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Orders/9-0939758999-07-10-2022-10:55:10/Check
+        ///     
+        /// </remarks>
+        [HttpPut("{id}/Check")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> CheckAsync(string id)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(id))
+                {
+                    return BadRequest();
+                }
+                var command = new CheckingBillCommand()
+                {
+                    Id = id
+                };
+                var result = await Mediator.Send(command);
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<OrderDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
     }
 }

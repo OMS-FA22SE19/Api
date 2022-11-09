@@ -6,12 +6,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories
 {
-    public class ReservationRepository : GenericRepository<Reservation>, IReservationRepository
+    public class ReservationRepository : AuditableEntityRepository<Reservation>, IReservationRepository
     {
         private IQueryable<ReservationTable> _dbSetReservationTable;
-        public ReservationRepository(IApplicationDbContext context) : base(context)
+        public ReservationRepository(IApplicationDbContext context) : base(context, context.Reservations)
         {
-            _dbSet = context.Reservations;
             _dbSetReservationTable = context.ReservationTables;
         }
 

@@ -16,9 +16,9 @@ namespace Core.Entities
             {
                 return false;
             }
-            return this.Id == other.Id 
-                && this.Name == other.Name 
-                && this.ChargePerSeat == other.ChargePerSeat 
+            return this.Id == other.Id
+                && this.Name == other.Name
+                && this.ChargePerSeat == other.ChargePerSeat
                 && this.CanBeCombined == other.CanBeCombined;
         }
     }
@@ -32,7 +32,7 @@ namespace Core.Entities
             if (Object.ReferenceEquals(x, null) || Object.ReferenceEquals(y, null))
                 return false;
 
-            return x.Id == y.Id 
+            return x.Id == y.Id
                 && x.Name == y.Name
                 && x.ChargePerSeat == y.ChargePerSeat
                 && x.CanBeCombined == y.CanBeCombined;

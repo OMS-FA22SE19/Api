@@ -29,7 +29,7 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property<bool>("IsDeleted")
                 .HasColumnType("bit");
 
-            builder.Property<bool>("IsHidden")
+            builder.Property<bool>("Available")
                 .HasColumnType("bit");
 
             builder.Property<DateTime?>("LastModified")

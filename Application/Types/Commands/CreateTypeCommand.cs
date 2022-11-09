@@ -13,6 +13,7 @@ namespace Application.Types.Commands
         [Required]
         [StringLength(1000, MinimumLength = 2)]
         public string Name { get; init; }
+        public string Description { get; init; }
 
         public void Mapping(Profile profile)
         {

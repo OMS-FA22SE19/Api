@@ -146,8 +146,7 @@ namespace Api.Controllers.V1
         ///     POST /Menus
         ///     {
         ///        "name": "Casual",
-        ///        "description": "An ordinary menu",
-        ///        "isHidden": false
+        ///        "description": "An ordinary menu"
         ///     }
         ///     
         /// </remarks>
@@ -194,7 +193,7 @@ namespace Api.Controllers.V1
         ///        "id": 1,
         ///        "name": "Casual",
         ///        "description": "An ordinary menu",
-        ///        "isHidden": false
+        ///        "available": false
         ///     }
         ///     
         /// </remarks>
@@ -455,7 +454,7 @@ namespace Api.Controllers.V1
         ///     
         /// </remarks>
         /// <param name="menuId">The desired id of Menu</param>
-        /// <param name="courseTypeId">The CourseTypeId of the Foods</param>
+        /// <param name="courseTypeId">The MenuId of the Foods</param>
         /// <param name="typeId">The TypeId of the Foods</param>
         [HttpGet("{menuId}/Food")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -545,6 +544,51 @@ namespace Api.Controllers.V1
             catch (Exception ex)
             {
                 var response = new Response<List<MenuFoodDto>>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
+        /// Recover a deleted Menu.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /Menus/1/Recover
+        ///
+        /// </remarks>
+        /// <param name="id">The id of deleted Menu</param>
+        [HttpPut("{id}/Recover")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> RestoreAsync(int id)
+        {
+            try
+            {
+                if (id < 0)
+                {
+                    return BadRequest();
+                }
+
+                var command = new RecoverMenuCommand
+                {
+                    Id = id
+                };
+                var result = await Mediator.Send(command);
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<MenuDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

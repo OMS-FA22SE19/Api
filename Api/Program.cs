@@ -2,6 +2,7 @@ using Api.Filters;
 using Api.Services;
 using Application;
 using Application.Common.Interfaces;
+using Application.Services;
 using Infrastructure;
 using Infrastructure.Persistence;
 using Microsoft.OpenApi.Models;
@@ -27,6 +28,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddSingleton<ICurrentUserService, CurrentUserService>();
+builder.Services.AddSingleton<IFirebaseMessagingService, FirebaseMessagingService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<ApplicationDbContext>();

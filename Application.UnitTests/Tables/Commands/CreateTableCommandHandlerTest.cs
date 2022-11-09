@@ -1,19 +1,16 @@
-﻿using Application.Tables.Commands;
-using Application.Tables.Response;
+﻿using Application.Common.Exceptions;
 using Application.Models;
+using Application.Tables.Commands;
+using Application.Tables.Response;
+using Application.TableTypes.Response;
 using AutoMapper;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 using Moq;
 using NUnit.Framework;
-using System.Net;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
-using Core.Enums;
-using Application.TableTypes.Response;
 using System.Linq.Expressions;
-using Infrastructure.Repositories;
-using Application.Common.Exceptions;
-using Application.TableTypes.Commands;
+using System.Net;
 
 namespace Application.UnitTests.Tables.Commands
 {
@@ -63,10 +60,11 @@ namespace Application.UnitTests.Tables.Commands
             var handler = new CreateTableCommandHandler(_unitOfWork, _mapper);
             var tableType = _tableTypes.Find(tt => tt.Id == tableTypeId);
             var mappedTableType = _mapper.Map<TableTypeDto>(tableType);
-            var expected = new Response<TableDto>(new TableDto { 
-                Id = _tables.Max(e => e.Id) + 1, 
-                NumOfSeats = numOfSeat, 
-                Status = TableStatus.Available, 
+            var expected = new Response<TableDto>(new TableDto
+            {
+                Id = _tables.Max(e => e.Id) + 1,
+                NumOfSeats = numOfSeat,
+                Status = TableStatus.Available,
                 TableType = mappedTableType
             })
             {

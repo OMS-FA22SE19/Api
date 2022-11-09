@@ -28,6 +28,9 @@ namespace Infrastructure.Persistence
         }
 
         public DbSet<AdminSetting> AdminSettings => Set<AdminSetting>();
+        public DbSet<Topic> Topics => Set<Topic>();
+        public DbSet<UserTopic> UserTopics => Set<UserTopic>();
+        public DbSet<UserDeviceToken> UserDeviceTokens => Set<UserDeviceToken>();
         public DbSet<ApplicationUser> Users => Set<ApplicationUser>();
         public DbSet<Core.Entities.Type> Types => Set<Core.Entities.Type>();
         public DbSet<Food> Foods => Set<Food>();

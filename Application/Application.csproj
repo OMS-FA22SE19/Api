@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="UserTopics\Queries\" />
     <Folder Include="VNPay\Queries\" />
   </ItemGroup>
 

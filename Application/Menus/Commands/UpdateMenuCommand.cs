@@ -19,7 +19,7 @@ namespace Application.Menus.Commands
         public string Name { get; set; }
         [StringLength(1000, MinimumLength = 2)]
         public string Description { get; set; }
-        public bool IsHidden { get; set; } = true;
+        public bool Available { get; set; }
 
         public void Mapping(Profile profile)
         {
@@ -62,11 +62,11 @@ namespace Application.Menus.Commands
             };
         }
 
-        private static void MapToEntity(UpdateMenuCommand request, Menu entity)
+        private void MapToEntity(UpdateMenuCommand request, Menu entity)
         {
             entity.Name = request.Name;
             entity.Description = request.Description;
-            entity.IsHidden = request.IsHidden;
+            entity.Available = request.Available;
         }
     }
 }

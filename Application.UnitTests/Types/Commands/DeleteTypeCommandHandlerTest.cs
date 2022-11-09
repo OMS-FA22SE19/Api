@@ -1,8 +1,7 @@
-﻿using Application.Types.Commands;
+﻿using Application.Models;
+using Application.Types.Commands;
 using Application.Types.Response;
-using Application.Models;
 using AutoMapper;
-using Core.Entities;
 using Core.Interfaces;
 using Moq;
 using NUnit.Framework;

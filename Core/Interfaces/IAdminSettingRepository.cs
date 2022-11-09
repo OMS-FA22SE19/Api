@@ -2,7 +2,7 @@
 
 namespace Core.Interfaces
 {
-    public interface IAdminSettingRepository : IGenericRepository<AdminSetting>
+    public interface IAdminSettingRepository : IEntityRepository<AdminSetting>
     {
     }
 }

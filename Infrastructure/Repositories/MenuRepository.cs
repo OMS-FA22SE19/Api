@@ -4,11 +4,10 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public class MenuRepository : GenericRepository<Menu>, IMenuRepository
+    public class MenuRepository : AuditableEntityRepository<Menu>, IMenuRepository
     {
-        public MenuRepository(IApplicationDbContext context) : base(context)
+        public MenuRepository(IApplicationDbContext context) : base(context, context.Menus)
         {
-            _dbSet = context.Menus;
         }
     }
 }

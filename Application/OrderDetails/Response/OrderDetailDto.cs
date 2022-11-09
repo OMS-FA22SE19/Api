@@ -22,7 +22,7 @@ namespace Application.OrderDetails.Response
         {
             profile.CreateMap<OrderDetail, OrderDetailDto>()
                 .ForMember(e => e.UserId, opt => opt.MapFrom(e => e.Order.UserId))
-                .ForMember(e => e.Date, opt => opt.MapFrom(e => e.Order.Date.ToString("dd/MM/yyyy HH:mm:ss")))
+                .ForMember(e => e.Date, opt => opt.MapFrom(e => e.Created))
                 .ForMember(e => e.FoodName, opt => opt.MapFrom(e => e.Food.Name))
                 .ReverseMap();
         }

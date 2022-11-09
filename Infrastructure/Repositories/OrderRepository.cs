@@ -4,11 +4,10 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public class OrderRepository : GenericRepository<Order>, IOrderRepository
+    public class OrderRepository : AuditableEntityRepository<Order>, IOrderRepository
     {
-        public OrderRepository(IApplicationDbContext context) : base(context)
+        public OrderRepository(IApplicationDbContext context) : base(context, context.Orders)
         {
-            _dbSet = context.Orders;
         }
     }
 }

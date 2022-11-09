@@ -5,6 +5,7 @@ namespace Core.Entities
     public sealed class CourseType : BaseAuditableEntity, IEquatable<CourseType>
     {
         public string Name { get; set; }
+        public string Description { get; set; }
 
         public IList<Food> Foods { get; set; }
 

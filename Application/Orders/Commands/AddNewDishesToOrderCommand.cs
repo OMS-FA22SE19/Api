@@ -46,7 +46,7 @@ namespace Application.Orders.Commands
         public async Task<Response<OrderDto>> Handle(AddNewDishesToOrderCommand request, CancellationToken cancellationToken)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
-            var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => !e.IsHidden);
+            var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => !e.Available);
             if (availableMenu is null)
             {
                 throw new NotFoundException(nameof(Menu), $"No available {nameof(Menu)}");
