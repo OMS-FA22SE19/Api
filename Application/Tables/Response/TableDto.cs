@@ -12,6 +12,7 @@ namespace Application.Tables.Response
         public int NumOfSeats { get; set; }
         public TableStatus Status { get; set; }
         public bool IsDeleted { get; set; }
+        public int TableTypeId { get; set; }
         public TableTypeDto TableType { get; set; }
 
         public bool Equals(TableDto? other)
