@@ -44,7 +44,6 @@ namespace Application.Reservations.Queries
 
             var mappedResult = _mapper.Map<ReservationDto>(result);
             var orderDetails = new List<OrderDetailDto>();
-            double total = 0;
             if (result.IsPriorFoodOrder)
             {
                 var order = await _unitOfWork.OrderRepository.GetAsync(o => o.ReservationId == request.Id, $"{nameof(Order.OrderDetails)}");
@@ -66,7 +65,7 @@ namespace Application.Reservations.Queries
                             OrderId = order.Id,
                             FoodId = detail.FoodId,
                             FoodName = food.Name,
-                            Status = OrderDetailStatus.Served,
+                            Status = detail.Status,
                             Quantity = 1,
                             Price = detail.Price,
                             Amount = detail.Price
@@ -77,7 +76,6 @@ namespace Application.Reservations.Queries
                         element.Quantity += 1;
                         element.Amount += detail.Price;
                     }
-                    total += detail.Price;
                 }
             }
             

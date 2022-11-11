@@ -139,6 +139,51 @@ namespace Api.Controllers.V1
             }
         }
 
+        /// Retrieve current order of a table.
+        /// </summary>
+        /// <returns>An Order.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     GET /Orders/Table/1
+        ///     
+        /// </remarks>
+        [HttpGet("Reservation/{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Response<OrderDto>>> GetReservationTable(int id)
+        {
+            try
+            {
+                if (id < 0)
+                {
+                    return BadRequest();
+                }
+
+                var query = new GetOrderWithReservationQuery()
+                {
+                    reservationId = id
+                };
+
+                var result = await Mediator.Send(query);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<OrderDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
         /// <summary>
         /// Create an Order.
         /// </summary>

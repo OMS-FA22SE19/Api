@@ -90,7 +90,7 @@ namespace Application.Orders.Commands
                         FoodId = dish.Key,
                         Price = food.Price,
                         Note = string.IsNullOrWhiteSpace(dish.Value.Note) ? string.Empty : dish.Value.Note,
-                        Status = OrderDetailStatus.Served
+                        Status = OrderDetailStatus.Reserved
                     });
                 }
             }
