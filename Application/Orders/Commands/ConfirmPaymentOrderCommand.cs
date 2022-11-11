@@ -42,8 +42,11 @@ namespace Application.Orders.Commands
 
             foreach (var detail in entity.OrderDetails)
             {
-                detail.Status = OrderDetailStatus.Overcharged;
-                await _unitOfWork.OrderDetailRepository.UpdateAsync(detail);
+                if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Served)
+                {
+                    detail.Status = OrderDetailStatus.Overcharged;
+                    await _unitOfWork.OrderDetailRepository.UpdateAsync(detail);
+                }
             }
 
             var reservation = await _unitOfWork.ReservationRepository.GetAsync(r => r.Id == entity.ReservationId, $"{nameof(Reservation.ReservationTables)}");
