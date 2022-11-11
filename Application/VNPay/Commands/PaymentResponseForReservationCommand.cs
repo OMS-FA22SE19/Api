@@ -55,6 +55,13 @@ namespace Application.VNPay.Commands
                 reservation.Status = ReservationStatus.Reserved;
                 await _unitOfWork.ReservationRepository.UpdateAsync(reservation);
 
+                if (reservation.IsPriorFoodOrder)
+                {
+                    var order = await _unitOfWork.OrderRepository.GetAsync(r => r.ReservationId == entity.ReservationId);
+                    order.PrePaid = Convert.ToDouble(amount) / 100;
+                    await _unitOfWork.OrderRepository.UpdateAsync(order);
+                }
+
                 var result = await _unitOfWork.BillingRepository.UpdateAsync(entity);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 if (result is null)

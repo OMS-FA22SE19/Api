@@ -1,4 +1,5 @@
 ﻿using Application.Common.Mappings;
+using Application.OrderDetails.Response;
 using Application.Users.Response;
 using AutoMapper;
 using Core.Entities;
@@ -21,6 +22,7 @@ namespace Application.Reservations.Response
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
         public IList<ReservationTableDto> ReservationTables { get; set; }
+        public IList<OrderDetailDto> OrderDetails { get; set; }
         public UserDto User { get; set; }
 
         public void Mapping(Profile profile)

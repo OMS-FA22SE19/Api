@@ -104,7 +104,11 @@ namespace Application.Orders.Queries
                 };
 
                 var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => order.ReservationId == e.Id, $"{nameof(Reservation.ReservationTables)}");
-                orderDto.TableId = reservation.ReservationTables[0].TableId;
+                if ( reservation.ReservationTables.Any() ) 
+                { 
+                    orderDto.TableId = reservation.ReservationTables[0].TableId;
+                }
+                
 
                 foreach (var detail in order.OrderDetails)
                 {
