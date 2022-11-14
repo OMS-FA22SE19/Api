@@ -196,7 +196,7 @@ namespace Api.Controllers.V1
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /Reservations/1
+        ///     PUT /Reservations/Status/1
         ///     {
         ///         "id": 1,
         ///         "status": "Available"
@@ -204,12 +204,12 @@ namespace Api.Controllers.V1
         ///     
         /// </remarks>
         /// <param name="id">The id of updated Reservation</param>
-        [HttpPut("{id}")]
+        [HttpPut("Status/{id}")]
         [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> PutAsync(int id, [FromBody] ChangeReservationStatusCommand command)
+        public async Task<ActionResult> ChangeStatus(int id, [FromBody] ChangeReservationStatusCommand command)
         {
             try
             {
@@ -316,6 +316,69 @@ namespace Api.Controllers.V1
                 }
 
                 var result = await Mediator.Send(query);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<ReservationDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
+        /// Update a Reservation.
+        /// </summary>
+        /// <returns>Update Reservation.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /Reservations/1
+        ///     {
+        ///         "id": 1,
+        ///         "startTime": "2022-10-07T10:00:00",
+        ///         "endTime": "2022-10-07T11:00:00",
+        ///         "numOfPeople":4,
+        ///         "TableTypeId":1
+        ///         "numOfSeats": 4,
+        ///         "quantity": 1
+        ///     }
+        ///     
+        /// </remarks>
+        [HttpPut("{id}")]
+        [Consumes("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Response<ReservationDto>>> PutAsync(int id, [FromBody] UpdateReservationCommand command)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                if (id != command.Id)
+                {
+                    var response = new Response<ReservationDto>("The Id do not match")
+                    {
+                        StatusCode = HttpStatusCode.BadRequest
+                    };
+                    return StatusCode((int)response.StatusCode, response);
+                }
+
+                var result = await Mediator.Send(command);
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (NotFoundException)

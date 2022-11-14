@@ -1,5 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Models;
+using Application.OrderDetails.Response;
 using Application.Reservations.Response;
 using AutoMapper;
 using Core.Common;
@@ -7,6 +8,7 @@ using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Application.Reservations.Queries
@@ -52,6 +54,42 @@ namespace Application.Reservations.Queries
                 {
                     throw new NotFoundException(nameof(TableType), item.TableTypeId);
                 }
+                var orderDetails = new List<OrderDetailDto>();
+                if (item.IsPriorFoodOrder)
+                {
+                    var order = await _unitOfWork.OrderRepository.GetAsync(o => o.ReservationId == item.Id, $"{nameof(Order.OrderDetails)}");
+                    if (order is null)
+                    {
+                        item.OrderDetails = orderDetails;
+                        item.PrePaid = item.NumOfPeople * tableType.ChargePerSeat;
+                        item.TableType = tableType.Name;
+                        break;
+                    }
+                    foreach (var detail in order.OrderDetails)
+                    {
+                        var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && e.Status == detail.Status);
+                        if (element is null)
+                        {
+                            var food = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == detail.FoodId);
+                            orderDetails.Add(new OrderDetailDto
+                            {
+                                OrderId = order.Id,
+                                FoodId = detail.FoodId,
+                                FoodName = food.Name,
+                                Status = detail.Status,
+                                Quantity = 1,
+                                Price = detail.Price,
+                                Amount = detail.Price
+                            });
+                        }
+                        else
+                        {
+                            element.Quantity += 1;
+                            element.Amount += detail.Price;
+                        }
+                    }
+                }
+                item.OrderDetails = orderDetails;
                 item.PrePaid = item.NumOfPeople * tableType.ChargePerSeat;
                 item.TableType = tableType.Name;
             }

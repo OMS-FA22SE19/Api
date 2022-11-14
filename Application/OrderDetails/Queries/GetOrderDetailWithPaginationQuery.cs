@@ -87,7 +87,10 @@ namespace Application.OrderDetails.Queries
             {
                 var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => orderDetail.Order.ReservationId == e.Id, $"{nameof(Reservation.ReservationTables)}");
                 var mappedEntity = _mapper.Map<DishDto>(orderDetail);
-                mappedEntity.TableId = reservation.ReservationTables[0].TableId;
+                if (reservation.ReservationTables.Any())
+                {
+                    mappedEntity.TableId = reservation.ReservationTables[0].TableId;
+                }
                 mappedResult.Add(mappedEntity);
             }
             return new Response<PaginatedList<DishDto>>(mappedResult);
