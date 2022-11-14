@@ -81,12 +81,12 @@ namespace Application.Reservations.Commands
                 await _unitOfWork.OrderRepository.UpdateAsync(entity.Order);
 
                 List<Expression<Func<OrderDetail, bool>>> orderDetailsFilter = new();
-                orderDetailsFilter.Add(od=>od.OrderId.Equals(entity.Order.Id));
+                orderDetailsFilter.Add(od => od.OrderId.Equals(entity.Order.Id) && od.IsDeleted == false);
 
                 var orderDetails = await _unitOfWork.OrderDetailRepository.GetAllAsync(orderDetailsFilter);
                 foreach(var orderDetail in orderDetails)
                 {
-                    orderDetail.Status = OrderDetailStatus.Processing;
+                    orderDetail.Status = OrderDetailStatus.Received;
                     await _unitOfWork.OrderDetailRepository.UpdateAsync(orderDetail);
 
                     var element = orderDetailDtos.FirstOrDefault(e => e.FoodId.Equals(orderDetail.FoodId));

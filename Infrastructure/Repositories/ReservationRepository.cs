@@ -22,6 +22,7 @@ namespace Infrastructure.Repositories
             r.StartTime.Date == date.Date
             && r.EndTime.Date == date.Date
             && r.Status != ReservationStatus.Available
+            && r.Status != ReservationStatus.Cancelled
             && !r.IsDeleted).OrderBy(r => r.StartTime)
             .Include(r => r.ReservationTables).ThenInclude(r => r.Table);
 
