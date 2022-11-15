@@ -46,7 +46,7 @@ namespace Application.Orders.Commands
         public async Task<Response<OrderDto>> Handle(CreatePreOrderFoodForReservationCommand request, CancellationToken cancellationToken)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
-            var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => !e.Available);
+            var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => e.Available);
             if (availableMenu is null)
             {
                 throw new NotFoundException($"No available {nameof(Menu)}");
@@ -55,7 +55,7 @@ namespace Application.Orders.Commands
             var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.ReservationId, includeProperties: $"{nameof(Reservation.ReservationTables)}");
             if (reservation is null)
             {
-                throw new NotFoundException(nameof(Reservation), $"with reservation {request.ReservationId}");
+                throw new NotFoundException(nameof(Reservation), $"with reservation id {request.ReservationId}");
             }
 
             var entity = new Order
@@ -124,10 +124,11 @@ namespace Application.Orders.Commands
                         OrderId = result.Id,
                         FoodId = detail.FoodId,
                         FoodName = food.Name,
-                        Status = OrderDetailStatus.Served,
+                        Status = OrderDetailStatus.Reserved,
                         Quantity = 1,
                         Price = detail.Price,
-                        Amount = detail.Price
+                        Amount = detail.Price,
+                        Note= detail.Note,
                     });
                 }
                 else

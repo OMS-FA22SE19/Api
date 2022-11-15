@@ -55,16 +55,10 @@ namespace Application.Reservations.Queries
                     throw new NotFoundException(nameof(TableType), item.TableTypeId);
                 }
                 var orderDetails = new List<OrderDetailDto>();
-                if (item.IsPriorFoodOrder)
+
+                var order = await _unitOfWork.OrderRepository.GetAsync(o => o.ReservationId == item.Id, $"{nameof(Order.OrderDetails)}");
+                if (order is not null)
                 {
-                    var order = await _unitOfWork.OrderRepository.GetAsync(o => o.ReservationId == item.Id, $"{nameof(Order.OrderDetails)}");
-                    if (order is null)
-                    {
-                        item.OrderDetails = orderDetails;
-                        item.PrePaid = item.NumOfPeople * tableType.ChargePerSeat;
-                        item.TableType = tableType.Name;
-                        break;
-                    }
                     foreach (var detail in order.OrderDetails)
                     {
                         var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && e.Status == detail.Status);
@@ -79,7 +73,8 @@ namespace Application.Reservations.Queries
                                 Status = detail.Status,
                                 Quantity = 1,
                                 Price = detail.Price,
-                                Amount = detail.Price
+                                Amount = detail.Price,
+                                Note = detail.Note,
                             });
                         }
                         else

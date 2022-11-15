@@ -47,7 +47,7 @@ namespace Application.Orders.Commands
         public async Task<Response<OrderDto>> Handle(UpdatePreOrderFoodForReservationCommand request, CancellationToken cancellationToken)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
-            var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => !e.Available);
+            var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => e.Available);
             if (availableMenu is null)
             {
                 throw new NotFoundException($"No available {nameof(Menu)}");
@@ -56,23 +56,13 @@ namespace Application.Orders.Commands
             var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.ReservationId, includeProperties: $"{nameof(Reservation.ReservationTables)}");
             if (reservation is null)
             {
-                throw new NotFoundException(nameof(Reservation), $"with reservation {request.ReservationId}");
+                throw new NotFoundException(nameof(Reservation), $"with reservation id {request.ReservationId}");
             }
-
-            //var entity = new Order
-            //{
-            //    Id = $"{reservation.Id}-{user.PhoneNumber}-{_dateTime.Now.ToString("dd-MM-yyyy-HH:mm:ss")}",
-            //    UserId = user.Id,
-            //    ReservationId = reservation.Id,
-            //    Date = _dateTime.Now,
-            //    Status = OrderStatus.Reserved,
-            //    OrderDetails = new List<OrderDetail>(),
-            //};
 
             var entity = await _unitOfWork.OrderRepository.GetAsync(o => o.ReservationId == request.ReservationId);
             if (entity is null)
             {
-                throw new NotFoundException(nameof(Order), $"with reservation {request.ReservationId}");
+                throw new NotFoundException(nameof(Order), $"with reservation id {request.ReservationId}");
             }
 
             //Comment until online payment complete
@@ -136,10 +126,11 @@ namespace Application.Orders.Commands
                         OrderId = result.Id,
                         FoodId = detail.FoodId,
                         FoodName = food.Name,
-                        Status = OrderDetailStatus.Served,
+                        Status = OrderDetailStatus.Reserved,
                         Quantity = 1,
                         Price = detail.Price,
-                        Amount = detail.Price
+                        Amount = detail.Price,
+                        Note= detail.Note
                     });
                 }
                 else
