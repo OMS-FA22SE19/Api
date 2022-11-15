@@ -68,7 +68,8 @@ namespace Application.Reservations.Queries
                             Status = detail.Status,
                             Quantity = 1,
                             Price = detail.Price,
-                            Amount = detail.Price
+                            Amount = detail.Price,
+                            Note= detail.Note,
                         });
                     }
                     else
