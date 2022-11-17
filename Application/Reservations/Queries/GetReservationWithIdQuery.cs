@@ -86,7 +86,7 @@ namespace Application.Reservations.Queries
             }
 
             mappedResult.OrderDetails = orderDetails;
-            mappedResult.PrePaid = result.NumOfPeople * tableType.ChargePerSeat;
+            mappedResult.PrePaid = result.NumOfSeats * tableType.ChargePerSeat;
             mappedResult.TableType = tableType.Name;
             return new Response<ReservationDto>(mappedResult);
         }
