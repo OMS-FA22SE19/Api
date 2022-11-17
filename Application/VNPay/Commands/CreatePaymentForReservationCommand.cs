@@ -54,15 +54,8 @@ namespace Application.VNPay.Commands
             }
             else
             {
-                if (billing.ReservationAmount == 0)
-                {
-                    billing.ReservationEBillingId = id;
-                    result = await _unitOfWork.BillingRepository.UpdateAsync(billing);
-                }
-                else
-                {
-                    return new Response<PaymentUrlDto>($"Reservation {request.ReservationId} has been payed");
-                }
+                billing.ReservationEBillingId = id;
+                result = await _unitOfWork.BillingRepository.UpdateAsync(billing);
             }
 
             await _unitOfWork.CompleteAsync(cancellationToken);
