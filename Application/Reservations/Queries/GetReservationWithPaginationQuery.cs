@@ -84,8 +84,14 @@ namespace Application.Reservations.Queries
                         }
                     }
                 }
+                var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == item.Id);
+                if (billing is not null)
+                {
+                    item.Paid = billing.ReservationAmount;
+                }
+
                 item.OrderDetails = orderDetails;
-                item.PrePaid = item.NumOfPeople * tableType.ChargePerSeat;
+                item.PrePaid = item.NumOfSeats * tableType.ChargePerSeat;
                 item.TableType = tableType.Name;
             }
             return new Response<PaginatedList<ReservationDto>>(mappedResult);

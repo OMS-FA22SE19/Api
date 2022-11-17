@@ -74,7 +74,16 @@ namespace Application.Orders.Commands
             {
                 throw new NotFoundException(nameof(TableType), reservation.TableTypeId);
             }
-            entity.PrePaid = reservation.NumOfPeople * tableType.ChargePerSeat;
+
+            var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == reservation.Id);
+            if (billing is not null)
+            {
+                entity.PrePaid = billing.ReservationAmount;
+            }
+            else
+            {
+                entity.PrePaid = 0;
+            }
 
             foreach (var dish in request.OrderDetails)
             {

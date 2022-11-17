@@ -49,7 +49,7 @@ namespace Application.VNPay.Commands
                     throw new NotFoundException($"Can not find billing with Reservation EBilling Id: {paymentId}");
                 }
 
-                entity.ReservationAmount = Convert.ToDouble(amount) / 100;
+                entity.ReservationAmount += Convert.ToDouble(amount) / 100;
 
                 var reservation = await _unitOfWork.ReservationRepository.GetAsync(r => r.Id == entity.ReservationId);
                 reservation.Status = ReservationStatus.Reserved;
@@ -58,7 +58,7 @@ namespace Application.VNPay.Commands
                 if (reservation.IsPriorFoodOrder)
                 {
                     var order = await _unitOfWork.OrderRepository.GetAsync(r => r.ReservationId == entity.ReservationId);
-                    order.PrePaid = Convert.ToDouble(amount) / 100;
+                    order.PrePaid = entity.ReservationAmount;
                     await _unitOfWork.OrderRepository.UpdateAsync(order);
                 }
 
@@ -75,12 +75,6 @@ namespace Application.VNPay.Commands
             }
             else
             {
-                var result = await _unitOfWork.BillingRepository.DeleteAsync(p => p.Id == paymentId);
-                await _unitOfWork.CompleteAsync(cancellationToken);
-                if (!result)
-                {
-                    return new Response<BillingDto>("error");
-                }
                 return new Response<BillingDto>("Transaction failed")
                 {
                     Succeeded = false
