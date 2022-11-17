@@ -63,12 +63,6 @@ namespace Application.VNPay.Commands
             }
             else
             {
-                var result = await _unitOfWork.BillingRepository.DeleteAsync(p => p.Id == paymentId);
-                await _unitOfWork.CompleteAsync(cancellationToken);
-                if (!result)
-                {
-                    return new Response<BillingDto>("error");
-                }
                 return new Response<BillingDto>("Transaction failed")
                 {
                     Succeeded = false

@@ -37,6 +37,12 @@ namespace Application.Orders.Queries
             var mappedResult = _mapper.Map<OrderDto>(result);
             double total = 0;
 
+            var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => result.ReservationId == e.Id, $"{nameof(Reservation.ReservationTables)}");
+            if (reservation.ReservationTables.Any())
+            {
+                mappedResult.TableId = reservation.ReservationTables[0].TableId;
+            }
+
             List<OrderDetailDto> orderDetails = new();
             if (result.OrderDetails == null)
             {

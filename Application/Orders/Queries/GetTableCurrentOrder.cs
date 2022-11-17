@@ -60,6 +60,8 @@ namespace Application.Orders.Queries
             var mappedResult = _mapper.Map<OrderDto>(tableOrder);
             double total = 0;
 
+            mappedResult.TableId = request.TableId;
+
             List<OrderDetailDto> orderDetails = new();
             if (tableOrder.OrderDetails == null)
             {

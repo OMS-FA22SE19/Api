@@ -58,6 +58,13 @@ namespace Application.Reservations.Commands
             {
                 throw new NotFoundException(nameof(Reservation), request.Id);
             }
+            if(reservation.NumOfEdits >= 3)
+            {
+                return new Response<ReservationDto>($"This reservation is can not be edited more!")
+                {
+                    StatusCode = System.Net.HttpStatusCode.BadRequest
+                };
+            }
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == request.TableTypeId && !e.IsDeleted);
             if (tableType is null)
             {
@@ -70,6 +77,15 @@ namespace Application.Reservations.Commands
                 {
                     StatusCode = System.Net.HttpStatusCode.BadRequest
                 };
+            }
+
+            var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == request.Id);
+            if (billing is not null)
+            {
+                if (billing.ReservationAmount < (request.NumOfPeople * tableType.ChargePerSeat))
+                {
+                    reservation.Status = ReservationStatus.Available;
+                }
             }
             MapToEntity(request, reservation);
             reservation.NumOfEdits++;
@@ -101,6 +117,15 @@ namespace Application.Reservations.Commands
         private async Task<bool> validateStartEndTime(UpdateReservationCommand request)
         {
             var reservation = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.StartTime.Date, request.TableTypeId, request.NumOfSeats);
+            if (reservation.Any())
+            {
+                var currentReservation = reservation.SingleOrDefault(r => r.Id == request.Id);
+                if (currentReservation != null)
+                {
+                    reservation.Remove(currentReservation);
+                }
+            }
+            
 
             var tables = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
             var maxTables = tables.Count - request.Quantity;
