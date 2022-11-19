@@ -4,6 +4,7 @@ using Application.OrderDetails.Response;
 using Application.Orders.Response;
 using AutoMapper;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
@@ -50,7 +51,7 @@ namespace Application.Orders.Queries
             }
             foreach (var detail in result.OrderDetails)
             {
-                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId));
+                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted && e.Status == detail.Status);
                 if (element is null)
                 {
                     orderDetails.Add(new OrderDetailDto
@@ -71,7 +72,10 @@ namespace Application.Orders.Queries
                     element.Quantity += 1;
                     element.Amount += detail.Price;
                 }
-                total += detail.Price;
+                if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
+                {
+                    total += detail.Price;
+                }
             }
             total -= result.PrePaid;
 

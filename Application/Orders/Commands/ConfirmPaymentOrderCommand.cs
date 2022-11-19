@@ -94,7 +94,10 @@ namespace Application.Orders.Commands
                     element.Quantity += 1;
                     element.Amount += detail.Price;
                 }
-                total += detail.Price;
+                if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
+                {
+                    total += detail.Price;
+                }
             }
             total -= entity.PrePaid;
 

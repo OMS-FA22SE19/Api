@@ -69,7 +69,7 @@ namespace Application.Orders.Queries
             }
             foreach (var detail in tableOrder.OrderDetails)
             {
-                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId));
+                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted && e.Status == detail.Status);
                 if (element is null)
                 {
                     orderDetails.Add(new OrderDetailDto
@@ -79,7 +79,7 @@ namespace Application.Orders.Queries
                         Date = tableOrder.Date,
                         FoodId = detail.FoodId,
                         FoodName = detail.Food.Name,
-                        Status = OrderDetailStatus.Served,
+                        Status = detail.Status,
                         Quantity = 1,
                         Price = detail.Price,
                         Amount = detail.Price
@@ -90,7 +90,10 @@ namespace Application.Orders.Queries
                     element.Quantity += 1;
                     element.Amount += detail.Price;
                 }
-                total += detail.Price;
+                if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
+                {
+                    total += detail.Price;
+                }
             }
             total -= tableOrder.PrePaid;
 
