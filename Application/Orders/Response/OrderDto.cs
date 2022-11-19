@@ -16,6 +16,7 @@ namespace Application.Orders.Response
         public DateTime Date { get; set; }
         public OrderStatus Status { get; set; }
         public double PrePaid { get; set; } = 0;
+        public int NumOfEdits { get; set; }
         public double Amount { get; set; }
         public double Total { get; set; }
 

@@ -1,19 +1,8 @@
 ﻿using FirebaseAdmin.Messaging;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Application.Common.Interfaces;
-using Application.Models;
-using Firebase.Auth;
-using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
-using static Google.Apis.Requests.BatchRequest;
-using Application.Foods.Response;
-using System.Net;
 using Newtonsoft.Json;
 
 namespace Application.Services
@@ -67,8 +56,7 @@ namespace Application.Services
             try
             {
                 var result = await messaging.SendAsync(CreateNotification(title, body, token));
-                //do something with result
-                Console.WriteLine("success: " + result);
+                
                 return result;
             }
             catch (FirebaseException ex)
