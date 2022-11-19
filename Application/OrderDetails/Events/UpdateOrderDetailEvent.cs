@@ -9,9 +9,10 @@ namespace Application.OrderDetails.Events
     public sealed class UpdateOrderDetailEvent : BaseEvent
     {
         public int Id { get; set; }
-        public string name { get; set; }
+        public string Name { get; set; }
+        public int TableId { get; set; }
         public OrderDetailStatus Status { get; set; }
-        public string token { get; set; }
+        public string Token { get; set; }
     }
     public sealed class UpdateOrderDetailEventHandler : INotificationHandler<UpdateOrderDetailEvent>
     {
@@ -45,9 +46,9 @@ namespace Application.OrderDetails.Events
             }
             _logger.LogInformation("Order Detail id: {0} was changed to status {1}", notification.Id, status);
 
-            if (!string.IsNullOrWhiteSpace(notification.token))
+            if (!string.IsNullOrWhiteSpace(notification.Token))
             {
-                var result = await _firebaseMessagingService.SendNotification(notification.token, "Order updated", $"Your {notification.name} was changed to {status}");
+                var result = await _firebaseMessagingService.SendNotification(notification.Token, "Order updated", $"Your {notification.Name} of table {notification.TableId} was changed to {status}");
             }
         }
     }
