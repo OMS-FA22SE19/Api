@@ -75,27 +75,29 @@ namespace Application.Orders.Commands
             List<OrderDetailDto> orderDetails = new();
             foreach (var detail in detailInDatabase)
             {
-                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId));
-                if (element is null)
+                if (detail.Status != OrderDetailStatus.Cancelled)
                 {
-                    orderDetails.Add(new OrderDetailDto
+                    var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId));
+                    if (element is null)
                     {
-                        OrderId = result.Id,
-                        FoodId = detail.FoodId,
-                        FoodName = detail.Food.Name,
-                        Status = OrderDetailStatus.Served,
-                        Quantity = 1,
-                        Price = detail.Price,
-                        Amount = detail.Price
-                    });
-                }
-                else
-                {
-                    element.Quantity += 1;
-                    element.Amount += detail.Price;
-                }
-                if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
-                {
+                        orderDetails.Add(new OrderDetailDto
+                        {
+                            OrderId = result.Id,
+                            UserId = result.UserId,
+                            Date = result.Date,
+                            FoodId = detail.FoodId,
+                            FoodName = detail.Food.Name,
+                            Status = detail.Status,
+                            Quantity = 1,
+                            Price = detail.Price,
+                            Amount = detail.Price
+                        });
+                    }
+                    else
+                    {
+                        element.Quantity += 1;
+                        element.Amount += detail.Price;
+                    }
                     total += detail.Price;
                 }
             }

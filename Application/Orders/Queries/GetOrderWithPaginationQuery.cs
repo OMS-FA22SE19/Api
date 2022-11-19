@@ -115,23 +115,46 @@ namespace Application.Orders.Queries
                     var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted && e.Status == detail.Status);
                     if (element is null)
                     {
-                        orderDetails.Add(new OrderDetailDto
+                        if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
                         {
-                            OrderId = order.Id,
-                            UserId = order.UserId,
-                            Date = order.Date,
-                            FoodId = detail.FoodId,
-                            FoodName = detail.Food.Name,
-                            Status = detail.Status,
-                            Quantity = 1,
-                            Price = detail.Price,
-                            Amount = detail.Price
-                        });
+                            orderDetails.Add(new OrderDetailDto
+                            {
+                                OrderId = order.Id,
+                                UserId = order.UserId,
+                                Date = order.Date,
+                                FoodId = detail.FoodId,
+                                FoodName = detail.Food.Name,
+                                Status = detail.Status,
+                                Quantity = 1,
+                                Price = detail.Price,
+                                Amount = detail.Price
+                            });
+                        }
+                        else
+                        {
+                            orderDetails.Add(new OrderDetailDto
+                            {
+                                OrderId = order.Id,
+                                UserId = order.UserId,
+                                Date = order.Date,
+                                FoodId = detail.FoodId,
+                                FoodName = detail.Food.Name,
+                                Status = detail.Status,
+                                Quantity = 1,
+                                Price = detail.Price,
+                                Amount = 0
+                            });
+                        }
                     }
                     else
                     {
                         element.Quantity += 1;
-                        element.Amount += detail.Price;
+                        if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
+                        {
+                            element.Amount += detail.Price;
+                        }
+                        else
+                            element.Amount += 0;
                     }
                     if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
                     {
