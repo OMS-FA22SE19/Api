@@ -3,7 +3,6 @@ using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Common.Models;
 using Application.OrderDetails.Response;
-using Application.Orders.Events;
 using Application.Orders.Helpers;
 using Application.Orders.Response;
 using AutoMapper;
@@ -71,7 +70,7 @@ namespace Application.Orders.Commands
             {
                 throw new NotFoundException(nameof(TableType), reservation.TableTypeId);
             }
-            entity.PrePaid = reservation.NumOfPeople * tableType.ChargePerSeat;
+            entity.PrePaid = reservation.NumOfSeats * tableType.ChargePerSeat;
             entity.OrderDetails = new List<OrderDetail>();
 
             List<Expression<Func<OrderDetail, bool>>> filters = new();
@@ -130,7 +129,7 @@ namespace Application.Orders.Commands
                         Quantity = 1,
                         Price = detail.Price,
                         Amount = detail.Price,
-                        Note= detail.Note
+                        Note = detail.Note
                     });
                 }
                 else
