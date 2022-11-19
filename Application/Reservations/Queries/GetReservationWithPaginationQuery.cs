@@ -91,7 +91,7 @@ namespace Application.Reservations.Queries
                 }
 
                 item.OrderDetails = orderDetails;
-                item.PrePaid = item.NumOfSeats * tableType.ChargePerSeat;
+                item.PrePaid = item.NumOfSeats * tableType.ChargePerSeat * item.Quantity;
                 item.TableType = tableType.Name;
             }
             return new Response<PaginatedList<ReservationDto>>(mappedResult);

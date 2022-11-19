@@ -82,7 +82,7 @@ namespace Application.Reservations.Commands
             var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == request.Id);
             if (billing is not null)
             {
-                if (billing.ReservationAmount < (request.NumOfSeats * tableType.ChargePerSeat))
+                if (billing.ReservationAmount < (request.NumOfSeats * tableType.ChargePerSeat * request.Quantity))
                 {
                     reservation.Status = ReservationStatus.Available;
                 }
