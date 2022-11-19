@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Application.Common.Interfaces;
-using Application.Models;
+using Application.Common.Models;
 using Firebase.Auth;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;

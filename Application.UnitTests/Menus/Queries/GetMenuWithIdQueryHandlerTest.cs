@@ -1,7 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Menus.Queries;
 using Application.Menus.Response;
-using Application.Models;
+using Application.Common.Models;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;

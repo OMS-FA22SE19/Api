@@ -1,5 +1,5 @@
 ﻿using Application.Foods.Response;
-using Application.Models;
+using Application.Common.Models;
 using Application.Types.Response;
 using AutoMapper;
 using Core.Common;

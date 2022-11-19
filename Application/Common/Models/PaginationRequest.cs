@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Application.Models
+namespace Application.Common.Models
 {
     public abstract class PaginationRequest
     {

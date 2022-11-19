@@ -2,7 +2,7 @@
 using Application.Foods.Commands;
 using Application.Foods.Queries;
 using Application.Foods.Response;
-using Application.Models;
+using Application.Common.Models;
 using Application.Types.Response;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;

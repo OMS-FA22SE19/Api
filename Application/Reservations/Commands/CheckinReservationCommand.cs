@@ -1,6 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
-using Application.Models;
+using Application.Common.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Events;
 using Application.Reservations.Response;

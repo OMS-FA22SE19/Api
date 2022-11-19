@@ -1,5 +1,5 @@
 ﻿using Application.Common.Exceptions;
-using Application.Models;
+using Application.Common.Models;
 using Application.OrderDetails.Response;
 using Application.Reservations.Response;
 using AutoMapper;

@@ -1,6 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Mappings;
-using Application.Models;
+using Application.Common.Models;
 using Application.OrderDetails.Events;
 using Application.OrderDetails.Response;
 using AutoMapper;
@@ -63,7 +63,7 @@ namespace Application.OrderDetails.Commands
                     }
                     break;
                 case OrderDetailStatus.Served:
-                    if (entity.Status != OrderDetailStatus.Processing)
+                    if (entity.Status != OrderDetailStatus.Processing || entity.Status != OrderDetailStatus.ReadyToServe)
                     {
                         return new Response<DishDto>("Invalid Operation! You can only serve processing dish")
                         {
@@ -87,9 +87,9 @@ namespace Application.OrderDetails.Commands
                     Id = request.Id,
                     name = food.Name,
                     Status = request.Status,
-                    token = token.deviceToken
+                    token = token?.deviceToken ?? "cWJj1yFK8_litSzqwFLVT8:APA91bEVtpTC5RZguTfy0GCDkNnB5sptwZIPUxc7C7kj36nuTvsK8Ck8QbaGSd8oLSd2Q-C283-27MkA7Y6u9AdWaEmPDPMjr1T2jTx52MWXe9YKmXFNCYDFqz6MsPjt5hFrjhOIhZI3"
                 });
-            } 
+            }
             else
             {
                 entity.AddDomainEvent(new UpdateOrderDetailEvent
@@ -97,10 +97,10 @@ namespace Application.OrderDetails.Commands
                     Id = request.Id,
                     name = food.Name,
                     Status = request.Status,
-                    token = ""
+                    token = "cWJj1yFK8_litSzqwFLVT8:APA91bEVtpTC5RZguTfy0GCDkNnB5sptwZIPUxc7C7kj36nuTvsK8Ck8QbaGSd8oLSd2Q-C283-27MkA7Y6u9AdWaEmPDPMjr1T2jTx52MWXe9YKmXFNCYDFqz6MsPjt5hFrjhOIhZI3"
                 });
             }
-            
+
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {

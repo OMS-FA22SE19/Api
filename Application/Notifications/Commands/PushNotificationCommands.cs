@@ -2,7 +2,7 @@
 using MediatR;
 using Application.Common.Interfaces;
 using Application.Notifications.Responses;
-using Application.Models;
+using Application.Common.Models;
 using Application.Reservations.Response;
 
 namespace Application.Notifications.Commands

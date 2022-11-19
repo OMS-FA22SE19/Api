@@ -1,6 +1,6 @@
 ﻿using Application.CourseTypes.Commands;
 using Application.CourseTypes.Response;
-using Application.Models;
+using Application.Common.Models;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;

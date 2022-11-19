@@ -2,7 +2,7 @@
 using Application.CourseTypes.Commands;
 using Application.CourseTypes.Queries;
 using Application.CourseTypes.Response;
-using Application.Models;
+using Application.Common.Models;
 using Core.Common;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;

@@ -1,5 +1,5 @@
 ﻿using Application.Common.Interfaces;
-using Application.Models;
+using Application.Common.Models;
 using Application.OrderDetails.Response;
 using AutoMapper;
 using Core.Common;
@@ -14,6 +14,7 @@ namespace Application.OrderDetails.Queries
     public sealed class GetOrderDetailWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<DishDto>>>
     {
         public OrderDetailProperty? OrderBy { get; set; }
+        public OrderDetailStatus? Status { get; set; }
     }
 
     public sealed class GetOrderDetailWithPaginationQueryHandler : IRequestHandler<GetOrderDetailWithPaginationQuery, Response<PaginatedList<DishDto>>>
@@ -42,6 +43,11 @@ namespace Application.OrderDetails.Queries
                 filters.Add(e => e.OrderId.Contains(request.SearchValue)
                     || request.SearchValue.Equals(e.FoodId.ToString())
                     || request.SearchValue.Equals(e.Id.ToString()));
+            }
+
+            if (request.Status is not null)
+            {
+                filters.Add(e => e.Status == request.Status);
             }
 
             filters.Add(e => !e.IsDeleted);

@@ -1,4 +1,4 @@
-﻿using Application.Models;
+﻿using Application.Common.Models;
 using Application.Reservations.Response;
 using AutoMapper;
 using Core.Interfaces;

@@ -1,5 +1,5 @@
 ﻿using Application.Common.Interfaces;
-using Application.Models;
+using Application.Common.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Response;
 using AutoMapper;

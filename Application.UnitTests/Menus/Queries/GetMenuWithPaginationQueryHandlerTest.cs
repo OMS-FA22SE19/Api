@@ -1,6 +1,6 @@
 ﻿using Application.Menus.Queries;
 using Application.Menus.Response;
-using Application.Models;
+using Application.Common.Models;
 using AutoMapper;
 using Core.Common;
 using Core.Entities;

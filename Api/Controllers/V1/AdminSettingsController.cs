@@ -3,7 +3,7 @@ using Application.AdminSettings.Queries;
 using Application.AdminSettings.Response;
 using Application.Common.Exceptions;
 using Application.CourseTypes.Response;
-using Application.Models;
+using Application.Common.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 

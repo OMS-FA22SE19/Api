@@ -1,6 +1,6 @@
 ﻿using Application.AdminSettings.Response;
 using Application.Common.Exceptions;
-using Application.Models;
+using Application.Common.Models;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;

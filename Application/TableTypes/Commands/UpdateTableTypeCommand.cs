@@ -1,6 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Mappings;
-using Application.Models;
+using Application.Common.Models;
 using Application.TableTypes.Response;
 using AutoMapper;
 using Core.Entities;

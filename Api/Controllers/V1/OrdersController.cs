@@ -1,5 +1,5 @@
 ﻿using Application.Common.Exceptions;
-using Application.Models;
+using Application.Common.Models;
 using Application.Orders.Commands;
 using Application.Orders.Queries;
 using Application.Orders.Response;

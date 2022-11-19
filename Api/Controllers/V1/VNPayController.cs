@@ -1,4 +1,4 @@
-﻿using Application.Models;
+﻿using Application.Common.Models;
 using Application.Orders.Commands;
 using Application.Orders.Response;
 using Application.Types.Response;

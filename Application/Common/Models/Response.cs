@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Application.Models
+namespace Application.Common.Models
 {
     public sealed class Response<T>
     {

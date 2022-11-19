@@ -5,7 +5,7 @@ using Application.MenuFoods.Commands;
 using Application.Menus.Commands;
 using Application.Menus.Queries;
 using Application.Menus.Response;
-using Application.Models;
+using Application.Common.Models;
 using Application.Types.Response;
 using Core.Common;
 using Core.Entities;

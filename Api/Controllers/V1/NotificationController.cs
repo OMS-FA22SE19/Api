@@ -1,7 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Menus.Commands;
 using Application.Menus.Response;
-using Application.Models;
+using Application.Common.Models;
 using Application.Notifications.Commands;
 using Application.Notifications.Responses;
 using MediatR;

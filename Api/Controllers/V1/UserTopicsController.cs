@@ -1,5 +1,5 @@
 ﻿using Application.Common.Exceptions;
-using Application.Models;
+using Application.Common.Models;
 using Application.Topics.Response;
 using Application.UserTopics.Commands;
 using Microsoft.AspNetCore.Mvc;

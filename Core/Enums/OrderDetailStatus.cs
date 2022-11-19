@@ -7,6 +7,7 @@
         Cancelled = -1,
         Received = 0,
         Processing = 1,
-        Served = 2
+        Served = 2,
+        ReadyToServe = 3
     }
 }

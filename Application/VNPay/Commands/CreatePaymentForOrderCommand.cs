@@ -1,6 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Helpers;
-using Application.Models;
+using Application.Common.Models;
 using Application.VNPay.Response;
 using AutoMapper;
 using Core.Entities;

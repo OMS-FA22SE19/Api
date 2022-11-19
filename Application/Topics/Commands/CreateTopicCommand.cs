@@ -1,5 +1,5 @@
 ﻿using Application.Common.Mappings;
-using Application.Models;
+using Application.Common.Models;
 using Application.Topics.Response;
 using AutoMapper;
 using Core.Entities;

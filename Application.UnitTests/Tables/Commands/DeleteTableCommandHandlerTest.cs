@@ -1,4 +1,4 @@
-﻿using Application.Models;
+﻿using Application.Common.Models;
 using Application.Tables.Commands;
 using Application.Tables.Response;
 using AutoMapper;

@@ -1,5 +1,5 @@
 ﻿using Application.Common.Exceptions;
-using Application.Models;
+using Application.Common.Models;
 using Application.TableTypes.Commands;
 using Application.TableTypes.Queries;
 using Application.TableTypes.Response;

@@ -1,6 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Foods.Response;
-using Application.Models;
+using Application.Common.Models;
 using Core.Entities;
 using Core.Interfaces;
 using MediatR;

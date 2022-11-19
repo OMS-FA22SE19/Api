@@ -1,5 +1,5 @@
 ﻿using Application.Common.Exceptions;
-using Application.Models;
+using Application.Common.Models;
 using Application.UserDeviceTokens.Commands;
 using Application.UserDeviceTokens.Queries;
 using Application.UserDeviceTokens.Responses;
