@@ -6,6 +6,7 @@ using Application.OrderDetails.Response;
 using Application.Orders.Events;
 using Application.Orders.Helpers;
 using Application.Orders.Response;
+using Application.Reservations.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Enums;
@@ -65,13 +66,26 @@ namespace Application.Orders.Commands
                 throw new NotFoundException(nameof(Order), $"with reservation id {request.ReservationId}");
             }
 
+            if (entity.NumOfEdits >= 3)
+            {
+                return new Response<OrderDto>($"This Order is can not be edited more!")
+                {
+                    StatusCode = System.Net.HttpStatusCode.BadRequest
+                };
+            }
+
             //Comment until online payment complete
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => !e.IsDeleted && e.Id == reservation.TableTypeId);
             if (tableType is null)
             {
                 throw new NotFoundException(nameof(TableType), reservation.TableTypeId);
             }
-            entity.PrePaid = reservation.NumOfPeople * tableType.ChargePerSeat;
+
+            var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == reservation.Id);
+            if (billing is not null)
+            {
+                entity.PrePaid = billing.ReservationAmount;
+            }
             entity.OrderDetails = new List<OrderDetail>();
 
             List<Expression<Func<OrderDetail, bool>>> filters = new();
@@ -99,6 +113,8 @@ namespace Application.Orders.Commands
                     });
                 }
             }
+
+            entity.NumOfEdits++;
             var result = await _unitOfWork.OrderRepository.UpdateAsync(entity);
 
             reservation.IsPriorFoodOrder = true;

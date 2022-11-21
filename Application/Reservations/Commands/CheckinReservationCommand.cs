@@ -128,7 +128,11 @@ namespace Application.Reservations.Commands
             }
             var mappedResult = _mapper.Map<ReservationDto>(result);
             mappedResult.OrderDetails = orderDetailDtos;
-            mappedResult.PrePaid = entity.NumOfPeople * tableType.ChargePerSeat;
+            var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == entity.Id);
+            if (billing is not null)
+            {
+                mappedResult.PrePaid = billing.ReservationAmount;
+            }
             mappedResult.TableType = tableType.Name;
             return new Response<ReservationDto>(mappedResult);
         }

@@ -1,4 +1,6 @@
 ﻿using Core.Entities;
+using Core.Interfaces;
+using Infrastructure.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -11,13 +13,15 @@ namespace Infrastructure.Persistence
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public ApplicationDbContextInitialiser(ILogger<ApplicationDbContextInitialiser> logger, ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, IUnitOfWork unitOfWork)
         {
             _logger = logger;
             _context = context;
             _userManager = userManager;
             _roleManager = roleManager;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task InitializeAsync()
@@ -89,6 +93,14 @@ namespace Infrastructure.Persistence
             if (_roleManager.Roles.All(r => r.Name != customerRole.Name))
             {
                 await _roleManager.CreateAsync(customerRole);
+            }
+
+            var topic = new Topic { Name = "Staff" };
+            var topicResult = await _unitOfWork.TopicRepository.GetAsync(r => r.Name.Equals(topic.Name));
+            if (topicResult is null)
+            {
+                await _unitOfWork.TopicRepository.InsertAsync(topic);
+                await _unitOfWork.CompleteAsync(default);
             }
         }
     }
