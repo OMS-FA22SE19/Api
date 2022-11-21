@@ -5,12 +5,12 @@ using System.Text.Json.Serialization;
 
 namespace Core.Entities
 {
-    [Owned]
     public class RefreshToken : Entity
     {
         [Key]
         [JsonIgnore]
         public int Id { get; set; }
+        public string UserId { get; set; }
         public string Token { get; set; }
         public DateTime Expires { get; set; }
         public DateTime Created { get; set; }
@@ -21,6 +21,7 @@ namespace Core.Entities
         public string ReasonRevoked { get; set; }
         public bool IsExpired => DateTime.UtcNow >= Expires;
         public bool IsRevoked => Revoked != null;
-        public bool IsActive => !IsRevoked && !IsExpired;
+        public bool IsActive => (!IsRevoked || !IsExpired);
+        public ApplicationUser User { get; set; }
     }
 }

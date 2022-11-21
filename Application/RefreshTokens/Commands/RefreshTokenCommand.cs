@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq.Expressions;
 using System.Net;
 using System.Security.Claims;
 using System.Threading;
@@ -51,14 +52,14 @@ namespace Application.RefreshTokens.Commands
         public async Task<Response<AuthenticationResponse>> Handle(RefreshTokenCommand request, CancellationToken cancellationToken)
         {
             var user = getUserByRefreshToken(request.token);
-            var refreshToken = user.RefreshTokens.Single(x => x.Token == request.token);
+            var refreshToken = await _unitOfWork.RefreshTokenRepository.GetAsync(t => t.UserId.Equals(user.Id) && t.Token.Equals(request.token));
 
             if (refreshToken.IsRevoked)
             {
                 // revoke all descendant tokens in case this token has been compromised
                 revokeDescendantRefreshTokens(refreshToken, user, request.ipAddress, $"Attempted reuse of revoked ancestor token: {request.token}");
                 await _unitOfWork.UserRepository.UpdateAsync(user);
-                _unitOfWork.CompleteAsync(cancellationToken);
+                await _unitOfWork.CompleteAsync(cancellationToken);
             }
 
             if (!refreshToken.IsActive)
@@ -66,14 +67,20 @@ namespace Application.RefreshTokens.Commands
 
             // replace old refresh token with a new one (rotate token)
             var newRefreshToken = await rotateRefreshToken(refreshToken, request.ipAddress);
-            user.RefreshTokens.Add(newRefreshToken);
+            //user.RefreshTokens.Add(newRefreshToken);
+            newRefreshToken.UserId = user.Id;
+            await _unitOfWork.RefreshTokenRepository.InsertAsync(newRefreshToken);
+
 
             // remove old refresh tokens from user
-            removeOldRefreshTokens(user);
+            List<Expression<Func<RefreshToken, bool>>> filters = new();
+            filters.Add(rt => rt.UserId.Equals(user.Id));
+            var oldTokens = await _unitOfWork.RefreshTokenRepository.GetAllAsync(filters);
+            user.RefreshTokens = oldTokens;
+            await removeOldRefreshTokens(user);
 
             // save changes to db
-            await _unitOfWork.UserRepository.UpdateAsync(user);
-            _unitOfWork.CompleteAsync(cancellationToken);
+            await _unitOfWork.CompleteAsync(cancellationToken);
 
             // generate new jwt
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -89,7 +96,8 @@ namespace Application.RefreshTokens.Commands
             {
                 Email = user.Email,
                 JwtToken = tokenHandler.WriteToken(jwtToken),
-                ExpiredAt = jwtToken.ValidTo
+                ExpiredAt = jwtToken.ValidTo,
+                RefreshToken = newRefreshToken.Token
             };
             return new Response<AuthenticationResponse>(response)
             {
@@ -112,27 +120,32 @@ namespace Application.RefreshTokens.Commands
         {
             var newRefreshToken = await _authenticationService.GenerateRefreshToken(ipAddress);
             revokeRefreshToken(refreshToken, ipAddress, "Replaced by new token", newRefreshToken.Token);
+            await _unitOfWork.RefreshTokenRepository.UpdateAsync(refreshToken);
             return newRefreshToken;
         }
 
-        private void removeOldRefreshTokens(ApplicationUser user)
+        private async Task removeOldRefreshTokens(ApplicationUser user)
         {
-            // remove old inactive refresh tokens from user based on TTL in app settings
-            //user.RefreshTokens.RemoveAll(x =>
-            //    !x.IsActive &&
-            //    x.Created.AddDays(_appSettings.RefreshTokenTTL) <= DateTime.UtcNow);
-            foreach(var token in user.RefreshTokens)
+            if (user.RefreshTokens is not null)
             {
-                user.RefreshTokens.Remove(token);
+                foreach (var token in user.RefreshTokens.ToList())
+                {
+                    if (!token.IsActive && token.Created.AddDays(2) <= DateTime.UtcNow)
+                    {
+                        //user.RefreshTokens.Remove(token);
+                        await _unitOfWork.RefreshTokenRepository.DeleteAsync(t => t.Token.Equals(token.Token));
+                        await _unitOfWork.CompleteAsync(default);
+                    }
+                }
             }
         }
 
-        private void revokeDescendantRefreshTokens(RefreshToken refreshToken, ApplicationUser user, string ipAddress, string reason)
+        private async void revokeDescendantRefreshTokens(RefreshToken refreshToken, ApplicationUser user, string ipAddress, string reason)
         {
             // recursively traverse the refresh token chain and ensure all descendants are revoked
             if (!string.IsNullOrEmpty(refreshToken.ReplacedByToken))
             {
-                var childToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken.ReplacedByToken);
+                var childToken = await _unitOfWork.RefreshTokenRepository.GetAsync(ct => ct.Token == refreshToken.ReplacedByToken); //user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken.ReplacedByToken);
                 if (childToken.IsActive)
                     revokeRefreshToken(childToken, ipAddress, reason);
                 else

@@ -20,6 +20,7 @@ namespace Core.Common.Interfaces
         DbSet<Order> Orders { get; }
         DbSet<OrderDetail> OrderDetails { get; }
         DbSet<Billing> Billings { get; }
+        DbSet<RefreshToken> RefreshTokens { get; }
         DbSet<Reservation> Reservations { get; }
         DbSet<ReservationTable> ReservationTables { get; }
         DbSet<Table> Tables { get; }

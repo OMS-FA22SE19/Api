@@ -4,9 +4,11 @@ using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Security;
 using Application.Models;
+using Application.RefreshTokens.Commands;
 using Application.Users.Queries;
 using Application.Users.Response;
 using Core.Entities;
+using Duende.IdentityServer.Models;
 using Firebase.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -15,6 +17,8 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using static Google.Apis.Requests.BatchRequest;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Api.ApiControllers.V1
 {
@@ -37,7 +41,7 @@ namespace Api.ApiControllers.V1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> AuthenticateAsync(AuthenticationRequest request)
+        public async Task<IActionResult> AuthenticateAsync(AuthenticationCommand command)
         {
             try
             {
@@ -46,7 +50,9 @@ namespace Api.ApiControllers.V1
                     return BadRequest();
                 }
 
-                var result = await _authenticationService.Authenticate(request);
+                command.ipAddress = ipAddress();
+                var result = await Mediator.Send(command);
+                setTokenCookie(result.Data.RefreshToken);
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (Exception ex)
@@ -95,24 +101,26 @@ namespace Api.ApiControllers.V1
 
         [AllowAnonymous]
         [HttpPost("refresh-token")]
-        public IActionResult RefreshToken()
+        public async Task<IActionResult> RefreshTokenAsync()
         {
             var refreshToken = Request.Cookies["refreshToken"];
-            var response = _authenticationService.RefreshToken(refreshToken, ipAddress());
-            setTokenCookie(response.RefreshToken);
+            var command = new RefreshTokenCommand() { token = refreshToken, ipAddress = ipAddress() };
+            var response = await Mediator.Send(command);
+            setTokenCookie(response.Data.RefreshToken);
             return Ok(response);
         }
 
         [HttpPost("revoke-token")]
-        public IActionResult RevokeToken(RevokeTokenRequest model)
+        public async Task<IActionResult> RevokeTokenAsync(RevokeTokenCommand command)
         {
             // accept refresh token in request body or cookie
-            var token = model.Token ?? Request.Cookies["refreshToken"];
+            var token = command.token ?? Request.Cookies["refreshToken"];
 
             if (string.IsNullOrEmpty(token))
                 return BadRequest(new { message = "Token is required" });
 
-            _authenticationService.RevokeToken(token, ipAddress());
+            command.ipAddress = ipAddress();
+            await Mediator.Send(command);
             return Ok(new { message = "Token revoked" });
         }
 

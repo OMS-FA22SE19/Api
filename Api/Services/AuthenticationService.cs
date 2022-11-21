@@ -248,8 +248,8 @@ namespace Api.Services
                 // token is a cryptographically strong random sequence of values
                 var token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64));
                 // ensure token is unique by checking against db
-                var users = await _unitOfWork.UserRepository.GetAllAsync();
-                var tokenIsUnique = users.Any(u => u.RefreshTokens.Any(rf => rf.Token.Equals(token)));
+                var users = await _unitOfWork.UserRepository.GetAllAsync(null, null, $"{nameof(ApplicationUser.RefreshTokens)}");
+                var tokenIsUnique = !users.Any(u => u.RefreshTokens.Any(rf => rf.Token.Equals(token)));
 
                 if (!tokenIsUnique)
                     return await getUniqueToken();
