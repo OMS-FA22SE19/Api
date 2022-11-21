@@ -99,7 +99,6 @@ namespace Api.ApiControllers.V1
             }
         }
 
-        [AllowAnonymous]
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshTokenAsync()
         {
