@@ -56,18 +56,15 @@ namespace Application.RefreshTokens.Commands
 
             if (refreshToken.IsRevoked)
             {
-                // revoke all descendant tokens in case this token has been compromised
                 revokeDescendantRefreshTokens(refreshToken, user, request.ipAddress, $"Attempted reuse of revoked ancestor token: {request.token}");
-                await _unitOfWork.UserRepository.UpdateAsync(user);
-                await _unitOfWork.CompleteAsync(cancellationToken);
+                throw new UnauthorizedAccessException("token Revoked");
             }
 
             if (!refreshToken.IsActive)
-                throw new NotFoundException("Invalid token");
+                throw new NotFoundException("Token is not active");
 
             // replace old refresh token with a new one (rotate token)
             var newRefreshToken = await rotateRefreshToken(refreshToken, request.ipAddress);
-            //user.RefreshTokens.Add(newRefreshToken);
             newRefreshToken.UserId = user.Id;
             await _unitOfWork.RefreshTokenRepository.InsertAsync(newRefreshToken);
 
@@ -132,7 +129,6 @@ namespace Application.RefreshTokens.Commands
                 {
                     if (!token.IsActive && token.Created.AddDays(2) <= DateTime.UtcNow)
                     {
-                        //user.RefreshTokens.Remove(token);
                         await _unitOfWork.RefreshTokenRepository.DeleteAsync(t => t.Token.Equals(token.Token));
                         await _unitOfWork.CompleteAsync(default);
                     }
@@ -145,9 +141,13 @@ namespace Application.RefreshTokens.Commands
             // recursively traverse the refresh token chain and ensure all descendants are revoked
             if (!string.IsNullOrEmpty(refreshToken.ReplacedByToken))
             {
-                var childToken = await _unitOfWork.RefreshTokenRepository.GetAsync(ct => ct.Token == refreshToken.ReplacedByToken); //user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken.ReplacedByToken);
+                var childToken = await _unitOfWork.RefreshTokenRepository.GetAsync(ct => ct.Token == refreshToken.ReplacedByToken);
                 if (childToken.IsActive)
+                {
                     revokeRefreshToken(childToken, ipAddress, reason);
+                    await _unitOfWork.RefreshTokenRepository.UpdateAsync(childToken);
+                    await _unitOfWork.CompleteAsync(default);
+                }
                 else
                     revokeDescendantRefreshTokens(childToken, user, ipAddress, reason);
             }

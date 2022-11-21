@@ -19,6 +19,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
 using System.Net;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using System.Threading;
 
 namespace Application.RefreshTokens.Commands
@@ -31,8 +32,8 @@ namespace Application.RefreshTokens.Commands
         [Required]
         [DataType(DataType.Password)]
         public string Password { get; set; }
-        [Required]
-        public string ipAddress { get; set; }
+        [JsonIgnore]
+        public string? ipAddress { get; set; }
     }
 
     public class AuthenticationCommandHandler : IRequestHandler<AuthenticationCommand, Response<AuthenticationResponse>>
@@ -55,15 +56,15 @@ namespace Application.RefreshTokens.Commands
                 var user = await _userManager.FindByEmailAsync(request.Email);
                 if (user is null)
                 {
-                    throw new NullReferenceException("Not found account");
+                    throw new NotFoundException("Not found account");
                 }
                 if (!(await _userManager.CheckPasswordAsync(user, request.Password)))
                 {
-                    throw new NullReferenceException("Not valid login information");
+                    throw new BadRequestException("Not valid login information");
                 }
                 if (user.IsDeleted == true)
                 {
-                    throw new NullReferenceException("This user has been deleted");
+                    throw new BadRequestException("This user has been deleted");
                 }
 
 
@@ -117,17 +118,12 @@ namespace Application.RefreshTokens.Commands
         //helpers
         private async Task removeOldRefreshTokensAsync(ApplicationUser user)
         {
-            // remove old inactive refresh tokens from user based on TTL in app settings
-            //user.RefreshTokens.RemoveAll(x =>
-            //    !x.IsActive &&
-            //    x.Created.AddDays(_appSettings.RefreshTokenTTL) <= DateTime.UtcNow);
             if (user.RefreshTokens is not null)
             {
                 foreach (var token in user.RefreshTokens.ToList())
                 {
                     if (!token.IsActive && token.Created.AddDays(2) <= DateTime.UtcNow)
                     {
-                        //user.RefreshTokens.Remove(token);
                         await _unitOfWork.RefreshTokenRepository.DeleteAsync(t => t.Token.Equals(token.Token));
                         await _unitOfWork.CompleteAsync(default);
                     }

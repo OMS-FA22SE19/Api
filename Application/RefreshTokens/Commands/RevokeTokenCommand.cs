@@ -17,6 +17,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using System.Threading;
 
 namespace Application.RefreshTokens.Commands
@@ -25,8 +26,8 @@ namespace Application.RefreshTokens.Commands
     {
         [Required]
         public string token { get; set; }
-        [Required]
-        public string ipAddress { get; set; }
+        [JsonIgnore]
+        public string? ipAddress { get; set; }
 
         public void Mapping(Profile profile)
         {

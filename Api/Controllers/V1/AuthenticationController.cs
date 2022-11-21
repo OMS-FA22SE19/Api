@@ -8,22 +8,15 @@ using Application.RefreshTokens.Commands;
 using Application.Users.Queries;
 using Application.Users.Response;
 using Core.Entities;
-using Duende.IdentityServer.Models;
-using Firebase.Auth;
-using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Net;
-using System.Threading.Tasks;
-using static Google.Apis.Requests.BatchRequest;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Api.ApiControllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public class AuthenticationController : ApiControllerBase
     {
         private readonly IAuthenticationService _authenticationService;
@@ -41,6 +34,7 @@ namespace Api.ApiControllers.V1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [AllowAnonymous]
         public async Task<IActionResult> AuthenticateAsync(AuthenticationCommand command)
         {
             try
@@ -52,7 +46,11 @@ namespace Api.ApiControllers.V1
 
                 command.ipAddress = ipAddress();
                 var result = await Mediator.Send(command);
-                setTokenCookie(result.Data.RefreshToken);
+                if (result.StatusCode != HttpStatusCode.NotFound)
+                {
+                    setTokenCookie(result.Data.RefreshToken);
+                }
+                
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (Exception ex)
@@ -65,7 +63,6 @@ namespace Api.ApiControllers.V1
             }
         }
 
-        // GET: api/Blogs
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -100,6 +97,7 @@ namespace Api.ApiControllers.V1
         }
 
         [HttpPost("refresh-token")]
+        [AllowAnonymous]
         public async Task<IActionResult> RefreshTokenAsync()
         {
             var refreshToken = Request.Cookies["refreshToken"];
