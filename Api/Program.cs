@@ -1,12 +1,18 @@
 using Api.Filters;
+using Api.Middlewares;
 using Api.Services;
 using Application;
 using Application.Common.Interfaces;
+using Application.Helpers;
 using Application.Services;
 using Infrastructure;
 using Infrastructure.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Configuration;
 using System.Reflection;
+using System.Text;
 using System.Text.Json.Serialization;
 
 var _developmentCors = "developmentCors";
@@ -27,6 +33,28 @@ builder.Services.AddCors(options =>
         });
 });
 
+builder.Services.Configure<AppSettings>(builder.Configuration.GetSection("AppSettings"));
+string secretKey = builder.Configuration["AppSettings:Secret"];
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opt =>
+                {
+                    opt.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateIssuer = bool.Parse(builder.Configuration["AppSettings:ValidateIssuer"]),
+                        ValidIssuer = builder.Configuration["AppSettings:ValidIssuer"],
+                        ValidateAudience = bool.Parse(builder.Configuration["AppSettings:ValidateAudience"]),
+                        ValidAudience = builder.Configuration["AppSettings:ValidAudience"],
+
+                        ValidateIssuerSigningKey = bool.Parse(builder.Configuration["AppSettings:ValidateIssuerSigningKey"]),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
+
+                        ClockSkew = TimeSpan.Zero,
+
+                    };
+                });
+
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddSingleton<ICurrentUserService, CurrentUserService>();
 builder.Services.AddSingleton<IFirebaseMessagingService, FirebaseMessagingService>();
 builder.Services.AddHttpContextAccessor();
@@ -97,6 +125,8 @@ app.UseCors(_developmentCors);
 app.UseIdentityServer();
 
 app.UseAuthorization();
+
+app.UseMiddleware<JwtMiddleware>();
 
 app.MapControllers();
 
