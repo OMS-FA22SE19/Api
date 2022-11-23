@@ -13,7 +13,7 @@ namespace Application.Common.Validator
             return name.All(Char.IsLetter);
         }
 
-        protected virtual bool BeAFutureDate(DateTime date) => date == default(DateTime) ? false : (date <= DateTime.Today);
+        protected virtual bool BeAFutureDate(DateTime date) => date == default(DateTime) ? false : (date >= DateTime.Today);
 
         protected virtual bool BeAPastDate(DateTime date) => date == default(DateTime) ? false : (date <= DateTime.Today);
 
