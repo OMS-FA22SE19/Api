@@ -8,9 +8,6 @@ namespace Application.Foods.Validators
     {
         public UpdateFoodCommandValidator()
         {
-            RuleFor(e => e.Id)
-                .NotEmpty().WithMessage("{PropertyName} is not empty");
-
             RuleFor(e => e.Name)
                 .NotEmpty().WithMessage("{PropertyName} is not empty")
                 .Length(2, 1000).WithMessage("Length {PropertyName} must between 2 and 256")
