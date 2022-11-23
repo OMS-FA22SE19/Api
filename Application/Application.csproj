@@ -31,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Tables\Validators\" />
     <Folder Include="UserTopics\Queries\" />
     <Folder Include="VNPay\Queries\" />
   </ItemGroup>

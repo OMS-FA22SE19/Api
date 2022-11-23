@@ -178,6 +178,10 @@ namespace Api.Controllers.V1
             {
                 throw;
             }
+            catch (ValidationException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var response = new Response<TableDto>(ex.Message)
@@ -240,6 +244,10 @@ namespace Api.Controllers.V1
                     return NoContent();
                 }
                 return StatusCode((int)result.StatusCode, result);
+            }
+            catch (ValidationException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
