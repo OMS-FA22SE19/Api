@@ -16,6 +16,6 @@ namespace Core.Entities
         public IList<Order> Orders { get; set; }
         public IList<UserDeviceToken> UserDeviceTokens { get; set; }
         public IList<UserTopic> UserTopics { get; set; }
-
+        public IList<RefreshToken> RefreshTokens { get; set; }
     }
 }

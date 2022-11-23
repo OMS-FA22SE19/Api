@@ -52,7 +52,10 @@ namespace Application.Reservations.Commands
             List<Expression<Func<Table, bool>>> filters = new();
             filters.Add(e => !e.IsDeleted && e.Status == TableStatus.Available && e.NumOfSeats == entity.NumOfSeats && e.TableTypeId == entity.TableTypeId);
             var tables = await _unitOfWork.TableRepository.GetPaginatedListAsync(filters, pageSize: entity.Quantity);
-
+            if(tables.Count < entity.Quantity)
+            {
+                throw new BadRequestException("There are not enough available table, check again later");
+            }
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => !e.IsDeleted && e.Id == entity.TableTypeId);
 
             var tableIds = new List<int>();
