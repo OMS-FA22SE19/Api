@@ -2,7 +2,7 @@
 using Application.Tables.Commands;
 using FluentValidation;
 
-namespace Application.Reservations.Validators
+namespace Application.Tables.Validators
 {
     public class UpdateTableCommandValidator : OMSAbstractValidator<UpdateTableCommand>
     {

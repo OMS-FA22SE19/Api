@@ -2,7 +2,7 @@
 using Application.Menus.Commands;
 using FluentValidation;
 
-namespace Application.Foods.Validators
+namespace Application.Menus.Validators
 {
     public class UpdateMenuCommandValidator : OMSAbstractValidator<UpdateMenuCommand>
     {
