@@ -13,23 +13,25 @@ using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Application.Orders.Commands
 {
     public sealed class AddOrderToReservationDemo : IMapFrom<Order>, IRequest<Response<OrderDto>>
     {
         public List<int> ReservationIds { get; set; }
-        public Dictionary<int, FoodInfo> OrderDetails { get; set; }
+        //public Dictionary<int, FoodInfo> OrderDetails { get; set; }
 
-        public void Mapping(Profile profile)
-        {
-            profile.CreateMap<AddOrderToReservationDemo, Order>()
-                .ForSourceMember(dto => dto.OrderDetails, opt => opt.DoNotValidate());
-        }
+        //public void Mapping(Profile profile)
+        //{
+        //    profile.CreateMap<AddOrderToReservationDemo, Order>()
+        //        .ForSourceMember(dto => dto.OrderDetails, opt => opt.DoNotValidate());
+        //}
     }
 
     public sealed class AddOrderToReservationDemoHandler : IRequestHandler<AddOrderToReservationDemo, Response<OrderDto>>
     {
+        static Random rnd = new Random();
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
@@ -45,15 +47,18 @@ namespace Application.Orders.Commands
 
         public async Task<Response<OrderDto>> Handle(AddOrderToReservationDemo request, CancellationToken cancellationToken)
         {
+            var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => e.Available);
+            if (availableMenu is null)
+            {
+                throw new NotFoundException($"No available {nameof(Menu)}");
+            }
+
+            List<Expression<Func<Food, bool>>> filters = new();
+            filters.Add(e => e.MenuFoods.Any(m => m.MenuId == availableMenu.Id));
+            var availableFood = await _unitOfWork.FoodRepository.GetAllAsync(filters, null, "");
+
             foreach (int reservationId in request.ReservationIds.ToList())
             {
-                
-                var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => e.Available);
-                if (availableMenu is null)
-                {
-                    throw new NotFoundException($"No available {nameof(Menu)}");
-                }
-
                 var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == reservationId && e.Status == ReservationStatus.CheckIn, includeProperties: $"{nameof(Reservation.ReservationTables)}");
                 if (reservation is null)
                 {
@@ -89,24 +94,41 @@ namespace Application.Orders.Commands
                     entity.PrePaid = 0;
                 }
 
-                foreach (var dish in request.OrderDetails)
+                //foreach (var dish in request.OrderDetails)
+                //{
+                //    for (int i = 0; i < dish.Value.Quantity; i++)
+                //    {
+                //        var food = await _unitOfWork.MenuFoodRepository.GetAsync(e => e.FoodId == dish.Key && e.MenuId == availableMenu.Id);
+                //        if (food is null)
+                //        {
+                //            throw new NotFoundException(nameof(Food), dish.Key);
+                //        }
+                //        entity.OrderDetails.Add(new OrderDetail
+                //        {
+                //            FoodId = dish.Key,
+                //            Price = food.Price,
+                //            Note = string.IsNullOrWhiteSpace(dish.Value.Note) ? string.Empty : dish.Value.Note,
+                //            Status = OrderDetailStatus.Received
+                //        });
+                //    }
+                //}
+
+                int randomQuantity = rnd.Next(1, 5);
+                for(int i = 0; i < randomQuantity; i++)
                 {
-                    for (int i = 0; i < dish.Value.Quantity; i++)
+                    int r = rnd.Next(availableFood.Count());
+                    var food = availableFood[r];
+                    var foodInMenu = await _unitOfWork.MenuFoodRepository.GetAsync(e => e.FoodId == food.Id && e.MenuId == availableMenu.Id);
+
+                    entity.OrderDetails.Add(new OrderDetail
                     {
-                        var food = await _unitOfWork.MenuFoodRepository.GetAsync(e => e.FoodId == dish.Key && e.MenuId == availableMenu.Id);
-                        if (food is null)
-                        {
-                            throw new NotFoundException(nameof(Food), dish.Key);
-                        }
-                        entity.OrderDetails.Add(new OrderDetail
-                        {
-                            FoodId = dish.Key,
-                            Price = food.Price,
-                            Note = string.IsNullOrWhiteSpace(dish.Value.Note) ? string.Empty : dish.Value.Note,
-                            Status = OrderDetailStatus.Received
-                        });
-                    }
+                        FoodId = food.Id,
+                        Price = foodInMenu.Price,
+                        Note = "For Demo",
+                        Status = OrderDetailStatus.Received
+                    });
                 }
+
                 var result = await _unitOfWork.OrderRepository.InsertAsync(entity);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 if (result is null)

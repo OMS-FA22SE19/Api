@@ -10,20 +10,22 @@ using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace Application.Reservations.Commands
 {
     public class CreateReservationDemo : IMapFrom<Reservation>, IRequest<Response<ReservationDemoDto>>
     {
         [Required]
-        public DateTime StartTime { get; set; }
-        [Required]
-        public DateTime EndTime { get; set; }
-        [Required]
-        public int numOfCheckInReservation { get; set; }
+        public string StartTime { get; set; }
+        public string? EndTime { get; set; }
+        public int? numOfCheckInReservation { get; set; }
+        public int? numOfAvailableReservation { get; set; }
+        public int? numOfCancelledReservation { get; set; }
     }
 
     public class CreateReservationDemoHandler : IRequestHandler<CreateReservationDemo, Response<ReservationDemoDto>>
@@ -42,6 +44,21 @@ namespace Application.Reservations.Commands
 
         public async Task<Response<ReservationDemoDto>> Handle(CreateReservationDemo request, CancellationToken cancellationToken)
         {
+            var startTime = Convert.ToDateTime(request.StartTime);
+            DateTime endTime;
+            if (request.EndTime is not null)
+            {
+                endTime = Convert.ToDateTime(request.EndTime);
+                if (startTime >= endTime) 
+                {
+                    throw new BadRequestException("EndTime is earlier than StartTime");
+                }
+            }
+            else
+            {
+                endTime = startTime.AddHours(1);
+            }
+
             var users = _userManager.Users.ToList();
             var tables = await _unitOfWork.TableRepository.GetAllAsync();
             var tableTypes = await _unitOfWork.TableTypeRepository.GetAllAsync();
@@ -52,6 +69,7 @@ namespace Application.Reservations.Commands
                 ReservationReserved = new List<int>(),
                 ReservationAvailable = new List<int>(),
                 ReservationCancelled = new List<int>(),
+                Error = ""
             };
 
             //checkin
@@ -60,6 +78,7 @@ namespace Application.Reservations.Commands
             {
                 if (tableForCheckIn.Count == 0)
                 {
+                    ReservationDemoDTO.Error = $"Can not add {request.numOfCheckInReservation - i} check in Reservation because there are not enough available table";
                     break;
                 }
 
@@ -73,8 +92,8 @@ namespace Application.Reservations.Commands
                     NumOfSeats = table.NumOfSeats,
                     TableTypeId = table.TableTypeId,
                     Quantity = 1,
-                    StartTime = request.StartTime,
-                    EndTime = request.EndTime,
+                    StartTime = startTime,
+                    EndTime = endTime, //add day +1
                     Status = ReservationStatus.CheckIn,
                     ReservationTables = new List<ReservationTable>()
                 };
@@ -82,6 +101,7 @@ namespace Application.Reservations.Commands
                 bool isValid = await validateStartEndTime(reservation);
                 if (!isValid)
                 {
+                    i--;
                     tableForCheckIn.Remove(table);
                 }
 
@@ -121,7 +141,7 @@ namespace Application.Reservations.Commands
             }
 
             //available
-            for (int i = 0; i < request.numOfCheckInReservation; i++)
+            for (int i = 0; i < request.numOfAvailableReservation; i++)
             {
                 int r = rnd.Next(tables.Count());
                 var table = tables[r];
@@ -133,8 +153,8 @@ namespace Application.Reservations.Commands
                     NumOfSeats = table.NumOfSeats,
                     TableTypeId = table.TableTypeId,
                     Quantity = 1,
-                    StartTime = request.StartTime.AddHours(2),
-                    EndTime = request.EndTime.AddHours(2),
+                    StartTime = startTime.AddHours(2),
+                    EndTime = endTime.AddHours(2),
                     Status = ReservationStatus.Available,
                     ReservationTables = new List<ReservationTable>()
                 };
@@ -157,13 +177,13 @@ namespace Application.Reservations.Commands
             }
 
             //Cancalled
-            for (int i = 0; i < request.numOfCheckInReservation; i++)
+            for (int i = 0; i < request.numOfCancelledReservation; i++)
             {
                 int r = rnd.Next(tables.Count());
                 var table = tables[r];
 
                 int time = rnd.Next(10, 20);
-                var cancelStartTime = request.StartTime.Date.AddHours(time);
+                var cancelStartTime = startTime.Date.AddHours(time);
                 var cancelEndTime = cancelStartTime.AddHours(1);
 
                 var reservation = new Reservation

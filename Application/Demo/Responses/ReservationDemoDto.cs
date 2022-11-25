@@ -13,5 +13,6 @@ namespace Application.Demo.Response
         public List<int> ReservationAvailable { get; set; }
         public List<int> ReservationReserved { get; set; }
         public List<int> ReservationCancelled { get; set; }
+        public string Error { get; set; }
     }
 }
