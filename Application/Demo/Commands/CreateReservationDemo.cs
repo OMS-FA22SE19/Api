@@ -42,15 +42,6 @@ namespace Application.Reservations.Commands
 
         public async Task<Response<ReservationDemoDto>> Handle(CreateReservationDemo request, CancellationToken cancellationToken)
         {
-            //bool isValid = await validateStartEndTime(request);
-            //if (!isValid)
-            //{
-            //    return new Response<ReservationDto>($"This reservation is unavailable! Please try again!")
-            //    {
-            //        StatusCode = System.Net.HttpStatusCode.BadRequest
-            //    };
-            //}
-
             var users = _userManager.Users.ToList();
             var tables = await _unitOfWork.TableRepository.GetAllAsync();
             var tableTypes = await _unitOfWork.TableTypeRepository.GetAllAsync();
@@ -91,12 +82,6 @@ namespace Application.Reservations.Commands
                 bool isValid = await validateStartEndTime(reservation);
                 if (!isValid)
                 {
-                    reservation.Status = ReservationStatus.Cancelled;
-                    var cancelledResult = await _unitOfWork.ReservationRepository.InsertAsync(reservation);
-                    await _unitOfWork.CompleteAsync(cancellationToken);
-
-                    ReservationDemoDTO.ReservationCancelled.Add(cancelledResult.Id);
-                    Console.WriteLine(cancelledResult.Id);
                     tableForCheckIn.Remove(table);
                 }
 

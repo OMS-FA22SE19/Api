@@ -4,6 +4,8 @@ using Application.AdminSettings.Response;
 using Application.Common.Exceptions;
 using Application.CourseTypes.Response;
 using Application.Models;
+using Application.Orders.Commands;
+using Application.Orders.Response;
 using Application.Reservations.Commands;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -15,13 +17,13 @@ namespace Api.Controllers.V1
     public sealed class DemoController : ApiControllerBase
     {
         /// <summary>
-        /// Retrieve Admin Settings.
+        /// Add demo Reservation.
         /// </summary>
-        /// <returns>Admin Settings.</returns>
+        /// <returns>List of id generated.</returns>
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /AdminSettings
+        ///     GET /Demo/Reservation
         ///
         /// </remarks>
         [HttpPost("Reservation")]
@@ -51,33 +53,39 @@ namespace Api.Controllers.V1
         }
 
         /// <summary>
-        /// Update admin settings.
+        /// Create an Order Demo.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>New Order for Demo.</returns>
         /// <remarks>
         /// Sample request:
         ///
-        ///     PUT /AdminSettings
+        ///     POST /Demo/Order
         ///     {
-        ///        "name": "OpeningTime",
-        ///        "value": "11AM"
+        ///        "reservationId": [1, 2],
+        ///        "orderDetails": {
+        ///             "2": {
+        ///             quantity: 2,
+        ///             note: null
+        ///             }
+        ///         }
         ///     }
-        ///
+        ///     
         /// </remarks>
-        [HttpPut]
+        [HttpPost("Order")]
         [Consumes("application/json")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> PutAsync([FromBody] UpdateAdminSettingCommand command)
+        public async Task<ActionResult> PostAsync([FromBody] AddOrderToReservationDemo command)
         {
             try
             {
-                var result = await Mediator.Send(command);
-                if (result.StatusCode == HttpStatusCode.NoContent)
+                if (!ModelState.IsValid)
                 {
-                    return NoContent();
+                    return BadRequest();
                 }
+
+                var result = await Mediator.Send(command);
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (NotFoundException)
@@ -86,7 +94,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<CourseTypeDto>(ex.Message)
+                var response = new Response<OrderDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };
