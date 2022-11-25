@@ -63,11 +63,18 @@ namespace Application.Reservations.Commands
                 ReservationCancelled = new List<int>(),
             };
 
-            for (int i = 0; i <= request.numOfCheckInReservation; i++)
+            //checkin
+            var tableForCheckIn = tables.ToList();
+            for (int i = 0; i < request.numOfCheckInReservation; i++)
             {
-                int r = rnd.Next(tables.Count());
-                var table = tables[r];
+                if (tableForCheckIn.Count == 0)
+                {
+                    break;
+                }
 
+                int r = rnd.Next(tableForCheckIn.Count());
+                var table = tableForCheckIn[r];
+                
                 var reservation = new Reservation
                 {
                     UserId = users[rnd.Next(users.Count())].Id,
@@ -81,18 +88,77 @@ namespace Application.Reservations.Commands
                     ReservationTables = new List<ReservationTable>()
                 };
 
-                reservation.ReservationTables.Add(new ReservationTable()
+                bool isValid = await validateStartEndTime(reservation);
+                if (!isValid)
                 {
-                    TableId = table.Id,
-                });
+                    reservation.Status = ReservationStatus.Cancelled;
+                    var cancelledResult = await _unitOfWork.ReservationRepository.InsertAsync(reservation);
+                    await _unitOfWork.CompleteAsync(cancellationToken);
+
+                    ReservationDemoDTO.ReservationCancelled.Add(cancelledResult.Id);
+                    Console.WriteLine(cancelledResult.Id);
+                    tableForCheckIn.Remove(table);
+                }
+
+                else
+                {
+                    reservation.ReservationTables.Add(new ReservationTable()
+                    {
+                        TableId = table.Id,
+                    });
+
+                    var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == table.TableTypeId && !e.IsDeleted);
+                    if (tableType is null)
+                    {
+                        throw new NotFoundException(nameof(TableType), table.TableTypeId);
+                    }
+
+                    var result = await _unitOfWork.ReservationRepository.InsertAsync(reservation);
+                    await _unitOfWork.CompleteAsync(cancellationToken);
+                    if (result is null)
+                    {
+                        return new Response<ReservationDemoDto>("error");
+                    }
+
+                    var billing = new Billing
+                    {
+                        Id = "Demo-" + result.Id,
+                        ReservationAmount = table.NumOfSeats * tableType.ChargePerSeat,
+                        ReservationId = result.Id
+                    };
+                    await _unitOfWork.BillingRepository.InsertAsync(billing);
+                    await _unitOfWork.CompleteAsync(cancellationToken);
+
+                    ReservationDemoDTO.ReservationCheckIn.Add(result.Id);
+                    Console.WriteLine(result.Id);
+                    tableForCheckIn.Remove(table);
+                }
+            }
+
+            //available
+            for (int i = 0; i < request.numOfCheckInReservation; i++)
+            {
+                int r = rnd.Next(tables.Count());
+                var table = tables[r];
+
+                var reservation = new Reservation
+                {
+                    UserId = users[rnd.Next(users.Count())].Id,
+                    NumOfPeople = table.NumOfSeats,
+                    NumOfSeats = table.NumOfSeats,
+                    TableTypeId = table.TableTypeId,
+                    Quantity = 1,
+                    StartTime = request.StartTime.AddHours(2),
+                    EndTime = request.EndTime.AddHours(2),
+                    Status = ReservationStatus.Available,
+                    ReservationTables = new List<ReservationTable>()
+                };
 
                 var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == table.TableTypeId && !e.IsDeleted);
                 if (tableType is null)
                 {
                     throw new NotFoundException(nameof(TableType), table.TableTypeId);
                 }
-
-                
 
                 var result = await _unitOfWork.ReservationRepository.InsertAsync(reservation);
                 await _unitOfWork.CompleteAsync(cancellationToken);
@@ -101,16 +167,48 @@ namespace Application.Reservations.Commands
                     return new Response<ReservationDemoDto>("error");
                 }
 
-                var billing = new Billing
-                {
-                    Id = "Demo-" + result.Id,
-                    ReservationAmount = table.NumOfSeats * tableType.ChargePerSeat
-                };
-                await _unitOfWork.BillingRepository.InsertAsync(billing);
-                await _unitOfWork.CompleteAsync(cancellationToken);
-                ReservationDemoDTO.ReservationCheckIn.Add(result.Id);
+                ReservationDemoDTO.ReservationAvailable.Add(result.Id);
                 Console.WriteLine(result.Id);
-                tables.Remove(table);
+            }
+
+            //Cancalled
+            for (int i = 0; i < request.numOfCheckInReservation; i++)
+            {
+                int r = rnd.Next(tables.Count());
+                var table = tables[r];
+
+                int time = rnd.Next(10, 20);
+                var cancelStartTime = request.StartTime.Date.AddHours(time);
+                var cancelEndTime = cancelStartTime.AddHours(1);
+
+                var reservation = new Reservation
+                {
+                    UserId = users[rnd.Next(users.Count())].Id,
+                    NumOfPeople = table.NumOfSeats,
+                    NumOfSeats = table.NumOfSeats,
+                    TableTypeId = table.TableTypeId,
+                    Quantity = 1,
+                    StartTime = cancelStartTime,
+                    EndTime = cancelEndTime,
+                    Status = ReservationStatus.Cancelled,
+                    ReservationTables = new List<ReservationTable>()
+                };
+
+                var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == table.TableTypeId && !e.IsDeleted);
+                if (tableType is null)
+                {
+                    throw new NotFoundException(nameof(TableType), table.TableTypeId);
+                }
+
+                var result = await _unitOfWork.ReservationRepository.InsertAsync(reservation);
+                await _unitOfWork.CompleteAsync(cancellationToken);
+                if (result is null)
+                {
+                    return new Response<ReservationDemoDto>("error");
+                }
+
+                ReservationDemoDTO.ReservationCancelled.Add(result.Id);
+                Console.WriteLine(result.Id);
             }
 
             return new Response<ReservationDemoDto>(ReservationDemoDTO)
@@ -119,36 +217,36 @@ namespace Application.Reservations.Commands
             };
         }
 
-        //private async Task<bool> validateStartEndTime(CreateReservationDemo request)
-        //{
-        //    var reservation = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.StartTime.Date, request.TableTypeId, request.NumOfSeats);
+        private async Task<bool> validateStartEndTime(Reservation request)
+        {
+            var reservation = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.StartTime.Date, request.TableTypeId, request.NumOfSeats);
 
-        //    var tables = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
-        //    var maxTables = tables.Count - request.Quantity;
-        //    var times = reservation.Select(e => e.StartTime).Concat(reservation.Select(e => e.EndTime)).ToImmutableSortedSet();
-        //    var busyTimes = new List<BusyTimeDto>();
+            var tables = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
+            var maxTables = tables.Count - request.Quantity;
+            var times = reservation.Select(e => e.StartTime).Concat(reservation.Select(e => e.EndTime.AddMinutes(15))).ToImmutableSortedSet();
+            var busyTimes = new List<BusyTimeDto>();
 
-        //    for (int i = 0; i < (times.Count - 1); i++)
-        //    {
-        //        var count = reservation.Where(e => e.StartTime <= times[i] && e.EndTime >= times[i + 1]).ToList().Sum(e => e.Quantity);
-        //        if (maxTables - count < 0)
-        //        {
-        //            var time = busyTimes.FirstOrDefault(e => e.EndTime == times[i]);
-        //            if (time is null)
-        //            {
-        //                busyTimes.Add(new BusyTimeDto
-        //                {
-        //                    StartTime = times[i],
-        //                    EndTime = times[i + 1]
-        //                });
-        //            }
-        //            else
-        //            {
-        //                time.EndTime = times[i + 1];
-        //            }
-        //        }
-        //    }
-        //    return busyTimes.All(e => request.StartTime > e.EndTime || request.EndTime < e.StartTime);
-        //}
+            for (int i = 0; i < times.Count - 1; i++)
+            {
+                var count = reservation.Where(e => e.StartTime <= times[i] && e.EndTime.AddMinutes(15) >= times[i + 1]).ToList().Sum(e => e.Quantity);
+                if (maxTables - count < 0)
+                {
+                    var time = busyTimes.FirstOrDefault(e => e.EndTime == times[i]);
+                    if (time is null)
+                    {
+                        busyTimes.Add(new BusyTimeDto
+                        {
+                            StartTime = times[i],
+                            EndTime = times[i + 1]
+                        });
+                    }
+                    else
+                    {
+                        time.EndTime = times[i + 1];
+                    }
+                }
+            }
+            return busyTimes.All(e => request.StartTime > e.EndTime || request.EndTime < e.StartTime);
+        }
     }
 }
