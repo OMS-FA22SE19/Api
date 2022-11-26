@@ -1,6 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Mappings;
+using Application.Demo.Responses;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Events;
@@ -17,7 +18,7 @@ using System.Linq.Expressions;
 
 namespace Application.Orders.Commands
 {
-    public sealed class AddOrderToReservationDemo : IMapFrom<Order>, IRequest<Response<OrderDto>>
+    public sealed class AddOrderToReservationDemo : IRequest<Response<OrderReservationDemoDto>>
     {
         public List<int> ReservationIds { get; set; }
         //public Dictionary<int, FoodInfo> OrderDetails { get; set; }
@@ -29,7 +30,7 @@ namespace Application.Orders.Commands
         //}
     }
 
-    public sealed class AddOrderToReservationDemoHandler : IRequestHandler<AddOrderToReservationDemo, Response<OrderDto>>
+    public sealed class AddOrderToReservationDemoHandler : IRequestHandler<AddOrderToReservationDemo, Response<OrderReservationDemoDto>>
     {
         static Random rnd = new Random();
         private readonly IUnitOfWork _unitOfWork;
@@ -45,7 +46,7 @@ namespace Application.Orders.Commands
             _dateTime = dateTime;
         }
 
-        public async Task<Response<OrderDto>> Handle(AddOrderToReservationDemo request, CancellationToken cancellationToken)
+        public async Task<Response<OrderReservationDemoDto>> Handle(AddOrderToReservationDemo request, CancellationToken cancellationToken)
         {
             var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => e.Available);
             if (availableMenu is null)
@@ -57,6 +58,11 @@ namespace Application.Orders.Commands
             filters.Add(e => e.MenuFoods.Any(m => m.MenuId == availableMenu.Id));
             var availableFood = await _unitOfWork.FoodRepository.GetAllAsync(filters, null, "");
 
+            OrderReservationDemoDto dto = new OrderReservationDemoDto()
+            {
+                created = new List<string>(),
+                Error = ""
+            };
             foreach (int reservationId in request.ReservationIds.ToList())
             {
                 var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == reservationId && e.Status == ReservationStatus.CheckIn, includeProperties: $"{nameof(Reservation.ReservationTables)}");
@@ -94,25 +100,6 @@ namespace Application.Orders.Commands
                     entity.PrePaid = 0;
                 }
 
-                //foreach (var dish in request.OrderDetails)
-                //{
-                //    for (int i = 0; i < dish.Value.Quantity; i++)
-                //    {
-                //        var food = await _unitOfWork.MenuFoodRepository.GetAsync(e => e.FoodId == dish.Key && e.MenuId == availableMenu.Id);
-                //        if (food is null)
-                //        {
-                //            throw new NotFoundException(nameof(Food), dish.Key);
-                //        }
-                //        entity.OrderDetails.Add(new OrderDetail
-                //        {
-                //            FoodId = dish.Key,
-                //            Price = food.Price,
-                //            Note = string.IsNullOrWhiteSpace(dish.Value.Note) ? string.Empty : dish.Value.Note,
-                //            Status = OrderDetailStatus.Received
-                //        });
-                //    }
-                //}
-
                 int randomQuantity = rnd.Next(1, 5);
                 for(int i = 0; i < randomQuantity; i++)
                 {
@@ -133,10 +120,12 @@ namespace Application.Orders.Commands
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 if (result is null)
                 {
-                    return new Response<OrderDto>("error");
+                    return new Response<OrderReservationDemoDto>("error");
                 }
+
+                dto.created.Add(entity.Id);
             }
-            return new Response<OrderDto>("success")
+            return new Response<OrderReservationDemoDto>(dto)
             {
                 StatusCode = System.Net.HttpStatusCode.Created
             };

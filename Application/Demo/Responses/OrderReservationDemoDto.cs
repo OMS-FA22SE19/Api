@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Application.Demo.Responses
 {
-    internal class OrderReservationDemoDto
+    public class OrderReservationDemoDto
     {
+        public List<string> created { get; set; }
+        public List<string> updated { get; set; }
+        public string Error { get; set; }
     }
 }
