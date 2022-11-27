@@ -61,8 +61,10 @@ namespace Application.Orders.Commands
             OrderReservationDemoDto dto = new OrderReservationDemoDto()
             {
                 created = new List<string>(),
-                Error = ""
+                Error = new List<string>(),
+                TotalDishAdded = ""
             };
+            int totalDishes = 0;
             foreach (int reservationId in request.ReservationIds.ToList())
             {
                 var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == reservationId && e.Status == ReservationStatus.CheckIn, includeProperties: $"{nameof(Reservation.ReservationTables)}");
@@ -116,6 +118,8 @@ namespace Application.Orders.Commands
                     });
                 }
 
+                totalDishes += randomQuantity;
+
                 var result = await _unitOfWork.OrderRepository.InsertAsync(entity);
                 await _unitOfWork.CompleteAsync(cancellationToken);
                 if (result is null)
@@ -125,6 +129,7 @@ namespace Application.Orders.Commands
 
                 dto.created.Add(entity.Id);
             }
+            dto.TotalDishAdded = $"Added {totalDishes}";
             return new Response<OrderReservationDemoDto>(dto)
             {
                 StatusCode = System.Net.HttpStatusCode.Created

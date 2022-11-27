@@ -10,6 +10,7 @@ namespace Application.Demo.Responses
     {
         public List<string> created { get; set; }
         public List<string> updated { get; set; }
-        public string Error { get; set; }
+        public List<string> Error { get; set; }
+        public string TotalDishAdded { get; set; }
     }
 }

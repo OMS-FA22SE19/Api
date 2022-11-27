@@ -46,7 +46,7 @@ namespace Application.Demo.Commands
             {
                 created = new List<string>(),
                 updated = new List<string>(),
-                Error = ""
+                Error = new List<string>()
             };
 
             var orders = await _unitOfWork.OrderRepository.GetAllAsync(filters, orderBy, $"{nameof(Order.OrderDetails)}");
@@ -92,7 +92,7 @@ namespace Application.Demo.Commands
                 }
                 else
                 {
-                    dto.Error = $"Cannot update {request.numOfOrder - i} because there not enough order";
+                    dto.Error.Add($"Cannot update {request.numOfOrder - i} because there not enough order");
                     break;
                 }
             }
