@@ -179,6 +179,10 @@ namespace Api.Controllers.V1
             {
                 throw;
             }
+            catch (ValidationException)
+            {
+                throw;
+            }
             catch (Exception ex)
             {
                 var response = new Response<ReservationDto>(ex.Message)
@@ -382,6 +386,10 @@ namespace Api.Controllers.V1
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (ValidationException)
             {
                 throw;
             }

@@ -4,6 +4,7 @@ using Application.OrderDetails.Response;
 using Application.Orders.Response;
 using AutoMapper;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
@@ -50,28 +51,54 @@ namespace Application.Orders.Queries
             }
             foreach (var detail in result.OrderDetails)
             {
-                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId));
+                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted && e.Status == detail.Status);
                 if (element is null)
                 {
-                    orderDetails.Add(new OrderDetailDto
+                    if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
                     {
-                        OrderId = result.Id,
-                        UserId = result.UserId,
-                        Date = result.Date,
-                        FoodId = detail.FoodId,
-                        FoodName = detail.Food.Name,
-                        Status = detail.Status,
-                        Quantity = 1,
-                        Price = detail.Price,
-                        Amount = detail.Price
-                    });
+                        orderDetails.Add(new OrderDetailDto
+                        {
+                            OrderId = result.Id,
+                            UserId = result.UserId,
+                            Date = result.Date,
+                            FoodId = detail.FoodId,
+                            FoodName = detail.Food.Name,
+                            Status = detail.Status,
+                            Quantity = 1,
+                            Price = detail.Price,
+                            Amount = detail.Price
+                        });
+                    }
+                    else
+                    {
+                        orderDetails.Add(new OrderDetailDto
+                        {
+                            OrderId = result.Id,
+                            UserId = result.UserId,
+                            Date = result.Date,
+                            FoodId = detail.FoodId,
+                            FoodName = detail.Food.Name,
+                            Status = detail.Status,
+                            Quantity = 1,
+                            Price = detail.Price,
+                            Amount = 0
+                        });
+                    }
                 }
                 else
                 {
                     element.Quantity += 1;
-                    element.Amount += detail.Price;
+                    if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
+                    {
+                        element.Amount += detail.Price;
+                    }
+                    else
+                        element.Amount += 0;
                 }
-                total += detail.Price;
+                if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
+                {
+                    total += detail.Price;
+                }
             }
             total -= result.PrePaid;
 

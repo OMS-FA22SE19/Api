@@ -17,6 +17,7 @@ namespace Core.Entities
         public OrderStatus Status { get; set; }
         [Range(0, double.PositiveInfinity)]
         public double PrePaid { get; set; } = 0;
+        public int NumOfEdits { get; set; }
 
         public ApplicationUser User { get; set; }
         public Reservation Reservation { get; set; }

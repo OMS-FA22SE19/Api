@@ -52,7 +52,10 @@ namespace Application.Reservations.Commands
             List<Expression<Func<Table, bool>>> filters = new();
             filters.Add(e => !e.IsDeleted && e.Status == TableStatus.Available && e.NumOfSeats == entity.NumOfSeats && e.TableTypeId == entity.TableTypeId);
             var tables = await _unitOfWork.TableRepository.GetPaginatedListAsync(filters, pageSize: entity.Quantity);
-
+            if(tables.Count < entity.Quantity)
+            {
+                throw new BadRequestException("There are not enough available table, check again later");
+            }
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => !e.IsDeleted && e.Id == entity.TableTypeId);
 
             var tableIds = new List<int>();
@@ -125,7 +128,11 @@ namespace Application.Reservations.Commands
             }
             var mappedResult = _mapper.Map<ReservationDto>(result);
             mappedResult.OrderDetails = orderDetailDtos;
-            mappedResult.PrePaid = entity.NumOfPeople * tableType.ChargePerSeat;
+            var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == entity.Id);
+            if (billing is not null)
+            {
+                mappedResult.PrePaid = billing.ReservationAmount;
+            }
             mappedResult.TableType = tableType.Name;
             return new Response<ReservationDto>(mappedResult);
         }

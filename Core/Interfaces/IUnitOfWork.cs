@@ -2,6 +2,7 @@
 {
     public interface IUnitOfWork
     {
+        IRefreshTokenRepository RefreshTokenRepository { get; }
         IAdminSettingRepository AdminSettingRepository { get; }
         ITopicRepository TopicRepository { get; }
         IUserTopicRepository UserTopicRepository { get; }
