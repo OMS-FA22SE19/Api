@@ -236,9 +236,9 @@ namespace Api.Controllers.V1
         }
 
         /// <summary>
-        /// Change Order status to checking.
+        /// Change Order status to pay by user.
         /// </summary>
-        /// <returns>New Order for Demo.</returns>
+        /// <returns>Order to pay for Demo.</returns>
         /// <remarks>
         /// Sample request:
         ///

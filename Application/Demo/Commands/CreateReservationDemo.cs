@@ -146,6 +146,10 @@ namespace Application.Reservations.Commands
                 int r = rnd.Next(tables.Count());
                 var table = tables[r];
 
+                int time = rnd.Next(10, 20);
+                var availableStartTime = startTime.Date.AddHours(time);
+                var availableEndTime = availableStartTime.AddHours(1);
+
                 var reservation = new Reservation
                 {
                     UserId = users[rnd.Next(users.Count())].Id,
@@ -153,11 +157,13 @@ namespace Application.Reservations.Commands
                     NumOfSeats = table.NumOfSeats,
                     TableTypeId = table.TableTypeId,
                     Quantity = 1,
-                    StartTime = startTime.AddHours(2),
-                    EndTime = endTime.AddHours(2),
+                    StartTime = availableStartTime,
+                    EndTime = availableEndTime,
                     Status = ReservationStatus.Available,
                     ReservationTables = new List<ReservationTable>()
                 };
+
+                await validTime(reservation);
 
                 var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == table.TableTypeId && !e.IsDeleted);
                 if (tableType is null)
@@ -252,6 +258,18 @@ namespace Application.Reservations.Commands
                 }
             }
             return busyTimes.All(e => request.StartTime > e.EndTime || request.EndTime < e.StartTime);
+        }
+
+        private async Task validTime(Reservation request)
+        {
+            bool isValid = await validateStartEndTime(request);
+            if (!isValid)
+            {
+                int time = rnd.Next(10, 20);
+                request.StartTime = DateTime.UtcNow.Date.AddHours(time);
+                request.EndTime = request.StartTime.AddHours(1);
+                await validTime(request);
+            }
         }
     }
 }
