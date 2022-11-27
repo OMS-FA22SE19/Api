@@ -78,29 +78,29 @@ namespace Application.OrderDetails.Commands
 
             var result = await _unitOfWork.OrderDetailRepository.UpdateAsync(entity);
             var food = await _unitOfWork.FoodRepository.GetAsync(f => f.Id == entity.FoodId);
-            var order = await _unitOfWork.OrderRepository.GetAsync(o => o.Id.Equals(entity.OrderId));
+            var order = await _unitOfWork.OrderRepository.GetAsync(o => o.Id.Equals(entity.OrderId), $"{nameof(Order.Reservation)}.{nameof(Reservation.ReservationTables)}");
             var token = await _unitOfWork.UserDeviceTokenRepository.GetAsync(t => t.userId.Equals(order.UserId));
             if (token is not null)
             {
                 entity.AddDomainEvent(new UpdateOrderDetailEvent
                 {
                     Id = request.Id,
-                    name = food.Name,
+                    Name = food.Name,
                     Status = request.Status,
-                    token = token.deviceToken
+                    Token = token?.deviceToken ?? "cWJj1yFK8_litSzqwFLVT8:APA91bEVtpTC5RZguTfy0GCDkNnB5sptwZIPUxc7C7kj36nuTvsK8Ck8QbaGSd8oLSd2Q-C283-27MkA7Y6u9AdWaEmPDPMjr1T2jTx52MWXe9YKmXFNCYDFqz6MsPjt5hFrjhOIhZI3"
                 });
-            } 
+            }
             else
             {
                 entity.AddDomainEvent(new UpdateOrderDetailEvent
                 {
                     Id = request.Id,
-                    name = food.Name,
+                    Name = food.Name,
                     Status = request.Status,
-                    token = ""
+                    Token = "cWJj1yFK8_litSzqwFLVT8:APA91bEVtpTC5RZguTfy0GCDkNnB5sptwZIPUxc7C7kj36nuTvsK8Ck8QbaGSd8oLSd2Q-C283-27MkA7Y6u9AdWaEmPDPMjr1T2jTx52MWXe9YKmXFNCYDFqz6MsPjt5hFrjhOIhZI3"
                 });
             }
-            
+
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)
             {
