@@ -16,12 +16,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
+using System.Threading;
 
 namespace Application.Demo.Commands
 {
     public sealed class PayOrderDemo : IRequest<Response<OrderReservationDemoDto>>
     {
-        public int? numOfOrder { get; set; }
+        public List<string> OrderIdsToPay { get; set; }
     }
 
     public sealed class PayOrderDemoHandler : IRequestHandler<PayOrderDemo, Response<OrderReservationDemoDto>>
@@ -37,11 +38,6 @@ namespace Application.Demo.Commands
 
         public async Task<Response<OrderReservationDemoDto>> Handle(PayOrderDemo request, CancellationToken cancellationToken)
         {
-            List<Expression<Func<Order, bool>>> filters = new();
-            filters.Add(od => od.Status == OrderStatus.Processing && od.Id.Substring(0, 5).Equals("demo-"));
-            Func<IQueryable<Order>, IOrderedQueryable<Order>> orderBy = null;
-            orderBy = e => e.OrderBy(x => x.Created);
-
             OrderReservationDemoDto dto = new OrderReservationDemoDto()
             {
                 created = new List<string>(),
@@ -49,16 +45,20 @@ namespace Application.Demo.Commands
                 Error = new List<string>()
             };
 
-            var orders = await _unitOfWork.OrderRepository.GetAllAsync(filters, orderBy, $"{nameof(Order.OrderDetails)}");
-            for (int i = 0; i < request.numOfOrder; i++)
+            foreach (var id in request.OrderIdsToPay)
             {
-                if (i < orders.Count)
+                var OrderDemoPaying = await _unitOfWork.OrderRepository.GetAsync(od => od.Id.Equals(id), $"{nameof(Order.OrderDetails)}");
+                if (OrderDemoPaying is null)
                 {
-                    orders[i].Status = OrderStatus.Paid;
-                    await _unitOfWork.OrderRepository.UpdateAsync(orders[i]);
+                    dto.Error.Add($"Cannot update {id} because it didnt exist");
+                }
+                else
+                {
+                    OrderDemoPaying.Status = OrderStatus.Checking;
+                    await _unitOfWork.OrderRepository.UpdateAsync(OrderDemoPaying);
 
                     double total = 0;
-                    foreach (var detail in orders[i].OrderDetails)
+                    foreach (var detail in OrderDemoPaying.OrderDetails)
                     {
                         if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Served)
                         {
@@ -68,15 +68,15 @@ namespace Application.Demo.Commands
                         total += detail.Price;
                     }
 
-                    var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == orders[i].ReservationId);
+                    var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == OrderDemoPaying.ReservationId);
                     var result = new Billing();
                     if (billing is null)
                     {
                         Billing bill = new Billing
                         {
-                            Id = "demo-" + orders[i].Id,
-                            ReservationId = orders[i].ReservationId,
-                            OrderId = orders[i].Id,
+                            Id = "demo-" + OrderDemoPaying.Id,
+                            ReservationId = OrderDemoPaying.ReservationId,
+                            OrderId = OrderDemoPaying.Id,
                             OrderAmount = total
                         };
                         result = await _unitOfWork.BillingRepository.InsertAsync(bill);
@@ -88,12 +88,7 @@ namespace Application.Demo.Commands
                     }
 
                     await _unitOfWork.CompleteAsync(cancellationToken);
-                    dto.updated.Add(orders[i].Id);
-                }
-                else
-                {
-                    dto.Error.Add($"Cannot update {request.numOfOrder - i} because there not enough order");
-                    break;
+                    dto.updated.Add(id);
                 }
             }
             return new Response<OrderReservationDemoDto>(dto)
@@ -105,3 +100,39 @@ namespace Application.Demo.Commands
         //private void MapToEntity(PayOrderDemo request, OrderDetail entity) => entity.Status = request.Status;
     }
 }
+
+//orders[i].Status = OrderStatus.Paid;
+//await _unitOfWork.OrderRepository.UpdateAsync(orders[i]);
+
+//double total = 0;
+//foreach (var detail in orders[i].OrderDetails)
+//{
+//    if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Served)
+//    {
+//        detail.Status = OrderDetailStatus.Overcharged;
+//        await _unitOfWork.OrderDetailRepository.UpdateAsync(detail);
+//    }
+//    total += detail.Price;
+//}
+
+//var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == orders[i].ReservationId);
+//var result = new Billing();
+//if (billing is null)
+//{
+//    Billing bill = new Billing
+//    {
+//        Id = "demo-" + orders[i].Id,
+//        ReservationId = orders[i].ReservationId,
+//        OrderId = orders[i].Id,
+//        OrderAmount = total
+//    };
+//    result = await _unitOfWork.BillingRepository.InsertAsync(bill);
+//}
+//else
+//{
+//    billing.OrderAmount = total - billing.ReservationAmount;
+//    result = await _unitOfWork.BillingRepository.UpdateAsync(billing);
+//}
+
+//await _unitOfWork.CompleteAsync(cancellationToken);
+//dto.updated.Add(orders[i].Id);

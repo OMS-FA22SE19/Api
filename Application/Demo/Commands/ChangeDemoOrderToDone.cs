@@ -16,23 +16,23 @@ using System.Linq.Expressions;
 
 namespace Application.Demo.Commands
 {
-    public sealed class ChangeDemoOrderToChecking : IRequest<Response<OrderReservationDemoDto>>
+    public sealed class ChangeDemoOrderToDone : IRequest<Response<OrderReservationDemoDto>>
     {
-        public List<string> OrderIdsToChecking { get; set; }
+        public List<string> OrderIdsToDone { get; set; }
     }
 
-    public sealed class ChangeDemoOrderToCheckingHandler : IRequestHandler<ChangeDemoOrderToChecking, Response<OrderReservationDemoDto>>
+    public sealed class ChangeDemoOrderToDoneHandler : IRequestHandler<ChangeDemoOrderToDone, Response<OrderReservationDemoDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public ChangeDemoOrderToCheckingHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public ChangeDemoOrderToDoneHandler(IUnitOfWork unitOfWork, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
-        public async Task<Response<OrderReservationDemoDto>> Handle(ChangeDemoOrderToChecking request, CancellationToken cancellationToken)
+        public async Task<Response<OrderReservationDemoDto>> Handle(ChangeDemoOrderToDone request, CancellationToken cancellationToken)
         {
             OrderReservationDemoDto dto = new OrderReservationDemoDto()
             {
@@ -41,17 +41,17 @@ namespace Application.Demo.Commands
                 Error = new List<string>()
             };
 
-            foreach (var id in request.OrderIdsToChecking)
+            foreach (var id in request.OrderIdsToDone)
             {
-                var OrderDemoChecking = await _unitOfWork.OrderRepository.GetAsync(od => od.Id.Equals(id));
-                if (OrderDemoChecking is null)
+                var OrderDemoDone = await _unitOfWork.OrderRepository.GetAsync(od => od.Id.Equals(id));
+                if (OrderDemoDone is null)
                 {
                     dto.Error.Add($"Cannot update {id} because it didnt exist");
                 }
                 else
                 {
-                    OrderDemoChecking.Status = OrderStatus.Checking;
-                    await _unitOfWork.OrderRepository.UpdateAsync(OrderDemoChecking);
+                    OrderDemoDone.Status = OrderStatus.Paid;
+                    await _unitOfWork.OrderRepository.UpdateAsync(OrderDemoDone);
                     await _unitOfWork.CompleteAsync(cancellationToken);
                     dto.updated.Add(id);
                 }
@@ -62,6 +62,6 @@ namespace Application.Demo.Commands
             };
         }
 
-        //private void MapToEntity(ChangeDemoOrderToChecking request, OrderDetail entity) => entity.Status = request.Status;
+        //private void MapToEntity(ChangeDemoOrderToDone request, OrderDetail entity) => entity.Status = request.Status;
     }
 }

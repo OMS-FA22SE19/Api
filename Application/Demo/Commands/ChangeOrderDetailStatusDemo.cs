@@ -18,8 +18,8 @@ namespace Application.Demo.Commands
 {
     public sealed class ChangeOrderDetailStatusDemo : IMapFrom<OrderDetail>, IRequest<Response<OrderReservationDemoDto>>
     {
-        public int? numOfProcessing { get; set; }
-        public int? numOfServed { get; set; }
+        public List<string>? OrderIdsToProcessing { get; set; }
+        public List<string>? OrderIdsToServed { get; set; }
 
         public void Mapping(Profile profile)
         {
@@ -40,10 +40,6 @@ namespace Application.Demo.Commands
 
         public async Task<Response<OrderReservationDemoDto>> Handle(ChangeOrderDetailStatusDemo request, CancellationToken cancellationToken)
         {
-            List<Expression<Func<OrderDetail, bool>>> filters = new();
-            filters.Add(od => od.Status == OrderDetailStatus.Received && od.OrderId.Substring(0,5).Equals("demo-"));
-            Func<IQueryable<OrderDetail>, IOrderedQueryable<OrderDetail>> orderBy = null;
-            orderBy = e => e.OrderBy(x => x.CreatedBy);
 
             OrderReservationDemoDto dto = new OrderReservationDemoDto()
             {
@@ -51,35 +47,45 @@ namespace Application.Demo.Commands
                 updated = new List<string>(),
                 Error = new List<string>()
             };
-
-            var OrderDetailDemo = await _unitOfWork.OrderDetailRepository.GetAllAsync(filters, orderBy);
-            for (int i = 0; i < request.numOfProcessing; i++)
+            
+            foreach (var id in request.OrderIdsToProcessing)
             {
-                if (i < OrderDetailDemo.Count)
+                List<Expression<Func<OrderDetail, bool>>> filters = new();
+                filters.Add(od => od.Status != OrderDetailStatus.Cancelled && od.OrderId.Equals(id));
+                var OrderDetailDemoForProcessing = await _unitOfWork.OrderDetailRepository.GetAllAsync(filters);
+                if (OrderDetailDemoForProcessing is null) 
                 {
-                    OrderDetailDemo[i].Status = OrderDetailStatus.Processing;
-                    await _unitOfWork.OrderDetailRepository.UpdateAsync(OrderDetailDemo[i]);
-                    await _unitOfWork.CompleteAsync(cancellationToken);
+                    dto.Error.Add($"Cannot update {id} because there not enough dishes");
                 }
                 else
                 {
-                    dto.Error.Add($"Cannot update {request.numOfProcessing - i} because there not enough dishes");
-                    break;
+                    foreach(var detail in OrderDetailDemoForProcessing)
+                    {
+                        detail.Status = OrderDetailStatus.Processing;
+                        await _unitOfWork.OrderDetailRepository.UpdateAsync(detail);
+                        await _unitOfWork.CompleteAsync(cancellationToken);
+                        dto.updated.Add(id);
+                    }
                 }
             }
-            for (int i = 0; i < request.numOfServed; i++)
+            foreach (var id in request.OrderIdsToServed)
             {
-                int k = (int)(i + request.numOfProcessing + 1);
-                if (k < OrderDetailDemo.Count)
+                List<Expression<Func<OrderDetail, bool>>> filters = new();
+                filters.Add(od => od.Status != OrderDetailStatus.Cancelled && od.OrderId.Equals(id));
+                var OrderDetailDemoForCancelled = await _unitOfWork.OrderDetailRepository.GetAllAsync(filters);
+                if (OrderDetailDemoForCancelled is null)
                 {
-                    OrderDetailDemo[k].Status = OrderDetailStatus.Served;
-                    await _unitOfWork.OrderDetailRepository.UpdateAsync(OrderDetailDemo[k]);
-                    await _unitOfWork.CompleteAsync(cancellationToken);
+                    dto.Error.Add($"Cannot update {id} because there not enough dishes");
                 }
                 else
                 {
-                    dto.Error.Add($"Cannot update {request.numOfServed - i} because there not enough dishes");
-                    break;
+                    foreach (var detail in OrderDetailDemoForCancelled)
+                    {
+                        detail.Status = OrderDetailStatus.Served;
+                        await _unitOfWork.OrderDetailRepository.UpdateAsync(detail);
+                        await _unitOfWork.CompleteAsync(cancellationToken);
+                        dto.updated.Add(id);
+                    }
                 }
             }
             return new Response<OrderReservationDemoDto>(dto)

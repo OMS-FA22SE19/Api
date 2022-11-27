@@ -156,7 +156,7 @@ namespace Api.Controllers.V1
         ///
         ///     POST /Demo/OrderToChecking
         ///     {
-        ///        "numOfOrder": 10
+        ///        "OrderIdsToChecking": ["string"]
         ///     }
         ///     
         /// </remarks>
@@ -192,6 +192,50 @@ namespace Api.Controllers.V1
         }
 
         /// <summary>
+        /// Change Order status to Done.
+        /// </summary>
+        /// <returns>New Order for Demo.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Demo/OrderToDone
+        ///     {
+        ///        "OrderIdsToChecking": ["string"]
+        ///     }
+        ///     
+        /// </remarks>
+        [HttpPost("OrderToDone")]
+        [Consumes("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> OrderToDone([FromBody] ChangeDemoOrderToDone command)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await Mediator.Send(command);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<OrderDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
         /// Change Order status to checking.
         /// </summary>
         /// <returns>New Order for Demo.</returns>
@@ -200,7 +244,9 @@ namespace Api.Controllers.V1
         ///
         ///     POST /Demo/PayOrderDemo
         ///     {
-        ///        "numOfOrder": 10
+        ///        "OrderIdsToPay": [
+        ///             "someid"
+        ///        ]
         ///     }
         ///     
         /// </remarks>
