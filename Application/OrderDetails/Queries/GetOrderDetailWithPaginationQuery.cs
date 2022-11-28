@@ -13,6 +13,7 @@ namespace Application.OrderDetails.Queries
 {
     public sealed class GetOrderDetailWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<DishDto>>>
     {
+        public OrderDetailStatus? Status { get; set; }
         public OrderDetailProperty? OrderBy { get; set; }
     }
 
@@ -42,6 +43,11 @@ namespace Application.OrderDetails.Queries
                 filters.Add(e => e.OrderId.Contains(request.SearchValue)
                     || request.SearchValue.Equals(e.FoodId.ToString())
                     || request.SearchValue.Equals(e.Id.ToString()));
+            }
+
+            if (request.Status is not null)
+            {
+                filters.Add(e => e.Status == request.Status);
             }
 
             filters.Add(e => !e.IsDeleted);
