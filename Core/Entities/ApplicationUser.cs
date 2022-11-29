@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Core.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace Core.Entities
 {
-    public sealed class ApplicationUser : IdentityUser
+    public sealed class ApplicationUser : IdentityUser, IBaseAuditableEntity
     {
         [MaxLength(300)]
         public override string Id { get; set; }
@@ -17,5 +18,9 @@ namespace Core.Entities
         public IList<UserDeviceToken> UserDeviceTokens { get; set; }
         public IList<UserTopic> UserTopics { get; set; }
         public IList<RefreshToken> RefreshTokens { get; set; }
+        public DateTime Created { get; set; }
+        public string? CreatedBy { get; set; }
+        public DateTime? LastModified { get; set; }
+        public string? LastModifiedBy { get; set; }
     }
 }
