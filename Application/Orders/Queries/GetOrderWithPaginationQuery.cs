@@ -14,6 +14,7 @@ namespace Application.Orders.Queries
 {
     public sealed class GetOrderWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<OrderDto>>>
     {
+        public OrderProperty? SearchBy { get; init; }
         public OrderProperty? OrderBy { get; init; }
         public OrderStatus? Status { get; init; }
     }
@@ -39,9 +40,27 @@ namespace Application.Orders.Queries
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
-                filters.Add(e => e.Id.Contains(request.SearchValue)
-                    || e.UserId.Contains(request.SearchValue)
-                    || e.Date.ToString().Contains(request.SearchValue));
+                switch (request.SearchBy)
+                {
+                    case OrderProperty.TableId:
+                        if (int.TryParse(request.SearchValue, out int tableId))
+                        {
+                            filters.Add(e => e.Reservation.ReservationTables.OrderBy(x => x.TableId).First().TableId == tableId);
+                        }
+                        else
+                        {
+                            filters.Add(e => false);
+                        }
+                        break;
+                    case OrderProperty.User:
+                        filters.Add(e => e.User.FullName.Contains(request.SearchValue));
+                        break;
+                    case OrderProperty.PhoneNumber:
+                        filters.Add(e => e.User.PhoneNumber.Contains(request.SearchValue));
+                        break;
+                    default:
+                        break;
+                }
             }
             if (request.Status != null)
             {
@@ -104,11 +123,11 @@ namespace Application.Orders.Queries
                 };
 
                 var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => order.ReservationId == e.Id, $"{nameof(Reservation.ReservationTables)}");
-                if ( reservation.ReservationTables.Any() ) 
-                { 
-                    orderDto.TableId = reservation.ReservationTables[0].TableId;
+                if (reservation.ReservationTables.Any())
+                {
+                    orderDto.TableId = reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId;
                 }
-                
+
 
                 foreach (var detail in order.OrderDetails)
                 {

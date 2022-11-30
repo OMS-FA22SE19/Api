@@ -6,6 +6,9 @@
         UserId,
         Date,
         Status,
-        PrePaid
+        PrePaid,
+        TableId,
+        User,
+        PhoneNumber
     }
 }
