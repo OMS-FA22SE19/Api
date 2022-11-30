@@ -1,6 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Models;
+using Application.OrderDetails.Response;
 using Application.Orders.Events;
 using Application.Reservations.Response;
 using AutoMapper;
@@ -40,7 +41,7 @@ namespace Application.Reservations.Commands
                 && _dateTime.Now >= e.StartTime.AddMinutes(-15) && _dateTime.Now <= e.EndTime
                 && e.Status == ReservationStatus.Reserved
                 && !e.IsDeleted,
-                    $"{nameof(Reservation.ReservationTables)}");
+                    $"{nameof(Reservation.ReservationTables)},{nameof(Reservation.Order)}");
             if (entity is null)
             {
                 throw new NotFoundException($"No reservation found for user {user.FullName}");
@@ -51,7 +52,10 @@ namespace Application.Reservations.Commands
             List<Expression<Func<Table, bool>>> filters = new();
             filters.Add(e => !e.IsDeleted && e.Status == TableStatus.Available && e.NumOfSeats == entity.NumOfSeats && e.TableTypeId == entity.TableTypeId);
             var tables = await _unitOfWork.TableRepository.GetPaginatedListAsync(filters, pageSize: entity.Quantity);
-
+            if(tables.Count < entity.Quantity)
+            {
+                throw new BadRequestException("There are not enough available table, check again later");
+            }
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => !e.IsDeleted && e.Id == entity.TableTypeId);
 
             var tableIds = new List<int>();
@@ -72,6 +76,45 @@ namespace Application.Reservations.Commands
                 table.TableType = tableType;
             }
 
+            List<OrderDetailDto> orderDetailDtos = new List<OrderDetailDto>();
+            if (entity.IsPriorFoodOrder)
+            {
+                entity.Order.Status = OrderStatus.Processing;
+
+                await _unitOfWork.OrderRepository.UpdateAsync(entity.Order);
+
+                List<Expression<Func<OrderDetail, bool>>> orderDetailsFilter = new();
+                orderDetailsFilter.Add(od => od.OrderId.Equals(entity.Order.Id) && od.IsDeleted == false);
+
+                var orderDetails = await _unitOfWork.OrderDetailRepository.GetAllAsync(orderDetailsFilter);
+                foreach(var orderDetail in orderDetails)
+                {
+                    orderDetail.Status = OrderDetailStatus.Received;
+                    await _unitOfWork.OrderDetailRepository.UpdateAsync(orderDetail);
+
+                    var element = orderDetailDtos.FirstOrDefault(e => e.FoodId.Equals(orderDetail.FoodId));
+                    if (element is null)
+                    {
+                        var food = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == orderDetail.FoodId);
+                        orderDetailDtos.Add(new OrderDetailDto
+                        {
+                            OrderId = entity.Order.Id,
+                            FoodId = orderDetail.FoodId,
+                            FoodName = food.Name,
+                            Status = orderDetail.Status,
+                            Quantity = 1,
+                            Price = orderDetail.Price,
+                            Amount = orderDetail.Price
+                        });
+                    }
+                    else
+                    {
+                        element.Quantity += 1;
+                        element.Amount += orderDetail.Price;
+                    }
+                }
+            }
+
             var result = await _unitOfWork.ReservationRepository.UpdateAsync(entity);
             entity.AddDomainEvent(new CheckInReservationEvent
             {
@@ -84,7 +127,12 @@ namespace Application.Reservations.Commands
                 return new Response<ReservationDto>("error");
             }
             var mappedResult = _mapper.Map<ReservationDto>(result);
-            mappedResult.PrePaid = entity.NumOfPeople * tableType.ChargePerSeat;
+            mappedResult.OrderDetails = orderDetailDtos;
+            var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == entity.Id);
+            if (billing is not null)
+            {
+                mappedResult.PrePaid = billing.ReservationAmount;
+            }
             mappedResult.TableType = tableType.Name;
             return new Response<ReservationDto>(mappedResult);
         }

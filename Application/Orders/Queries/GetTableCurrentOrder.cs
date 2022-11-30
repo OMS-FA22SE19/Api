@@ -60,6 +60,8 @@ namespace Application.Orders.Queries
             var mappedResult = _mapper.Map<OrderDto>(tableOrder);
             double total = 0;
 
+            mappedResult.TableId = request.TableId;
+
             List<OrderDetailDto> orderDetails = new();
             if (tableOrder.OrderDetails == null)
             {
@@ -67,28 +69,54 @@ namespace Application.Orders.Queries
             }
             foreach (var detail in tableOrder.OrderDetails)
             {
-                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId));
+                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted && e.Status == detail.Status);
                 if (element is null)
                 {
-                    orderDetails.Add(new OrderDetailDto
+                    if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
                     {
-                        OrderId = tableOrder.Id,
-                        UserId = tableOrder.UserId,
-                        Date = tableOrder.Date,
-                        FoodId = detail.FoodId,
-                        FoodName = detail.Food.Name,
-                        Status = OrderDetailStatus.Served,
-                        Quantity = 1,
-                        Price = detail.Price,
-                        Amount = detail.Price
-                    });
+                        orderDetails.Add(new OrderDetailDto
+                        {
+                            OrderId = tableOrder.Id,
+                            UserId = tableOrder.UserId,
+                            Date = tableOrder.Date,
+                            FoodId = detail.FoodId,
+                            FoodName = detail.Food.Name,
+                            Status = detail.Status,
+                            Quantity = 1,
+                            Price = detail.Price,
+                            Amount = detail.Price
+                        });
+                    }
+                    else
+                    {
+                        orderDetails.Add(new OrderDetailDto
+                        {
+                            OrderId = tableOrder.Id,
+                            UserId = tableOrder.UserId,
+                            Date = tableOrder.Date,
+                            FoodId = detail.FoodId,
+                            FoodName = detail.Food.Name,
+                            Status = detail.Status,
+                            Quantity = 1,
+                            Price = detail.Price,
+                            Amount = 0
+                        });
+                    }
                 }
                 else
                 {
                     element.Quantity += 1;
-                    element.Amount += detail.Price;
+                    if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
+                    {
+                        element.Amount += detail.Price;
+                    }
+                    else
+                        element.Amount += 0;
                 }
-                total += detail.Price;
+                if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
+                {
+                    total += detail.Price;
+                }
             }
             total -= tableOrder.PrePaid;
 

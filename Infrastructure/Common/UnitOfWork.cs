@@ -7,6 +7,7 @@ namespace Infrastructure.Common
     public sealed class UnitOfWork : IUnitOfWork, IDisposable
     {
         private readonly IApplicationDbContext _context;
+        private IRefreshTokenRepository _refreshTokenRepository;
         private IAdminSettingRepository _adminSettingRepository;
         private ITopicRepository _topicRepository;
         private IUserTopicRepository _userTopicRepository;
@@ -29,6 +30,18 @@ namespace Infrastructure.Common
         public UnitOfWork(IApplicationDbContext context)
         {
             _context = context;
+        }
+
+        public IRefreshTokenRepository RefreshTokenRepository
+        {
+            get
+            {
+                if (_refreshTokenRepository is null)
+                {
+                    _refreshTokenRepository = new RefreshTokenRepository(_context);
+                }
+                return _refreshTokenRepository;
+            }
         }
         public IAdminSettingRepository AdminSettingRepository
         {

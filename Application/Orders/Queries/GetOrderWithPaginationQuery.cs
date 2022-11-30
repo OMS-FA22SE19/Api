@@ -104,32 +104,62 @@ namespace Application.Orders.Queries
                 };
 
                 var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => order.ReservationId == e.Id, $"{nameof(Reservation.ReservationTables)}");
-                orderDto.TableId = reservation.ReservationTables[0].TableId;
+                if ( reservation.ReservationTables.Any() ) 
+                { 
+                    orderDto.TableId = reservation.ReservationTables[0].TableId;
+                }
+                
 
                 foreach (var detail in order.OrderDetails)
                 {
                     var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted && e.Status == detail.Status);
                     if (element is null)
                     {
-                        orderDetails.Add(new OrderDetailDto
+                        if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
                         {
-                            OrderId = order.Id,
-                            UserId = order.UserId,
-                            Date = order.Date,
-                            FoodId = detail.FoodId,
-                            FoodName = detail.Food.Name,
-                            Status = detail.Status,
-                            Quantity = 1,
-                            Price = detail.Price,
-                            Amount = detail.Price
-                        });
+                            orderDetails.Add(new OrderDetailDto
+                            {
+                                OrderId = order.Id,
+                                UserId = order.UserId,
+                                Date = order.Date,
+                                FoodId = detail.FoodId,
+                                FoodName = detail.Food.Name,
+                                Status = detail.Status,
+                                Quantity = 1,
+                                Price = detail.Price,
+                                Amount = detail.Price
+                            });
+                        }
+                        else
+                        {
+                            orderDetails.Add(new OrderDetailDto
+                            {
+                                OrderId = order.Id,
+                                UserId = order.UserId,
+                                Date = order.Date,
+                                FoodId = detail.FoodId,
+                                FoodName = detail.Food.Name,
+                                Status = detail.Status,
+                                Quantity = 1,
+                                Price = detail.Price,
+                                Amount = 0
+                            });
+                        }
                     }
                     else
                     {
                         element.Quantity += 1;
-                        element.Amount += detail.Price;
+                        if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
+                        {
+                            element.Amount += detail.Price;
+                        }
+                        else
+                            element.Amount += 0;
                     }
-                    total += detail.Price;
+                    if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
+                    {
+                        total += detail.Price;
+                    }
                 }
 
                 orderDto.Amount = total;

@@ -4,6 +4,7 @@ using Application.Common.Interfaces;
 using Application.Notifications.Responses;
 using Application.Models;
 using Application.Reservations.Response;
+using Core.Interfaces;
 
 namespace Application.Notifications.Commands
 {
@@ -16,9 +17,11 @@ namespace Application.Notifications.Commands
     public sealed class PushNotificationCommandsHandler : IRequestHandler<PushNotificationCommands, Response<NotificationDto>>
     {
         private readonly IFirebaseMessagingService _messagingService;
-        public PushNotificationCommandsHandler(IFirebaseMessagingService messagingService)
+        private readonly IUnitOfWork _unitOfWork;
+        public PushNotificationCommandsHandler(IFirebaseMessagingService messagingService, IUnitOfWork unitOfWork)
         {
             _messagingService = messagingService;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Response<NotificationDto>> Handle(PushNotificationCommands command, CancellationToken cancellationToken)
@@ -35,6 +38,9 @@ namespace Application.Notifications.Commands
             {
                 notificationDto.IsSuccess = false;
                 notificationDto.Message = "Not Success";
+
+                await _unitOfWork.UserDeviceTokenRepository.DeleteAsync(dv => dv.deviceToken.Equals(command.token));
+                await _unitOfWork.CompleteAsync(cancellationToken);
             }
             return new Response<NotificationDto>(notificationDto);
         }

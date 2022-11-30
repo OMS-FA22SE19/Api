@@ -34,6 +34,9 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property<double>("PrePaid")
                 .HasColumnType("float");
 
+            builder.Property<int>("NumOfEdits")
+                .HasColumnType("int");
+
             builder.Property(e => e.Status)
                 .HasColumnType("int");
 

@@ -1,4 +1,5 @@
 ﻿using Application.Common.Mappings;
+using Application.OrderDetails.Response;
 using Application.Users.Response;
 using AutoMapper;
 using Core.Entities;
@@ -16,11 +17,13 @@ namespace Application.Reservations.Response
         public int NumOfSeats { get; set; }
         public int Quantity { get; set; }
         public double PrePaid { get; set; }
+        public double Paid { get; set; }
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
         public IList<ReservationTableDto> ReservationTables { get; set; }
+        public IList<OrderDetailDto> OrderDetails { get; set; }
         public UserDto User { get; set; }
 
         public void Mapping(Profile profile)

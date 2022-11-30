@@ -38,6 +38,9 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property<int>("Quantity")
                 .HasColumnType("int");
 
+            builder.Property<int>("NumOfEdits")
+                .HasColumnType("int");
+
             builder.Property<string>("UserId")
                 .IsRequired()
                 .HasColumnType("nvarchar(300)");

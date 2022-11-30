@@ -1,5 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Models;
+using Application.OrderDetails.Response;
 using Application.Reservations.Response;
 using AutoMapper;
 using Core.Common;
@@ -7,6 +8,7 @@ using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace Application.Reservations.Queries
@@ -52,7 +54,44 @@ namespace Application.Reservations.Queries
                 {
                     throw new NotFoundException(nameof(TableType), item.TableTypeId);
                 }
-                item.PrePaid = item.NumOfPeople * tableType.ChargePerSeat;
+                var orderDetails = new List<OrderDetailDto>();
+
+                var order = await _unitOfWork.OrderRepository.GetAsync(o => o.ReservationId == item.Id, $"{nameof(Order.OrderDetails)}");
+                if (order is not null)
+                {
+                    foreach (var detail in order.OrderDetails)
+                    {
+                        var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && e.Status == detail.Status);
+                        if (element is null)
+                        {
+                            var food = await _unitOfWork.FoodRepository.GetAsync(e => e.Id == detail.FoodId);
+                            orderDetails.Add(new OrderDetailDto
+                            {
+                                OrderId = order.Id,
+                                FoodId = detail.FoodId,
+                                FoodName = food.Name,
+                                Status = detail.Status,
+                                Quantity = 1,
+                                Price = detail.Price,
+                                Amount = detail.Price,
+                                Note = detail.Note,
+                            });
+                        }
+                        else
+                        {
+                            element.Quantity += 1;
+                            element.Amount += detail.Price;
+                        }
+                    }
+                }
+                var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == item.Id);
+                if (billing is not null)
+                {
+                    item.Paid = billing.ReservationAmount;
+                }
+
+                item.OrderDetails = orderDetails;
+                item.PrePaid = item.NumOfSeats * tableType.ChargePerSeat * item.Quantity;
                 item.TableType = tableType.Name;
             }
             return new Response<PaginatedList<ReservationDto>>(mappedResult);

@@ -4,6 +4,7 @@ using Application.OrderDetails.Response;
 using Application.Orders.Response;
 using AutoMapper;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
@@ -37,6 +38,12 @@ namespace Application.Orders.Queries
             var mappedResult = _mapper.Map<OrderDto>(result);
             double total = 0;
 
+            var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => result.ReservationId == e.Id, $"{nameof(Reservation.ReservationTables)}");
+            if (reservation.ReservationTables.Any())
+            {
+                mappedResult.TableId = reservation.ReservationTables[0].TableId;
+            }
+
             List<OrderDetailDto> orderDetails = new();
             if (result.OrderDetails == null)
             {
@@ -44,28 +51,31 @@ namespace Application.Orders.Queries
             }
             foreach (var detail in result.OrderDetails)
             {
-                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId));
-                if (element is null)
+                if (detail.Status != OrderDetailStatus.Cancelled) 
                 {
-                    orderDetails.Add(new OrderDetailDto
+                    var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId));
+                    if (element is null)
                     {
-                        OrderId = result.Id,
-                        UserId = result.UserId,
-                        Date = result.Date,
-                        FoodId = detail.FoodId,
-                        FoodName = detail.Food.Name,
-                        Status = detail.Status,
-                        Quantity = 1,
-                        Price = detail.Price,
-                        Amount = detail.Price
-                    });
+                        orderDetails.Add(new OrderDetailDto
+                        {
+                            OrderId = result.Id,
+                            UserId = result.UserId,
+                            Date = result.Date,
+                            FoodId = detail.FoodId,
+                            FoodName = detail.Food.Name,
+                            Status = detail.Status,
+                            Quantity = 1,
+                            Price = detail.Price,
+                            Amount = detail.Price
+                        });
+                    }
+                    else
+                    {
+                        element.Quantity += 1;
+                        element.Amount += detail.Price;
+                    }
+                    total += detail.Price;
                 }
-                else
-                {
-                    element.Quantity += 1;
-                    element.Amount += detail.Price;
-                }
-                total += detail.Price;
             }
             total -= result.PrePaid;
 
