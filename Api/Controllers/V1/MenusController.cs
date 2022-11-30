@@ -480,7 +480,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response<List<MenuDto>>>> GetFoodWithMenuIdAsync(int menuId, int? courseTypeId, int? typeId)
+        public async Task<ActionResult<Response<List<MenuDto>>>> GetFoodWithMenuIdAsync(int menuId, [FromQuery] GetFoodWithMenuIdQuery query)
         {
             try
             {
@@ -493,12 +493,7 @@ namespace Api.Controllers.V1
                 {
                     return BadRequest();
                 }
-                var query = new GetFoodWithMenuIdQuery()
-                {
-                    MenuId = menuId,
-                    CourseTypeId = courseTypeId,
-                    TypeId = typeId
-                };
+                query.MenuId = menuId;
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
             }

@@ -7,18 +7,21 @@ using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
-using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq.Expressions;
+using Type = Core.Entities.Type;
 
 namespace Application.Foods.Queries
 {
     public class GetFoodWithMenuIdQuery : PaginationRequest, IRequest<Response<List<MenuFoodDto>>>
     {
-        [Required]
-        public int MenuId { get; init; }
-        public int? CourseTypeId { get; init; }
-        public int? TypeId { get; init; }
-        public FoodProperty? OrderBy { get; init; }
+        [NotMapped]
+        public int MenuId { get; set; }
+        public int? CourseTypeId { get; set; }
+        public int? TypeId { get; set; }
+        public FoodProperty SearchBy { get; set; }
+        public string? SearchValue { get; set; }
+        public FoodProperty? OrderBy { get; set; }
     }
 
     public sealed class GetFoodWithMenuIdQueryHandler : IRequestHandler<GetFoodWithMenuIdQuery, Response<List<MenuFoodDto>>>
@@ -45,6 +48,33 @@ namespace Application.Foods.Queries
             string includeProperties = $"{nameof(Food.FoodTypes)}.{nameof(FoodType.Type)},{nameof(Food.MenuFoods)},{nameof(Food.CourseType)}";
 
             filters.Add(e => e.MenuFoods.Any(m => m.MenuId == request.MenuId));
+
+            if (!string.IsNullOrWhiteSpace(request.SearchValue))
+            {
+                switch (request.SearchBy)
+                {
+                    case FoodProperty.Name:
+                        filters.Add(e => e.Name.Contains(request.SearchValue));
+                        break;
+                    case FoodProperty.Description:
+                        filters.Add(e => e.Description.Contains(request.SearchValue));
+                        break;
+                    case FoodProperty.Ingredient:
+                        filters.Add(e => e.Ingredient.Contains(request.SearchValue));
+                        break;
+                    case FoodProperty.Available:
+                        break;
+                    case FoodProperty.CourseType:
+                        List<Expression<Func<CourseType, bool>>> courseTypeFilters = new();
+                        courseTypeFilters.Add(e => e.Name.Contains(request.SearchValue) && !e.IsDeleted);
+                        var courseTypes = await _unitOfWork.CourseTypeRepository.GetAllAsync(courseTypeFilters, null, null);
+                        var courseTypeIds = courseTypes.Select(e => e.Id).ToList();
+                        filters.Add(e => courseTypeIds.Contains(e.CourseTypeId));
+                        break;
+                    default:
+                        break;
+                }
+            }
 
             if (request.CourseTypeId is not null)
             {
@@ -93,6 +123,14 @@ namespace Application.Foods.Queries
                     break;
             }
             var result = await _unitOfWork.FoodRepository.GetAllAsync(filters, orderBy, includeProperties);
+            if (!string.IsNullOrWhiteSpace(request.SearchValue) && request.SearchBy == FoodProperty.FoodType)
+            {
+                List<Expression<Func<Type, bool>>> typeFilters = new();
+                typeFilters.Add(e => e.Name.Contains(request.SearchValue) && !e.IsDeleted);
+                var types = await _unitOfWork.TypeRepository.GetAllAsync(typeFilters, null, null);
+                var typeIds = types.Select(e => e.Id).ToList();
+                result = result.Where(e => e.FoodTypes.Any(x => typeIds.Contains(x.TypeId))).ToList();
+            }
             var mappedResult = _mapper.Map<List<MenuFoodDto>>(result);
             foreach (var item in mappedResult)
             {

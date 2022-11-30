@@ -9,12 +9,8 @@ using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
-using System.Globalization;
 
 namespace Application.Reservations.Commands
 {
@@ -46,10 +42,10 @@ namespace Application.Reservations.Commands
         {
             var startTime = Convert.ToDateTime(request.StartTime);
             DateTime endTime;
-            if (string.IsNullOrWhiteSpace(request.EndTime))
+            if (!string.IsNullOrWhiteSpace(request.EndTime))
             {
                 endTime = Convert.ToDateTime(request.EndTime);
-                if (startTime >= endTime) 
+                if (startTime >= endTime)
                 {
                     throw new BadRequestException("EndTime is earlier than StartTime");
                 }
@@ -84,7 +80,7 @@ namespace Application.Reservations.Commands
 
                 int r = rnd.Next(tableForCheckIn.Count());
                 var table = tableForCheckIn[r];
-                
+
                 var reservation = new Reservation
                 {
                     UserId = users[rnd.Next(users.Count())].Id,
