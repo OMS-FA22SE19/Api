@@ -5,6 +5,8 @@
         Name,
         Description,
         Ingredient,
-        Available
+        Available,
+        CourseType,
+        FoodType
     }
 }

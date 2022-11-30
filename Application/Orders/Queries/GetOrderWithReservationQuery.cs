@@ -41,7 +41,7 @@ namespace Application.Orders.Queries
             var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => result.ReservationId == e.Id, $"{nameof(Reservation.ReservationTables)}");
             if (reservation.ReservationTables.Any())
             {
-                mappedResult.TableId = reservation.ReservationTables[0].TableId;
+                mappedResult.TableId = reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId;
             }
 
             List<OrderDetailDto> orderDetails = new();

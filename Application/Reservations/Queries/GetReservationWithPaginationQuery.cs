@@ -8,13 +8,13 @@ using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
-using System.Linq;
 using System.Linq.Expressions;
 
 namespace Application.Reservations.Queries
 {
     public class GetReservationWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<ReservationDto>>>
     {
+        public ReservationProperty SearchBy { get; set; }
         public string? userId { get; set; }
         public ReservationStatus? Status { get; init; }
     }
@@ -39,6 +39,48 @@ namespace Application.Reservations.Queries
             if (!string.IsNullOrWhiteSpace(request.userId))
             {
                 filters.Add(e => e.UserId.Contains(request.userId));
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.SearchValue))
+            {
+                switch (request.SearchBy)
+                {
+                    case ReservationProperty.FullName:
+                        filters.Add(e => e.User.FullName.Contains(request.SearchValue));
+                        break;
+                    case ReservationProperty.PhoneNumber:
+                        filters.Add(e => e.User.PhoneNumber.Contains(request.SearchValue));
+                        break;
+                    case ReservationProperty.NumOfPeople:
+                        if (int.TryParse(request.SearchValue, out var numberOfPeople))
+                        {
+                            filters.Add(e => e.NumOfPeople == numberOfPeople);
+                        }
+                        else
+                        {
+                            filters.Add(e => false);
+                        }
+                        break;
+                    case ReservationProperty.TableType:
+                        List<Expression<Func<TableType, bool>>> tableFilters = new();
+                        tableFilters.Add(e => e.Name.Contains(request.SearchValue) && !e.IsDeleted);
+                        var tableTypes = await _unitOfWork.TableTypeRepository.GetAllAsync(tableFilters, null, null);
+                        var tableTypeIds = tableTypes.Select(e => e.Id).ToList();
+                        filters.Add(e => tableTypeIds.Contains(e.TableTypeId));
+                        break;
+                    case ReservationProperty.NumOfSeats:
+                        if (int.TryParse(request.SearchValue, out var numOfSeats))
+                        {
+                            filters.Add(e => e.NumOfSeats == numOfSeats);
+                        }
+                        else
+                        {
+                            filters.Add(e => false);
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
             if (request.Status is not null)
             {
