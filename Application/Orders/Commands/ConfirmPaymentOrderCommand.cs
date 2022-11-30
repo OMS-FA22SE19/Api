@@ -42,7 +42,7 @@ namespace Application.Orders.Commands
 
             foreach (var detail in entity.OrderDetails)
             {
-                if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Served)
+                if (detail.Status == OrderDetailStatus.Processing)
                 {
                     detail.Status = OrderDetailStatus.Overcharged;
                     await _unitOfWork.OrderDetailRepository.UpdateAsync(detail);

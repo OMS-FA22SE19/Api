@@ -37,6 +37,16 @@ namespace Application.Orders.Commands
             {
                 throw new NotFoundException(nameof(Order), request.Id);
             }
+            var receivedOrderDetails = new List<OrderDetail>();
+            foreach (var orderDetail in entity.OrderDetails)
+            {
+                if (orderDetail.Status == OrderDetailStatus.Reserved)
+                {
+                    orderDetail.IsDeleted = true;
+                    receivedOrderDetails.Add(orderDetail);
+                }
+            }
+            await _unitOfWork.OrderDetailRepository.DeleteAsync(receivedOrderDetails);
 
             MapToEntity(entity);
             var result = await _unitOfWork.OrderRepository.UpdateAsync(entity);
