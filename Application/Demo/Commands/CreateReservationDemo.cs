@@ -46,7 +46,7 @@ namespace Application.Reservations.Commands
         {
             var startTime = Convert.ToDateTime(request.StartTime);
             DateTime endTime;
-            if (request.EndTime is not null)
+            if (string.IsNullOrWhiteSpace(request.EndTime))
             {
                 endTime = Convert.ToDateTime(request.EndTime);
                 if (startTime >= endTime) 

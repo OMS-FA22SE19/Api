@@ -32,7 +32,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response<List<AdminSettingDto>>>> DemoCreateReservation([FromQuery] CreateReservationDemo request)
+        public async Task<ActionResult<Response<List<AdminSettingDto>>>> DemoCreateReservation([FromBody] CreateReservationDemo request)
         {
             try
             {
