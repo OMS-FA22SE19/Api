@@ -34,9 +34,14 @@ namespace Application.TableTypes.Queries
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
-                filters.Add(e => e.Name.Contains(request.SearchValue)
-                    || request.SearchValue.Equals(e.Id.ToString())
-                    || request.SearchValue.Equals(e.ChargePerSeat.ToString()));
+                if (double.TryParse(request.SearchValue, out double chargePerSeat))
+                {
+                    filters.Add(e => e.ChargePerSeat == chargePerSeat);
+                }
+                else
+                {
+                    filters.Add(e => e.Name.Contains(request.SearchValue));
+                }
             }
 
             switch (request.OrderBy)
