@@ -171,6 +171,7 @@ namespace Application.UnitTests
                     Ingredient = "Trung",
                     Available = true,
                     PictureUrl = "picture",
+                    IsDeleted = false,
                     CourseTypeId = 3
                 },
                 new Food()
@@ -181,6 +182,7 @@ namespace Application.UnitTests
                     Ingredient = "Trung",
                     Available = true,
                     PictureUrl = "picture",
+                    IsDeleted = false,
                     CourseTypeId = 2
                 },
                 new Food()
@@ -191,6 +193,7 @@ namespace Application.UnitTests
                     Ingredient = "Sua",
                     Available = true,
                     PictureUrl = "picture",
+                    IsDeleted = false,
                     CourseTypeId = 4
                 },
                 new Food()
@@ -201,6 +204,7 @@ namespace Application.UnitTests
                     Ingredient = "Cam",
                     Available = true,
                     PictureUrl = "picture",
+                    IsDeleted = false,
                     CourseTypeId = 5
                 }
         };

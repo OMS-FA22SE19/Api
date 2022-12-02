@@ -144,7 +144,7 @@ namespace Application.UnitTests.Foods.Queries
                 Description = inDatabase.Description,
                 Ingredient= inDatabase.Ingredient,
                 PictureUrl= inDatabase.PictureUrl,
-                IsDeleted=true,
+                IsDeleted = true,
                 Available = inDatabase.Available,
                 CourseType = mappedCourseType,
                 Types = mappedType
