@@ -159,5 +159,103 @@ namespace Application.UnitTests
                     IsDeleted = true
                 }
         };
+
+        public static List<Food> Foods
+            => new List<Food>()
+        {
+                new Food()
+                {
+                    Id = 1,
+                    Name = "Mi",
+                    Description = "Mi",
+                    Ingredient = "Trung",
+                    Available = true,
+                    PictureUrl = "picture",
+                    CourseTypeId = 3
+                },
+                new Food()
+                {
+                    Id = 2,
+                    Name = "Sup",
+                    Description = "Sup",
+                    Ingredient = "Trung",
+                    Available = true,
+                    PictureUrl = "picture",
+                    CourseTypeId = 2
+                },
+                new Food()
+                {
+                    Id = 3,
+                    Name = "Kem",
+                    Description = "Kem",
+                    Ingredient = "Sua",
+                    Available = true,
+                    PictureUrl = "picture",
+                    CourseTypeId = 4
+                },
+                new Food()
+                {
+                    Id = 4,
+                    Name = "Cam ep",
+                    Description = "Cam ep",
+                    Ingredient = "Cam",
+                    Available = true,
+                    PictureUrl = "picture",
+                    CourseTypeId = 5
+                }
+        };
+        public static List<MenuFood> MenuFoods
+            => new List<MenuFood>()
+        {
+                new MenuFood()
+                {
+                    MenuId = 1,
+                    FoodId = 1,
+                    Price = 100000
+                },
+                new MenuFood()
+                {
+                    MenuId = 1,
+                    FoodId = 2,
+                    Price = 50000
+                },
+                new MenuFood()
+                {
+                    MenuId = 1,
+                    FoodId = 3,
+                    Price = 30000
+                },
+                new MenuFood()
+                {
+                    MenuId = 1,
+                    FoodId = 4,
+                    Price = 10000
+                }
+        };
+
+        public static List<FoodType> FoodTypes
+            => new List<FoodType>()
+        {
+                new FoodType()
+                {
+                    FoodId = 1,
+                    TypeId = 4
+                },
+                new FoodType()
+                {
+                    FoodId = 2,
+                    TypeId = 3
+                },
+                new FoodType()
+                {
+                    FoodId = 3,
+                    TypeId = 4
+                },
+                new FoodType()
+                {
+                    FoodId = 4,
+                    TypeId = 2
+                }
+        };
     }
 }
