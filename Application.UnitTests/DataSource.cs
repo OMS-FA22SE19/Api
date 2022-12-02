@@ -261,5 +261,111 @@ namespace Application.UnitTests
                     TypeId = 2
                 }
         };
+
+        public static List<Reservation> Reservations
+            => new List<Reservation>()
+        {
+                new Reservation()
+                {
+                    Id = 1,
+                    StartTime = DateTime.UtcNow,
+                    EndTime = DateTime.UtcNow.AddHours(1),
+                    NumOfPeople = 4,
+                    NumOfSeats = 4,
+                    TableTypeId = 1,
+                    Quantity = 1,
+                    Status = ReservationStatus.Reserved,
+                    UserId = "123",
+                    NumOfEdits = 0
+                },
+                new Reservation()
+                {
+                    Id = 2,
+                    StartTime = DateTime.UtcNow,
+                    EndTime = DateTime.UtcNow.AddHours(1),
+                    NumOfPeople = 4,
+                    NumOfSeats = 4,
+                    TableTypeId = 1,
+                    Quantity = 1,
+                    Status = ReservationStatus.Available,
+                    UserId = "123",
+                    NumOfEdits = 3
+                },
+                new Reservation()
+                {
+                    Id = 3,
+                    StartTime = DateTime.UtcNow,
+                    EndTime = DateTime.UtcNow.AddHours(1),
+                    NumOfPeople = 4,
+                    NumOfSeats = 4,
+                    TableTypeId = 1,
+                    Quantity = 1,
+                    Status = ReservationStatus.CheckIn,
+                    UserId = "123",
+                    NumOfEdits = 3
+                },
+                new Reservation()
+                {
+                    Id = 4,
+                    StartTime = DateTime.UtcNow,
+                    EndTime = DateTime.UtcNow.AddHours(1),
+                    NumOfPeople = 4,
+                    NumOfSeats = 8,
+                    TableTypeId = 1,
+                    Quantity = 1,
+                    Status = ReservationStatus.Reserved,
+                    UserId = "123",
+                    NumOfEdits = 3
+                },
+        };
+
+        public static List<ReservationTable> ReservationTables
+            => new List<ReservationTable>()
+            {
+                new ReservationTable()
+                {
+                    ReservationId = 3,
+                    TableId = 1
+                }
+            };
+
+        public static List<Billing> Billings
+            => new List<Billing>()
+            {
+                new Billing()
+                {
+                    Id = "1",
+                    ReservationId = 3,
+                    ReservationAmount = 40000
+                }
+            };
+
+        public static List<Order> Orders
+            => new List<Order>()
+            {
+                new Order()
+                {
+                    Id = "1",
+                    ReservationId = 3,
+                    UserId = "123",
+                    Status = OrderStatus.Processing,
+                    Date = DateTime.UtcNow,
+                    NumOfEdits=  3
+                }
+            };
+
+        public static List<OrderDetail> OrderDetails
+            => new List<OrderDetail>()
+            {
+                new OrderDetail()
+                {
+                    Id = 1,
+                    FoodId= 1,
+                    Price= 10000,
+                    Note= "test",
+                    Status = OrderDetailStatus.Served,
+                    OrderId = "1"
+                }
+            };
     }
 }
