@@ -40,6 +40,7 @@ namespace Application.UnitTests.Tables.Commands
 
         #region Unit Tests
         [TestCase(2)]
+        [TestCase(10)]
         public async Task Should_Remove_Table(int id)
         {
             //Arrange
