@@ -14,13 +14,13 @@ namespace Api.Controllers.V1
         /// <summary>
         /// Create a Payment for Reservation.
         /// </summary>
-        /// <returns>Url redirect to VNPay.</returns>
+        /// <returns>Billing for the reservation.</returns>
         /// <remarks>
         /// Sample request:
         ///
-        ///     POST /VNPay
+        ///     POST /Billings/Reservation
         ///     {
-        ///        "Amount": 200000,
+        ///        "amount": 200000,
         ///        "reservationId": "2015"
         ///     }
         ///     
