@@ -367,5 +367,20 @@ namespace Application.UnitTests
                     OrderId = "1"
                 }
             };
+
+        public static List<ApplicationUser> Users
+            => new List<ApplicationUser>()
+            {
+                new ApplicationUser()
+                {
+                    Id = "123",
+                    UserName= "defaultCustomer"
+                },
+                new ApplicationUser()
+                {
+                    Id = "456",
+                    UserName= "Random"
+                }
+            };
     }
 }
