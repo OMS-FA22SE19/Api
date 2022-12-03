@@ -1,4 +1,5 @@
 ﻿using Application.Models;
+using Application.Types.Response;
 using Application.VNPay.Commands;
 using Application.VNPay.Response;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<Response<PaymentUrlDto>>> CreateBillingForReservation([FromBody] CreateBillingForReservationCommand command)
+        public async Task<ActionResult<Response<BillingDto>>> CreateBillingForReservation([FromBody] CreateBillingForReservationCommand command)
         {
             try
             {
@@ -41,7 +42,7 @@ namespace Api.Controllers.V1
             }
             catch (Exception ex)
             {
-                var response = new Response<PaymentUrlDto>(ex.Message)
+                var response = new Response<BillingDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

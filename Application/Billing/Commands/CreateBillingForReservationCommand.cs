@@ -41,6 +41,10 @@ namespace Application.VNPay.Commands
             {
                 return new Response<BillingDto>($"Reservation {request.ReservationId} cannot be found!");
             }
+            if (reservation.Status == ReservationStatus.Done || reservation.Status == ReservationStatus.CheckIn)
+            {
+                return new Response<BillingDto>($"This Reservation is already checked in or done");
+            }
 
             string id = DateTime.UtcNow.AddHours(7).ToString("yyyyMMddHHmmss");
             var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == request.ReservationId);
@@ -61,6 +65,13 @@ namespace Application.VNPay.Commands
                 result = await _unitOfWork.BillingRepository.UpdateAsync(billing);
             }
 
+            var order = await _unitOfWork.OrderRepository.GetAsync(o => o.ReservationId == request.ReservationId);
+            if (order is not null)
+            {
+                order.PrePaid = request.Amount;
+                await _unitOfWork.OrderRepository.UpdateAsync(order);
+            }
+
             reservation.Status = ReservationStatus.Reserved;
             await _unitOfWork.ReservationRepository.UpdateAsync(reservation);
 
@@ -70,7 +81,18 @@ namespace Application.VNPay.Commands
                 return new Response<BillingDto>("error");
             }
 
-            return new Response<BillingDto>()
+            var dto = new BillingDto()
+            {
+                Id = id,
+                ReservationId = request.ReservationId,
+                Amount = request.Amount
+            };
+            if (billing is not null)
+            {
+                dto.Id = billing.Id;
+            }
+
+            return new Response<BillingDto>(dto)
             {
                 StatusCode = System.Net.HttpStatusCode.Created
             };
