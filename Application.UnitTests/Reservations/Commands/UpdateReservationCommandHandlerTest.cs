@@ -6,6 +6,8 @@ using AutoMapper;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
+using Firebase.Auth;
+using FluentAssertions.Common;
 using Microsoft.AspNetCore.Identity;
 using MockQueryable.Moq;
 using Moq;
@@ -15,8 +17,7 @@ using System.Net;
 
 namespace Application.UnitTests.Reservations.Commands
 {
-    [TestFixture]
-    public class CreateReservationCommandHandlerTest
+    public class UpdateReservationCommandHandlerTest
     {
         private List<Reservation> _Reservations;
         private List<ReservationTable> _ReservationTables;
@@ -86,30 +87,26 @@ namespace Application.UnitTests.Reservations.Commands
         }
 
         #region Unit Tests
-        [TestCase(4, 2, 2, 1)]
-        public async Task Should_Create_Reservation(int numOfSeat, int numOfPeople, int tableTypeId, int quantity)
+        [TestCase(1, 4, 2, 2, 1)]
+        public async Task Should_Update_Reservation(int id, int numOfSeat, int numOfPeople, int tableTypeId, int quantity)
         {
             //Arrange
             DateTime startTime = DateTime.UtcNow;
             DateTime endTime = startTime.AddHours(1);
-            var request = new CreateReservationCommand()
+            var request = new UpdateReservationCommand()
             {
+                Id = id,
                 NumOfSeats = numOfSeat,
-                StartTime = startTime, 
-                EndTime = endTime, 
-                IsPriorFoodOrder = false, 
-                NumOfPeople = numOfPeople, 
-                Quantity = quantity, 
+                StartTime = startTime,
+                EndTime = endTime,
+                NumOfPeople = numOfPeople,
+                Quantity = quantity,
                 TableTypeId = tableTypeId
             };
-
-            var handler = new CreateReservationCommandHandler(_unitOfWork, _mapper, _UserManager);
-
-            var type = _TableTypes.Find(t => t.Id == tableTypeId);
-
-            var expected = new Response<ReservationDto>(new ReservationDto
+            var handler = new UpdateReservationCommandHandler(_unitOfWork, _mapper, _UserManager);
+            var expected = new Reservation()
             {
-                Id = _Reservations.Max(e => e.Id) + 1,
+                Id = id,
                 UserId = "123",
                 StartTime = startTime,
                 EndTime = endTime,
@@ -117,77 +114,54 @@ namespace Application.UnitTests.Reservations.Commands
                 NumOfSeats = numOfSeat,
                 TableTypeId = tableTypeId,
                 Quantity = quantity,
-                Status = ReservationStatus.Available,
-                IsPriorFoodOrder = false,
-                PrePaid = numOfSeat * type.ChargePerSeat * quantity,
-                TableType = type.Name
-            })
-            {
-                StatusCode = HttpStatusCode.Created
+                Status = ReservationStatus.Reserved,
+                IsPriorFoodOrder = false
             };
-            var count = _Reservations.Count + 1;
             //Act
             var actual = await handler.Handle(request, CancellationToken.None);
 
             //Assert
-            Assert.That(actual.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-            Assert.That(_Reservations.Count, Is.EqualTo(count));
-            var inDatabase = _Reservations.FirstOrDefault(e => e.NumOfSeats == numOfSeat);
-            Assert.NotNull(inDatabase);
-            Assert.That(actual.Data, Is.EqualTo(expected.Data));
+            Assert.That(actual.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
+            Assert.That(actual, Is.TypeOf(typeof(Response<ReservationDto>)));
+            Assert.Null(actual.Data);
+            var inDatabase = _Reservations.FirstOrDefault(e => e.Id == id);
+            Assert.That(inDatabase, Is.EqualTo(expected));
         }
 
-        [TestCase(4, 10, 10, 1)]
-        public async Task Should_Return_Throw_NotFound_Exception(int numOfSeat, int numOfPeople, int tableTypeId, int quantity)
+        [TestCase(10)]
+        [TestCase(0)]
+        public async Task Should_Return_Throw_NotFound_ReservationId_Exception(int id)
         {
             //Arrange
-            DateTime startTime = DateTime.UtcNow;
-            DateTime endTime = startTime.AddHours(1);
-            var request = new CreateReservationCommand()
+            var request = new UpdateReservationCommand()
             {
-                NumOfSeats = numOfSeat,
-                StartTime = startTime,
-                EndTime = endTime,
-                IsPriorFoodOrder = false,
-                NumOfPeople = numOfPeople,
-                Quantity = quantity,
-                TableTypeId = tableTypeId
+                Id = id
             };
-            var handler = new CreateReservationCommandHandler(_unitOfWork, _mapper, _UserManager);
+            var handler = new UpdateReservationCommandHandler(_unitOfWork, _mapper, _UserManager);
 
             //Act
             var ex = Assert.ThrowsAsync<NotFoundException>(async () => await handler.Handle(request, CancellationToken.None));
 
             //Assert
-            Assert.That(ex.Message, Is.EqualTo($"Entity TableType ({request.TableTypeId}) was not found."));
+            Assert.That(ex.Message, Is.EqualTo($"Entity {nameof(Reservation)} ({request.Id}) was not found."));
         }
 
-        [TestCase(4, 10, 1, 1)]
-        public async Task Should_Return_Throw_Not_EnoughTable(int numOfSeat, int numOfPeople, int tableTypeId, int quantity)
+        [TestCase(10)]
+        [TestCase(0)]
+        public async Task Should_Return_Throw_NotFound_ReservationTypeId_Exception(int id)
         {
             //Arrange
-            DateTime startTime = DateTime.UtcNow;
-            DateTime endTime = startTime.AddHours(1);
-            var request = new CreateReservationCommand()
+            var request = new UpdateReservationCommand()
             {
-                NumOfSeats = numOfSeat,
-                StartTime = startTime,
-                EndTime = endTime,
-                IsPriorFoodOrder = false,
-                NumOfPeople = numOfPeople,
-                Quantity = quantity,
-                TableTypeId = tableTypeId
+                Id = id
             };
-            var handler = new CreateReservationCommandHandler(_unitOfWork, _mapper, _UserManager);
+            var handler = new UpdateReservationCommandHandler(_unitOfWork, _mapper, _UserManager);
 
             //Act
-            var actual = await handler.Handle(request, CancellationToken.None);
-            var expected = new Response<ReservationDto>($"This reservation is unavailable! Please try again!")
-            {
-                StatusCode = System.Net.HttpStatusCode.BadRequest
-            };
+            var ex = Assert.ThrowsAsync<NotFoundException>(async () => await handler.Handle(request, CancellationToken.None));
+
             //Assert
-            Assert.That(actual.Data, Is.EqualTo(expected.Data));
+            Assert.That(ex.Message, Is.EqualTo($"Entity {nameof(Reservation)} ({request.Id}) was not found."));
         }
         #endregion Unit Tests
 
@@ -195,14 +169,27 @@ namespace Application.UnitTests.Reservations.Commands
         private IReservationRepository SetUpReservationRepository()
         {
             var mockReservationRepository = new Mock<IReservationRepository>();
-            mockReservationRepository.Setup(m => m.InsertAsync(It.IsAny<Reservation>()))
+            mockReservationRepository.Setup(m => m.GetAsync(It.IsAny<Expression<Func<Reservation, bool>>>(), It.IsAny<string>()))
                 .ReturnsAsync(
-                (Reservation Reservation)
+                (Expression<Func<Reservation, bool>> expression,
+                string includeProperties)
                 =>
                 {
-                    Reservation.Id = _Reservations.Max(e => e.Id) + 1;
-                    _Reservations.Add(Reservation);
-                    return Reservation;
+                    return _Reservations.AsQueryable().FirstOrDefault(expression);
+                });
+            mockReservationRepository.Setup(m => m.UpdateAsync(It.IsAny<Reservation>()))
+                .ReturnsAsync(
+                (Reservation updatedEntity)
+                =>
+                {
+                    var inDatabase = _Reservations.FirstOrDefault(e => e.Id == updatedEntity.Id);
+                    inDatabase.StartTime = updatedEntity.StartTime;
+                    inDatabase.EndTime = updatedEntity.EndTime;
+                    inDatabase.NumOfPeople = updatedEntity.NumOfPeople;
+                    inDatabase.NumOfSeats = updatedEntity.NumOfSeats;
+                    inDatabase.TableTypeId = updatedEntity.TableTypeId;
+                    inDatabase.Quantity = updatedEntity.Quantity;
+                    return inDatabase;
                 });
             mockReservationRepository.Setup(m => m.GetAllReservationWithDate(It.IsAny<DateTime>(), It.IsAny<int>(), It.IsAny<int>()))
                 .ReturnsAsync(
@@ -323,36 +310,19 @@ namespace Application.UnitTests.Reservations.Commands
         private IMapper SetUpMapper()
         {
             var mapperMock = new Mock<IMapper>();
-            mapperMock.Setup(m => m.Map<Reservation>(It.IsAny<CreateReservationCommand>()))
-                .Returns((CreateReservationCommand command) => new Reservation
+            mapperMock.Setup(m => m.Map<Reservation>(It.IsAny<UpdateReservationCommand>()))
+                .Returns((UpdateReservationCommand command) => new Reservation
                 {
                     NumOfSeats = command.NumOfSeats,
                     Status = ReservationStatus.Available,
                     NumOfPeople = command.NumOfPeople,
-                    Quantity= command.Quantity,
-                    StartTime= command.StartTime,
-                    EndTime= command.EndTime,
-                    TableTypeId= command.TableTypeId,
-                    IsPriorFoodOrder= command.IsPriorFoodOrder,
-                    
-                });
-            mapperMock.Setup(m => m.Map<ReservationDto>(It.IsAny<Reservation>()))
-                .Returns((Reservation Reservation) => new ReservationDto
-                {
-                    Id = Reservation.Id,
-                    UserId = Reservation.UserId,
-                    StartTime = Reservation.StartTime,
-                    EndTime = Reservation.EndTime,
-                    NumOfPeople = Reservation.NumOfPeople,
-                    NumOfSeats = Reservation.NumOfSeats,
-                    TableTypeId = Reservation.TableTypeId,
-                    Quantity = Reservation.Quantity,
-                    Status = ReservationStatus.Available,
-                    IsPriorFoodOrder = false
+                    Quantity = command.Quantity,
+                    StartTime = command.StartTime,
+                    EndTime = command.EndTime,
+                    TableTypeId = command.TableTypeId
                 });
             return mapperMock.Object;
         }
         #endregion
-
     }
 }
