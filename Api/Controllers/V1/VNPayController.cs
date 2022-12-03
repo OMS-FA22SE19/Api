@@ -20,7 +20,7 @@ namespace Api.Controllers.V1
         /// <remarks>
         /// Sample request:
         ///
-        ///     POST /VNPay
+        ///     POST /VNPay/Reservation
         ///     {
         ///        "Amount": 200000,
         ///        "OrderId": "1-0939758999-14-10-2022-21:07:57"
