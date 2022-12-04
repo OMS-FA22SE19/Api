@@ -139,7 +139,7 @@ namespace Application.UnitTests
                     Id = 1,
                     Name = "Main Menu",
                     Description = "This is the main menu of the restaurant",
-                    Available = false,
+                    Available = true,
                     IsDeleted = false
                 },
                 new Menu()
@@ -147,7 +147,7 @@ namespace Application.UnitTests
                     Id = 2,
                     Name = "Hidden Menu",
                     Description = "This is the hidden menu of the restaurant",
-                    Available = true,
+                    Available = false,
                     IsDeleted = false
                 },
                 new Menu()
@@ -302,7 +302,7 @@ namespace Application.UnitTests
                     Quantity = 1,
                     Status = ReservationStatus.CheckIn,
                     UserId = "123",
-                    NumOfEdits = 3
+                    NumOfEdits = 1
                 },
                 new Reservation()
                 {
@@ -313,7 +313,7 @@ namespace Application.UnitTests
                     NumOfSeats = 8,
                     TableTypeId = 1,
                     Quantity = 1,
-                    Status = ReservationStatus.Reserved,
+                    Status = ReservationStatus.CheckIn,
                     UserId = "123",
                     NumOfEdits = 3
                 },
@@ -326,6 +326,12 @@ namespace Application.UnitTests
                 {
                     ReservationId = 3,
                     TableId = 1
+                },
+
+                new ReservationTable()
+                {
+                    ReservationId = 4,
+                    TableId = 2
                 }
             };
 
@@ -351,6 +357,15 @@ namespace Application.UnitTests
                     Status = OrderStatus.Processing,
                     Date = DateTime.UtcNow,
                     NumOfEdits=  3
+                },
+                new Order()
+                {
+                    Id = "2",
+                    ReservationId = 1,
+                    UserId = "456",
+                    Status = OrderStatus.Reserved,
+                    Date = DateTime.UtcNow,
+                    NumOfEdits=  3
                 }
             };
 
@@ -365,6 +380,15 @@ namespace Application.UnitTests
                     Note= "test",
                     Status = OrderDetailStatus.Served,
                     OrderId = "1"
+                },
+                new OrderDetail()
+                {
+                    Id = 2,
+                    FoodId= 1,
+                    Price= 10000,
+                    Note= "test",
+                    Status = OrderDetailStatus.Served,
+                    OrderId = "2"
                 }
             };
 
@@ -374,12 +398,16 @@ namespace Application.UnitTests
                 new ApplicationUser()
                 {
                     Id = "123",
-                    UserName= "defaultCustomer"
+                    UserName= "defaultCustomer",
+                    FullName = "Name",
+                    PhoneNumber= "1234567890",
                 },
                 new ApplicationUser()
                 {
                     Id = "456",
-                    UserName= "Random"
+                    UserName= "Random",
+                    FullName = "Name Random",
+                    PhoneNumber= "0987654321",
                 }
             };
     }

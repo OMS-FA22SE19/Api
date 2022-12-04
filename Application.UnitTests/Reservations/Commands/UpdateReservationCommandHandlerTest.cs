@@ -88,6 +88,7 @@ namespace Application.UnitTests.Reservations.Commands
 
         #region Unit Tests
         [TestCase(1, 4, 2, 2, 1)]
+        [TestCase(3, 4, 2, 2, 1)]
         public async Task Should_Update_Reservation(int id, int numOfSeat, int numOfPeople, int tableTypeId, int quantity)
         {
             //Arrange
@@ -104,6 +105,9 @@ namespace Application.UnitTests.Reservations.Commands
                 TableTypeId = tableTypeId
             };
             var handler = new UpdateReservationCommandHandler(_unitOfWork, _mapper, _UserManager);
+            var reservation = _Reservations.FirstOrDefault(e => e.Id == id);
+            var billing = _Billing.FirstOrDefault(b => b.ReservationId == reservation.Id);
+            
             var expected = new Reservation()
             {
                 Id = id,
@@ -114,11 +118,22 @@ namespace Application.UnitTests.Reservations.Commands
                 NumOfSeats = numOfSeat,
                 TableTypeId = tableTypeId,
                 Quantity = quantity,
-                Status = ReservationStatus.Reserved,
-                IsPriorFoodOrder = false
+                Status = reservation.Status,
+                IsPriorFoodOrder = false,
+
             };
+            if (billing is not null)
+            {
+                var type = _TableTypes.Find(t => t.Id == tableTypeId);
+                if (billing.ReservationAmount <= numOfSeat * quantity * type.ChargePerSeat)
+                {
+                    expected.Status = ReservationStatus.Available;
+                }
+            }
+            
             //Act
             var actual = await handler.Handle(request, CancellationToken.None);
+            
 
             //Assert
             Assert.That(actual.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
