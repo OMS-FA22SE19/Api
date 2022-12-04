@@ -50,6 +50,8 @@ namespace Application.UnitTests.Types.Queries
 
         #region Unit Tests
         [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
         public async Task Should_Return_Type(int id)
         {
             //Arrange
@@ -74,6 +76,7 @@ namespace Application.UnitTests.Types.Queries
             Assert.That(expected.Data, Is.EqualTo(actual.Data));
         }
 
+        [TestCase(0)]
         [TestCase(10)]
         public async Task Should_Return_Throw_NotFound_Exception(int id)
         {

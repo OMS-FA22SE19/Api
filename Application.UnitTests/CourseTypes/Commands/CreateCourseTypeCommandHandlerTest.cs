@@ -39,6 +39,7 @@ namespace Application.UnitTests.CourseTypes.Commands
 
         #region Unit Tests
         [TestCase("abcdef")]
+        [TestCase("random name")]
         public async Task Should_Create_CourseType(string name)
         {
             //Arrange

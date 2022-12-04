@@ -51,6 +51,8 @@ namespace Application.UnitTests.CourseTypes.Queries
 
         #region Unit Tests
         [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
         public async Task Should_Return_CourseType(int id)
         {
             //Arrange

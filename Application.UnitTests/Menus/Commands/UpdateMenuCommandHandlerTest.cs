@@ -40,6 +40,9 @@ namespace Application.UnitTests.Menus.Commands
 
         #region Unit Tests
         [TestCase(2, "abcdef", "Test Update", false)]
+        [TestCase(1, "abcdef", "random name", true)]
+        [TestCase(1, "random name", "Test Update", false)]
+        [TestCase(2, "abcdef", "random name", false)]
         public async Task Should_Update_Menu(int id, string name, string description, bool available)
         {
             //Arrange
@@ -69,6 +72,7 @@ namespace Application.UnitTests.Menus.Commands
             Assert.That(inDatabase, Is.EqualTo(expected));
         }
         [TestCase(10)]
+        [TestCase(3)]
         public async Task Should_Return_Throw_NotFound_Exception(int id)
         {
             //Arrange
