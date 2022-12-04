@@ -379,17 +379,29 @@ namespace Application.UnitTests
                     Price= 10000,
                     Note= "test",
                     Status = OrderDetailStatus.Served,
-                    OrderId = "1"
+                    OrderId = "1",
+                    Created = DateTime.UtcNow
                 },
                 new OrderDetail()
                 {
                     Id = 2,
+                    FoodId= 2,
+                    Price= 20000,
+                    Note= "test",
+                    Status = OrderDetailStatus.Processing,
+                    OrderId = "2",
+                    Created = DateTime.UtcNow.AddHours(-1)
+                },
+                new OrderDetail()
+                {
+                    Id = 3,
                     FoodId= 1,
                     Price= 10000,
                     Note= "test",
                     Status = OrderDetailStatus.Served,
-                    OrderId = "2"
-                }
+                    OrderId = "1",
+                    Created = DateTime.UtcNow
+                },
             };
 
         public static List<ApplicationUser> Users

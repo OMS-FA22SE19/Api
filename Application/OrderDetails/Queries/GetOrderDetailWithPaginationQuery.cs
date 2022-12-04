@@ -58,6 +58,7 @@ namespace Application.OrderDetails.Queries
                     if (request.IsDescending)
                     {
                         orderBy = e => e.OrderByDescending(x => x.OrderId);
+                        break;
                     }
                     orderBy = e => e.OrderBy(x => x.OrderId);
                     break;
@@ -65,6 +66,7 @@ namespace Application.OrderDetails.Queries
                     if (request.IsDescending)
                     {
                         orderBy = e => e.OrderByDescending(x => x.FoodId);
+                        break;
                     }
                     orderBy = e => e.OrderBy(x => x.FoodId);
                     break;
@@ -72,6 +74,7 @@ namespace Application.OrderDetails.Queries
                     if (request.IsDescending)
                     {
                         orderBy = e => e.OrderByDescending(x => x.Price);
+                        break;
                     }
                     orderBy = e => e.OrderBy(x => x.Price);
                     break;
@@ -79,6 +82,7 @@ namespace Application.OrderDetails.Queries
                     if (request.IsDescending)
                     {
                         orderBy = e => e.OrderByDescending(x => x.Status);
+                        break;
                     }
                     orderBy = e => e.OrderBy(x => x.Status);
                     break;
