@@ -12,6 +12,7 @@ using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Net;
 using Application.Types.Response;
+using System.Web.Mvc;
 
 namespace Application.UnitTests.Foods.Queries
 {
@@ -104,20 +105,21 @@ namespace Application.UnitTests.Foods.Queries
         #region Unit Tests
 
         [TestCase]
-        [TestCase(1, 50, "", null, false)]
-        [TestCase(1, 2, "", null, false)]
-        [TestCase(2, 2, "", null, false)]
-        [TestCase(1, 50, "", FoodProperty.Name, false)]
-        [TestCase(1, 50, "", FoodProperty.Name, true)]
-        [TestCase(1, 50, "", FoodProperty.Description, false)]
-        [TestCase(1, 50, "", FoodProperty.Description, true)]
-        [TestCase(1, 50, "", FoodProperty.Available, false)]
-        [TestCase(1, 50, "", FoodProperty.Available, true)]
-        [TestCase(1, 50, "random", null, false)]
-        [TestCase(1, 50, "4", null, false)]
+        [TestCase(1, 50, FoodProperty.Name, "", null, false)]
+        [TestCase(1, 2, FoodProperty.Name, "", null, false)]
+        [TestCase(2, 2, FoodProperty.Name, "", null, false)]
+        [TestCase(1, 50, FoodProperty.Name, "", FoodProperty.Name, false)]
+        [TestCase(1, 50, FoodProperty.Name, "", FoodProperty.Name, true)]
+        [TestCase(1, 50, FoodProperty.Name, "", FoodProperty.Description, false)]
+        [TestCase(1, 50, FoodProperty.Name, "", FoodProperty.Description, true)]
+        [TestCase(1, 50, FoodProperty.Name, "", FoodProperty.Available, false)]
+        [TestCase(1, 50, FoodProperty.Name, "", FoodProperty.Available, true)]
+        [TestCase(1, 50, FoodProperty.Name, "random", null, false)]
+        [TestCase(1, 50, FoodProperty.CourseType, "4", null, false)]
         public async Task Should_Return_With_Condition(
             int pageIndex = 1,
             int pageSize = 50,
+            FoodProperty SearchBy = FoodProperty.Name,
             string searchValue = "",
             FoodProperty? orderBy = null,
             bool IsDescending = false)
@@ -127,17 +129,47 @@ namespace Application.UnitTests.Foods.Queries
             {
                 PageIndex = pageIndex,
                 PageSize = pageSize,
+                SearchBy = SearchBy,
                 SearchValue = searchValue,
                 OrderBy = orderBy,
                 IsDescending = IsDescending
             };
             var handler = new GetFoodWithPaginationQueryHandler(_unitOfWork, _mapper);
             var conditionedList = _Foods;
-            if (!string.IsNullOrWhiteSpace(searchValue))
+            //if (!string.IsNullOrWhiteSpace(searchValue))
+            //{
+            //    conditionedList = conditionedList.Where(e => e.Ingredient.Contains(request.SearchValue)
+            //    || request.SearchValue.Contains(e.Id.ToString())
+            //    || e.Name.ToString().Contains(request.SearchValue)).ToList();
+            //}
+
+            if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
-                conditionedList = conditionedList.Where(e => e.Ingredient.Contains(request.SearchValue)
-                || request.SearchValue.Contains(e.Id.ToString())
-                || e.Name.ToString().Contains(request.SearchValue)).ToList();
+                switch (request.SearchBy)
+                {
+                    case FoodProperty.Name:
+                        conditionedList = conditionedList.Where(e => e.Name.Contains(request.SearchValue)).ToList();
+                        break;
+                    case FoodProperty.Description:
+                        conditionedList = conditionedList.Where(e => e.Description.Contains(request.SearchValue)).ToList();
+                        break;
+                    case FoodProperty.Ingredient:
+                        conditionedList = conditionedList.Where(e => e.Ingredient.Contains(request.SearchValue)).ToList();
+                        break;
+                    case FoodProperty.Available:
+                        break;
+                    case FoodProperty.CourseType:
+                        List<Expression<Func<CourseType, bool>>> courseTypeFilters = new();
+                        //courseTypeFilters.Add(e => e.Name.Contains(request.SearchValue) && !e.IsDeleted);
+                        //var courseTypes = await _unitOfWork.CourseTypeRepository.GetAllAsync(courseTypeFilters, null, null);
+                        //var courseTypeIds = courseTypes.Select(e => e.Id).ToList();
+                        var courseTypes = _CourseTypes.FindAll(e => e.Name.Contains(request.SearchValue) && !e.IsDeleted);
+                        var courseTypeIds = courseTypes.Select(e => e.Id).ToList();
+                        conditionedList = conditionedList.Where(e => courseTypeIds.Contains(e.CourseTypeId)).ToList();
+                        break;
+                    default:
+                        break;
+                }
             }
 
             conditionedList = conditionedList.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
@@ -262,6 +294,26 @@ namespace Application.UnitTests.Foods.Queries
                 =>
                 {
                     return _CourseTypes.AsQueryable().FirstOrDefault(filter);
+                });
+            mockCourseTypeRepository.Setup(m => m.GetAllAsync(It.IsAny<List<Expression<Func<CourseType, bool>>>>()
+                , It.IsAny<Func<IQueryable<CourseType>, IOrderedQueryable<CourseType>>>()
+                , It.IsAny<string>()))
+                .ReturnsAsync(
+                (List<Expression<Func<CourseType, bool>>> filters,
+                Func<IQueryable<CourseType>, IOrderedQueryable<CourseType>> orderBy,
+                string includeString)
+                =>
+                {
+                    var query = _CourseTypes.AsQueryable();
+
+                    if (filters is not null)
+                    {
+                        foreach (var filter in filters)
+                        {
+                            query = query.Where(filter);
+                        }
+                    }
+                    return query.ToList();
                 });
             return mockCourseTypeRepository.Object;
         }
