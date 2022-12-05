@@ -87,6 +87,7 @@ namespace Application.UnitTests.Reservations.Commands
 
         #region Unit Tests
         [TestCase(4, 2, 2, 1)]
+        [TestCase(4, 2, 2, 2)]
         public async Task Should_Create_Reservation(int numOfSeat, int numOfPeople, int tableTypeId, int quantity)
         {
             //Arrange

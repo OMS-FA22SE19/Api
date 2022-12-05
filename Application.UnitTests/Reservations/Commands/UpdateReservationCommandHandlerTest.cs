@@ -143,14 +143,18 @@ namespace Application.UnitTests.Reservations.Commands
             Assert.That(inDatabase, Is.EqualTo(expected));
         }
 
-        [TestCase(10)]
-        [TestCase(0)]
-        public async Task Should_Return_Throw_NotFound_ReservationId_Exception(int id)
+        [TestCase(1, 4, 2, 10, 1)]
+        [TestCase(1, 4, 2, 0, 1)]
+        public async Task Should_Return_Throw_NotFound_ReservationId_Exception(int id, int numOfSeat, int numOfPeople, int tableTypeId, int quantity)
         {
             //Arrange
             var request = new UpdateReservationCommand()
             {
-                Id = id
+                Id = id,
+                NumOfSeats = numOfSeat,
+                NumOfPeople = numOfPeople,
+                Quantity = quantity,
+                TableTypeId = tableTypeId
             };
             var handler = new UpdateReservationCommandHandler(_unitOfWork, _mapper, _UserManager);
 
@@ -158,7 +162,7 @@ namespace Application.UnitTests.Reservations.Commands
             var ex = Assert.ThrowsAsync<NotFoundException>(async () => await handler.Handle(request, CancellationToken.None));
 
             //Assert
-            Assert.That(ex.Message, Is.EqualTo($"Entity {nameof(Reservation)} ({request.Id}) was not found."));
+            Assert.That(ex.Message, Is.EqualTo($"Entity {nameof(TableType)} ({request.TableTypeId}) was not found."));
         }
 
         [TestCase(10)]

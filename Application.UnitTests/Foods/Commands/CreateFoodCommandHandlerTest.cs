@@ -64,13 +64,14 @@ namespace Application.UnitTests.Foods.Commands
         }
 
         #region Unit Tests
-        [TestCase("Random food", "test food", "egg", 1, new []{1, 2})]
-        public async Task Should_Create_Food(string name, string description, string ingredient, int courseTypeId, int[] Types)
+        [TestCase("Random food", "test food", "egg", 1, new[] { 1, 2 })]
+        [TestCase("Random food", "test food", "egg", 1, null)]
+        public async Task Should_Create_Food(string name, string description, string ingredient, int courseTypeId, int[]? Types)
         {
             var bytes = Encoding.UTF8.GetBytes("This is a dummy file");
             IFormFile file = new FormFile(new MemoryStream(bytes), 0, bytes.Length, "Data", "dummy.txt");
 
-            List<int> types = Types.ToList();
+            //List<int> types = Types.ToList();
             //Arrange
             var request = new CreateFoodCommand()
             {
@@ -136,6 +137,32 @@ namespace Application.UnitTests.Foods.Commands
 
             //Assert
             Assert.That(ex.Message, Is.EqualTo($"Entity {nameof(CourseType)} ({request.CourseTypeId}) was not found."));
+        }
+
+        [TestCase("Random food", "test food", "egg", 1, new[] { 1, 10 })]
+        public async Task Should_Return_Throw_NotFound_Type_Exception(string name, string description, string ingredient, int courseTypeId, int[] Types)
+        {
+            var bytes = Encoding.UTF8.GetBytes("This is a dummy file");
+            IFormFile file = new FormFile(new MemoryStream(bytes), 0, bytes.Length, "Data", "dummy.txt");
+
+            //Arrange
+            var request = new CreateFoodCommand()
+            {
+                Name = name,
+                Description = description,
+                Ingredient = ingredient,
+                Available = true,
+                Picture = file,
+                CourseTypeId = courseTypeId,
+                Types = Types
+            };
+            var handler = new CreateFoodCommandHandler(_unitOfWork, _mapper, _uploadService);
+
+            //Act
+            var ex = Assert.ThrowsAsync<NotFoundException>(async () => await handler.Handle(request, CancellationToken.None));
+
+            //Assert
+            Assert.That(ex.Message, Is.EqualTo($"Entity {nameof(Core.Entities.Type)} (10) was not found."));
         }
         #endregion Unit Tests
 

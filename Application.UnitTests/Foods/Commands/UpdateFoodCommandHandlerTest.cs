@@ -63,12 +63,13 @@ namespace Application.UnitTests.Foods.Commands
 
         #region Unit Tests
         [TestCase(2, "abcdef", "Test Update", "test food", false, 1, new[] { 1, 2 })]
-        public async Task Should_Update_Food(int id, string name, string description, string ingredient, bool available, int courseTypeId, int[] Types)
+        [TestCase(2, "abcdef", "Test Update", "test food", false, 1, null)]
+        public async Task Should_Update_Food(int id, string name, string description, string ingredient, bool available, int courseTypeId, int[]? Types)
         {
             var bytes = Encoding.UTF8.GetBytes("This is a dummy file");
             IFormFile file = new FormFile(new MemoryStream(bytes), 0, bytes.Length, "Data", "dummy.txt");
 
-            List<int> types = Types.ToList();
+            //List<int> types = Types.ToList();
             //Arrange
             var request = new UpdateFoodCommand()
             {
@@ -84,10 +85,14 @@ namespace Application.UnitTests.Foods.Commands
             var handler = new UpdateFoodCommandHandler(_unitOfWork, _mapper, _uploadService);
 
             var foodType = new List<FoodType>();
-            foreach (var type in Types)
+            if (Types is not null)
             {
-                foodType.Add(new FoodType { FoodId = id, TypeId = type});
+                foreach (var type in Types)
+                {
+                    foodType.Add(new FoodType { FoodId = id, TypeId = type});
+                }
             }
+            
             
             var expected = new Food()
             {
