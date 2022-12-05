@@ -14,6 +14,9 @@ namespace Infrastructure.Persistence.Configurations
             builder.Property<string>("Value")
                 .HasColumnType("nvarchar(450)");
 
+            builder.Property<int>("Order")
+                .HasColumnType("int");
+
             builder.HasKey(e => e.Name);
 
             builder.ToTable("AdminSettings");

@@ -14,6 +14,7 @@ namespace Application.Foods.Queries
 {
     public sealed class GetFoodWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<FoodDto>>>
     {
+        public FoodProperty SearchBy { get; init; }
         public FoodProperty? OrderBy { get; init; }
         public bool? Available { get; init; }
     }
@@ -37,7 +38,29 @@ namespace Application.Foods.Queries
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
-                filters.Add(e => e.Ingredient.Contains(request.SearchValue) || e.Name.Contains(request.SearchValue) || request.SearchValue.Equals(e.Id.ToString()));
+                switch (request.SearchBy)
+                {
+                    case FoodProperty.Name:
+                        filters.Add(e => e.Name.Contains(request.SearchValue));
+                        break;
+                    case FoodProperty.Description:
+                        filters.Add(e => e.Description.Contains(request.SearchValue));
+                        break;
+                    case FoodProperty.Ingredient:
+                        filters.Add(e => e.Ingredient.Contains(request.SearchValue));
+                        break;
+                    case FoodProperty.Available:
+                        break;
+                    case FoodProperty.CourseType:
+                        List<Expression<Func<CourseType, bool>>> courseTypeFilters = new();
+                        courseTypeFilters.Add(e => e.Name.Contains(request.SearchValue) && !e.IsDeleted);
+                        var courseTypes = await _unitOfWork.CourseTypeRepository.GetAllAsync(courseTypeFilters, null, null);
+                        var courseTypeIds = courseTypes.Select(e => e.Id).ToList();
+                        filters.Add(e => courseTypeIds.Contains(e.CourseTypeId));
+                        break;
+                    default:
+                        break;
+                }
             }
             if (request.Available is not null)
             {
@@ -83,6 +106,15 @@ namespace Application.Foods.Queries
             }
 
             var result = await _unitOfWork.FoodRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, request.PageIndex, request.PageSize);
+            if (!string.IsNullOrWhiteSpace(request.SearchValue) && request.SearchBy == FoodProperty.FoodType)
+            {
+                List<Expression<Func<Type, bool>>> typeFilters = new();
+                typeFilters.Add(e => e.Name.Contains(request.SearchValue) && !e.IsDeleted);
+                var types = await _unitOfWork.TypeRepository.GetAllAsync(typeFilters, null, null);
+                var typeIds = types.Select(e => e.Id).ToList();
+                var items = result.Where(e => e.FoodTypes.Any(x => typeIds.Contains(x.TypeId))).ToList();
+                result = new PaginatedList<Food>(pageNumber: result.PageNumber, totalPages: result.TotalPages, totalCount: result.TotalCount, items: items);
+            }
             var mappedResult = _mapper.Map<PaginatedList<Food>, PaginatedList<FoodDto>>(result);
             foreach (var item in mappedResult)
             {

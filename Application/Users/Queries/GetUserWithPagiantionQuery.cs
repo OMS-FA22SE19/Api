@@ -12,7 +12,8 @@ namespace Application.Users.Queries
 {
     public sealed class GetUserWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<UserDto>>>
     {
-        public UserProperty OrderBy { get; set; }
+        public UserProperty SearchBy { get; set; }
+        public UserProperty? OrderBy { get; set; }
     }
 
     public sealed class GetUserWithPaginationQueryHandler : IRequestHandler<GetUserWithPaginationQuery, Response<PaginatedList<UserDto>>>
@@ -34,9 +35,26 @@ namespace Application.Users.Queries
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
-                filters.Add(e => e.FullName.Contains(request.SearchValue)
-                    || request.SearchValue.Equals(e.Id.ToString())
-                    || request.SearchValue.Equals(e.PhoneNumber.ToString()));
+                switch (request.SearchBy)
+                {
+                    case UserProperty.Id:
+                        filters.Add(e => e.Id.Contains(request.SearchValue));
+                        break;
+                    case UserProperty.UserName:
+                        filters.Add(e => e.UserName.Contains(request.SearchValue));
+                        break;
+                    case UserProperty.FullName:
+                        filters.Add(e => e.FullName.Contains(request.SearchValue));
+                        break;
+                    case UserProperty.Email:
+                        filters.Add(e => e.Email.Contains(request.SearchValue));
+                        break;
+                    case UserProperty.PhoneNumber:
+                        filters.Add(e => e.PhoneNumber.Contains(request.SearchValue));
+                        break;
+                    default:
+                        break;
+                }
             }
 
             switch (request.OrderBy)
@@ -55,12 +73,26 @@ namespace Application.Users.Queries
                     }
                     orderBy = e => e.OrderBy(x => x.FullName);
                     break;
-                case UserProperty.Phone:
+                case UserProperty.PhoneNumber:
                     if (request.IsDescending)
                     {
                         orderBy = e => e.OrderByDescending(x => x.PhoneNumber);
                     }
                     orderBy = e => e.OrderBy(x => x.PhoneNumber);
+                    break;
+                case UserProperty.UserName:
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.UserName);
+                    }
+                    orderBy = e => e.OrderBy(x => x.UserName);
+                    break;
+                case UserProperty.Email:
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.Email);
+                    }
+                    orderBy = e => e.OrderBy(x => x.Email);
                     break;
                 default:
                     break;

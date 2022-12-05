@@ -1,6 +1,7 @@
 ﻿using Application.AdminSettings.Response;
 using Application.Models;
 using AutoMapper;
+using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 
@@ -23,7 +24,8 @@ namespace Application.AdminSettings.Queries
 
         public async Task<Response<List<AdminSettingDto>>> Handle(GetAdminSettingQuery request, CancellationToken cancellationToken)
         {
-            var settings = await _unitOfWork.AdminSettingRepository.GetAllAsync();
+            Func<IQueryable<AdminSetting>, IOrderedQueryable<AdminSetting>> orderBy = e => e.OrderBy(x => x.Order);
+            var settings = await _unitOfWork.AdminSettingRepository.GetAllAsync(orderBy: orderBy);
 
             var mappedResult = _mapper.Map<List<AdminSettingDto>>(settings);
             return new Response<List<AdminSettingDto>>(mappedResult);

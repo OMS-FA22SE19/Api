@@ -18,7 +18,7 @@ namespace Application.TableTypes.Validators
                 .GreaterThan(0).WithMessage("{PropertyName} is invalid");
 
             RuleFor(e => e.CanBeCombined)
-                .NotEmpty().WithMessage("{PropertyName} is not empty");
+                .NotNull().WithMessage("{PropertyName} is not empty");
         }
     }
 }

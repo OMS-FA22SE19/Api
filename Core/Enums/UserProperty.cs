@@ -3,7 +3,9 @@
     public enum UserProperty
     {
         Id,
+        UserName,
         FullName,
-        Phone
+        Email,
+        PhoneNumber
     }
 }
