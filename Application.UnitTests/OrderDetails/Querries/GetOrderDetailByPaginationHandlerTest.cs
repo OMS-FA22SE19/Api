@@ -158,8 +158,8 @@ namespace Application.UnitTests.Orders.Queries
         [TestCase(1, 50, "", null, null, false)]
         [TestCase(1, 2, null, null, null, false)]
         [TestCase(2, 2, null, null, null, false)]
-        //[TestCase(1, 50, "1", null, null, false)]
-        //[TestCase(1, 50, "4", null, null, false)]
+        // TODO: [TestCase(1, 50, "1", null, null, false)]
+        // TODO: [TestCase(1, 50, "4", null, null, false)]
         [TestCase(1, 50, "", OrderDetailProperty.OrderId, null, false)]
         [TestCase(1, 50, "", OrderDetailProperty.OrderId, null, true)]
         [TestCase(1, 50, "", OrderDetailProperty.FoodId, null, false)]
@@ -171,7 +171,6 @@ namespace Application.UnitTests.Orders.Queries
         [TestCase(1, 50, "", null, OrderDetailStatus.Processing, false)]
         [TestCase(1, 50, "", null, OrderDetailStatus.Reserved, false)]
         [TestCase(1, 50, "", null, OrderDetailStatus.Received, false)]
-        //[TestCase(1, 50, null, ReservationStatus.Reserved)]
         public async Task Should_Return_With_Condition(
             int pageIndex = 1,
             int pageSize = 50,
