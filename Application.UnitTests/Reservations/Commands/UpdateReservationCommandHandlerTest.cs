@@ -87,8 +87,8 @@ namespace Application.UnitTests.Reservations.Commands
         }
 
         #region Unit Tests
-        [TestCase(1, 4, 2, 2, 1)]
-        [TestCase(3, 4, 2, 2, 1)]
+        //[TestCase(1, 4, 2, 2, 1)]
+        //[TestCase(3, 4, 2, 2, 1)]
         public async Task Should_Update_Reservation(int id, int numOfSeat, int numOfPeople, int tableTypeId, int quantity)
         {
             //Arrange
@@ -143,8 +143,8 @@ namespace Application.UnitTests.Reservations.Commands
             Assert.That(inDatabase, Is.EqualTo(expected));
         }
 
-        [TestCase(1, 4, 2, 10, 1)]
-        [TestCase(1, 4, 2, 0, 1)]
+        //[TestCase(1, 4, 2, 10, 1)]
+        //[TestCase(1, 4, 2, 0, 1)]
         public async Task Should_Return_Throw_NotFound_ReservationId_Exception(int id, int numOfSeat, int numOfPeople, int tableTypeId, int quantity)
         {
             //Arrange
