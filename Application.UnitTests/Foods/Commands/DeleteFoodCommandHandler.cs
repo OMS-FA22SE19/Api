@@ -1,55 +1,57 @@
-﻿using Application.Models;
-using Application.Tables.Commands;
-using Application.Tables.Response;
+﻿using Application.Foods.Commands;
+using Application.Foods.Response;
+using Application.Models;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
+using MediatR;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Net;
 
-namespace Application.UnitTests.Tables.Commands
+namespace Application.UnitTests.Foods.Commands
 {
     [TestFixture]
-    public class DeleteTableCommandHandlerTest
+    public class DeleteFoodCommandHandlerTest
     {
-        private List<Table> _tables;
-        private ITableRepository _TableRepository;
+        private List<Food> _foods;
+        private IFoodRepository _FoodRepository;
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
+        private IMediator _mediator;
 
         [SetUp]
         public void ReInitializeTest()
         {
-            _tables = DataSource.Tables;
-            _TableRepository = SetUpTableRepository();
+            _foods = DataSource.Foods;
+            _FoodRepository = SetUpFoodRepository();
             var unitOfWork = new Mock<IUnitOfWork>();
-            unitOfWork.SetupGet(x => x.TableRepository).Returns(_TableRepository);
+            unitOfWork.SetupGet(x => x.FoodRepository).Returns(_FoodRepository);
             _unitOfWork = unitOfWork.Object;
             _mapper = SetUpMapper();
+            _mediator = SetUpMediator();
         }
 
         [TearDown]
         public void DisposeTest()
         {
-            _TableRepository = null;
+            _FoodRepository = null;
             _unitOfWork = null;
-            _tables = null;
+            _foods = null;
         }
 
         #region Unit Tests
         [TestCase(2)]
-        [TestCase(10)]
-        public async Task Should_Remove_Table(int id)
+        public async Task Should_Remove_Food(int id)
         {
             //Arrange
-            var request = new DeleteTableCommand()
+            var request = new DeleteFoodCommand()
             {
                 Id = id
             };
-            var handler = new DeleteTableCommandHandler(_unitOfWork, _mapper);
-            var expected = new Response<TableDto>()
+            var handler = new DeleteFoodCommandHandler(_unitOfWork, _mapper, _mediator);
+            var expected = new Response<FoodDto>()
             {
                 StatusCode = HttpStatusCode.NoContent
             };
@@ -58,34 +60,40 @@ namespace Application.UnitTests.Tables.Commands
 
             //Assert
             Assert.That(actual.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
-            var inDatabase = _tables.FirstOrDefault(e => e.Id == id);
+            var inDatabase = _foods.FirstOrDefault(e => e.Id == id);
             Assert.Null(inDatabase);
             Assert.Null(actual.Data);
         }
         #endregion Unit Tests
 
         #region Private member methods
-        private ITableRepository SetUpTableRepository()
+        private IFoodRepository SetUpFoodRepository()
         {
-            var mockTableRepository = new Mock<ITableRepository>();
-            mockTableRepository.Setup(m => m.DeleteAsync(It.IsAny<Expression<Func<Table, bool>>>()))
+            var mockFoodRepository = new Mock<IFoodRepository>();
+            mockFoodRepository.Setup(m => m.DeleteAsync(It.IsAny<Expression<Func<Food, bool>>>()))
                 .ReturnsAsync(
-                (Expression<Func<Table, bool>> expression)
+                (Expression<Func<Food, bool>> expression)
                 =>
                 {
-                    var inDatabase = _tables.AsQueryable().FirstOrDefault(expression);
+                    var inDatabase = _foods.AsQueryable().FirstOrDefault(expression);
                     if (inDatabase is not null)
                     {
-                        _tables.Remove(inDatabase);
+                        _foods.Remove(inDatabase);
                     }
                     return true;
                 });
-            return mockTableRepository.Object;
+            return mockFoodRepository.Object;
         }
 
         private IMapper SetUpMapper()
         {
             var mapperMock = new Mock<IMapper>();
+            return mapperMock.Object;
+        }
+
+        private IMediator SetUpMediator()
+        {
+            var mapperMock = new Mock<IMediator>();
             return mapperMock.Object;
         }
         #endregion

@@ -33,7 +33,7 @@ namespace Application.Orders.Queries
             var result = await _unitOfWork.OrderRepository.GetAsync(e => e.Id.Equals(request.Id), $"{nameof(Order.OrderDetails)}.{nameof(OrderDetail.Food)},{nameof(Order.User)}");
             if (result is null)
             {
-                throw new NotFoundException(nameof(Order), $"with TableId {request.Id}");
+                throw new NotFoundException(nameof(Order), $"with {request.Id}");
             }
             var mappedResult = _mapper.Map<OrderDto>(result);
             double total = 0;
