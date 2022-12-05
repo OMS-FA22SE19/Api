@@ -227,9 +227,14 @@ namespace Application.Reservations.Commands
         private async Task<bool> validateStartEndTime(Reservation request)
         {
             var reservation = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.StartTime.Date, request.TableTypeId, request.NumOfSeats);
-
+            double availablePercentage = 1;
+            var reservationTables = await _unitOfWork.AdminSettingRepository.GetAsync(e => e.Name.Equals("ReservationTable"));
+            if (reservationTables is not null)
+            {
+                availablePercentage = double.Parse(reservationTables.Value) / 100;
+            }
             var tables = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
-            var maxTables = tables.Count - request.Quantity;
+            var maxTables = tables.Count * availablePercentage - request.Quantity;
             var times = reservation.Select(e => e.StartTime).Concat(reservation.Select(e => e.EndTime.AddMinutes(15))).ToImmutableSortedSet();
             var busyTimes = new List<BusyTimeDto>();
 
