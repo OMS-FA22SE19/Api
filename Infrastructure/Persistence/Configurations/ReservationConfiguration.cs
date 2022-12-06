@@ -42,8 +42,24 @@ namespace Infrastructure.Persistence.Configurations
                 .HasColumnType("int");
 
             builder.Property<string>("UserId")
+                .IsRequired(false)
+                .HasColumnType("nvarchar(300)");
+
+            builder.Property<string>("Fullname")
                 .IsRequired()
                 .HasColumnType("nvarchar(300)");
+
+            builder.Property<string>("PhoneNumber")
+                .IsRequired()
+                .HasColumnType("nvarchar(20)");
+
+            builder.Property<string?>("FullnameFor")
+                .IsRequired(false)
+                .HasColumnType("nvarchar(300)");
+
+            builder.Property<string?>("PhoneNumberFor")
+                .IsRequired(false)
+                .HasColumnType("nvarchar(20)");
 
             builder.HasOne(e => e.User)
                 .WithMany(e => e.Reservations)

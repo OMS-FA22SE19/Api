@@ -14,6 +14,8 @@ using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Net;
+using Microsoft.AspNetCore.Identity;
+using MockQueryable.Moq;
 
 namespace Application.UnitTests.Reservations.Queries
 {
@@ -25,6 +27,8 @@ namespace Application.UnitTests.Reservations.Queries
         private List<Table> _Tables;
         private List<TableType> _TableTypes;
         private List<Billing> _Billing;
+        private List<ApplicationUser> _Users;
+        private UserManager<ApplicationUser> _UserManager;
         private IReservationRepository _ReservationRepository;
         private ITableRepository _TableRepository;
         private ITableTypeRepository _TableTypeRepository;
@@ -41,6 +45,7 @@ namespace Application.UnitTests.Reservations.Queries
             _Tables = DataSource.Tables;
             _TableTypes = DataSource.TableTypes;
             _Billing = DataSource.Billings;
+            _Users= DataSource.Users;
             foreach (Reservation reservation in _Reservations)
             {
                 reservation.ReservationTables = _ReservationTables.FindAll(ft => ft.ReservationId == reservation.Id);
@@ -62,6 +67,7 @@ namespace Application.UnitTests.Reservations.Queries
             _Tables = DataSource.Tables;
             _TableTypes = DataSource.TableTypes;
             _Billing = DataSource.Billings;
+            _Users= DataSource.Users;
             foreach (Reservation reservation in _Reservations)
             {
                 reservation.ReservationTables = _ReservationTables.FindAll(ft => ft.ReservationId == reservation.Id);
@@ -73,6 +79,7 @@ namespace Application.UnitTests.Reservations.Queries
                     }
                 }
             }
+            _UserManager = MockUserManager<ApplicationUser>(_Users).Object;
             _ReservationRepository = SetUpReservationRepository();
             _TableRepository = SetUpTableRepository();
             _ReservationTableRepository = SetUpReservationTableRepository();
@@ -117,7 +124,7 @@ namespace Application.UnitTests.Reservations.Queries
             {
                 Id = id
             };
-            var handler = new GetReservationWithIdQueryHandler(_unitOfWork, _mapper);
+            var handler = new GetReservationWithIdQueryHandler(_unitOfWork, _mapper, _UserManager);
 
             //Act
             var actual = await handler.Handle(request, CancellationToken.None);
@@ -173,7 +180,7 @@ namespace Application.UnitTests.Reservations.Queries
             {
                 Id = id
             };
-            var handler = new GetReservationWithIdQueryHandler(_unitOfWork, _mapper);
+            var handler = new GetReservationWithIdQueryHandler(_unitOfWork, _mapper, _UserManager);
 
             //Act
             var ex = Assert.ThrowsAsync<NotFoundException>(async () => await handler.Handle(request, CancellationToken.None));
@@ -196,6 +203,28 @@ namespace Application.UnitTests.Reservations.Queries
                     return _Reservations.AsQueryable().FirstOrDefault(filter);
                 });
             return mockReservationRepository.Object;
+        }
+
+        public static Mock<UserManager<TUser>> MockUserManager<TUser>(List<TUser> ls) where TUser : class
+        {
+            var store = new Mock<IUserStore<TUser>>();
+            var mgr = new Mock<UserManager<TUser>>(store.Object, null, null, null, null, null, null, null, null);
+            mgr.Object.UserValidators.Add(new UserValidator<TUser>());
+            mgr.Object.PasswordValidators.Add(new PasswordValidator<TUser>());
+
+            mgr.Setup(x => x.DeleteAsync(It.IsAny<TUser>())).ReturnsAsync(IdentityResult.Success);
+            mgr.Setup(x => x.CreateAsync(It.IsAny<TUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success).Callback<TUser, string>((x, y) => ls.Add(x));
+            mgr.Setup(x => x.UpdateAsync(It.IsAny<TUser>())).ReturnsAsync(IdentityResult.Success);
+            //mgr.Setup(x => x.Users).Returns(_Users);
+            var mock = ls.AsQueryable().BuildMock();
+
+            //3 - setup the mock as Queryable for Moq
+            mgr.Setup(x => x.Users).Returns(ls.AsQueryable().BuildMock());
+
+            //3 - setup the mock as Queryable for NSubstitute
+            //mgr.GetQueryable().Returns(mock);
+
+            return mgr;
         }
 
         private IReservationTableRepository SetUpReservationTableRepository()

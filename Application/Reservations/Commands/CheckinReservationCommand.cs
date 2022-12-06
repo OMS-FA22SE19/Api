@@ -11,12 +11,15 @@ using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 
 namespace Application.Reservations.Commands
 {
     public sealed class CheckinReservationCommand : IRequest<Response<ReservationDto>>
     {
+        [Required]
+        public int reservationId { get; set; }
     }
 
     public sealed class CheckinReservationCommandHandler : IRequestHandler<CheckinReservationCommand, Response<ReservationDto>>
@@ -25,26 +28,61 @@ namespace Application.Reservations.Commands
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly IDateTime _dateTime;
+        private readonly ICurrentUserService _currentUserService;
 
-        public CheckinReservationCommandHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IDateTime dateTime)
+        public CheckinReservationCommandHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IDateTime dateTime, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
             _dateTime = dateTime;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<ReservationDto>> Handle(CheckinReservationCommand request, CancellationToken cancellationToken)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
-            var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.UserId.Equals(user.Id)
+            //var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
+            //var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.UserId.Equals(user.Id)
+            //    && _dateTime.Now >= e.StartTime.AddMinutes(-15) && _dateTime.Now <= e.EndTime
+            //    && e.Status == ReservationStatus.Reserved
+            //    && !e.IsDeleted,
+            //        $"{nameof(Reservation.ReservationTables)},{nameof(Reservation.Order)}");
+            ApplicationUser user = new ApplicationUser();
+            bool isDefault = false;
+            if (_currentUserService.UserId is null)
+            {
+                throw new NotFoundException($"The user is not logged in yet");
+            }
+            if (_currentUserService.Name.Equals("defaultCustomer"))
+            {
+                isDefault = true;
+            }
+            else
+            {
+                user = await _userManager.FindByIdAsync(_currentUserService.UserId);
+            }
+            var entity = await _unitOfWork.ReservationRepository.GetAsync(e=> e.Id == request.reservationId
                 && _dateTime.Now >= e.StartTime.AddMinutes(-15) && _dateTime.Now <= e.EndTime
                 && e.Status == ReservationStatus.Reserved
                 && !e.IsDeleted,
                     $"{nameof(Reservation.ReservationTables)},{nameof(Reservation.Order)}");
             if (entity is null)
             {
-                throw new NotFoundException($"No reservation found for user {user.FullName}");
+                throw new NotFoundException($"Reservation is invalid");
+            }
+            if (!isDefault)
+            {
+                if (entity.UserId is not null)
+                {
+                    if (!entity.UserId.Equals(_currentUserService.UserId))
+                    {
+                        throw new NotFoundException($"this is not the user");
+                    }
+                }
+                else
+                {
+                    throw new NotFoundException($"This reservation can not be checked in by user");
+                }
             }
 
             entity.Status = ReservationStatus.CheckIn;

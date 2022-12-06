@@ -8,6 +8,7 @@ using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.Reservations.Queries
@@ -22,16 +23,18 @@ namespace Application.Reservations.Queries
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public GetReservationWithIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetReservationWithIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         public async Task<Response<ReservationDto>> Handle(GetReservationWithIdQuery request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Reservation.ReservationTables)}.{nameof(ReservationTable.Table)}.{nameof(Table.TableType)},{nameof(Reservation.User)}");
+            var result = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Reservation.ReservationTables)}.{nameof(ReservationTable.Table)}.{nameof(Table.TableType)}");//,{nameof(Reservation.User)}");
             if (result is null)
             {
                 throw new NotFoundException(nameof(Reservation), $"with {request.Id}");

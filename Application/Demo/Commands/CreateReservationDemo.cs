@@ -81,9 +81,21 @@ namespace Application.Reservations.Commands
                 int r = rnd.Next(tableForCheckIn.Count());
                 var table = tableForCheckIn[r];
 
+                var userRandom = rnd.Next(users.Count());
+                var fullname = users[userRandom].FullName;
+                var phonenumber = users[userRandom].PhoneNumber;
+                if (fullname is null)
+                {
+                    fullname = "";
+                }
+                if (phonenumber is null)
+                {
+                    phonenumber= "0";
+                }
+
                 var reservation = new Reservation
                 {
-                    UserId = users[rnd.Next(users.Count())].Id,
+                    UserId = users[userRandom].Id,
                     NumOfPeople = table.NumOfSeats,
                     NumOfSeats = table.NumOfSeats,
                     TableTypeId = table.TableTypeId,
@@ -91,6 +103,8 @@ namespace Application.Reservations.Commands
                     StartTime = startTime,
                     EndTime = endTime, //add day +1
                     Status = ReservationStatus.CheckIn,
+                    Fullname = fullname,
+                    PhoneNumber = phonenumber,
                     ReservationTables = new List<ReservationTable>()
                 };
 

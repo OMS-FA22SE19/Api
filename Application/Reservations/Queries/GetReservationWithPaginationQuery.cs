@@ -2,12 +2,14 @@
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Reservations.Response;
+using Application.Users.Response;
 using AutoMapper;
 using Core.Common;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using System.Linq.Expressions;
 
 namespace Application.Reservations.Queries
@@ -23,11 +25,13 @@ namespace Application.Reservations.Queries
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public GetReservationWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetReservationWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         public async Task<Response<PaginatedList<ReservationDto>>> Handle(GetReservationWithPaginationQuery request, CancellationToken cancellationToken)
@@ -91,6 +95,15 @@ namespace Application.Reservations.Queries
             var mappedResult = _mapper.Map<PaginatedList<Reservation>, PaginatedList<ReservationDto>>(result);
             foreach (var item in mappedResult)
             {
+                //if (item.UserId is not null)
+                //{
+                //    var user = await _userManager.FindByIdAsync(item.UserId);
+                //    if (user is not null)
+                //    {
+                //        item.User = _mapper.Map<ApplicationUser, UserDto>(user);
+                //    }
+                //}
+
                 var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == item.TableTypeId);
                 if (tableType is null)
                 {

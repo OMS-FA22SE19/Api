@@ -140,7 +140,7 @@ namespace Api.Controllers.V1
         }
 
         /// <summary>
-        /// Create a Reservation.
+        /// Create a Reservation. (When Log in will add user id)
         /// </summary>
         /// <returns>New Reservation.</returns>
         /// <remarks>
@@ -154,7 +154,10 @@ namespace Api.Controllers.V1
         ///         "TableTypeId":1
         ///         "numOfSeats": 4,
         ///         "quantity": 1,
-        ///         "isPriorFoodOrder": false
+        ///         "fullName": "Bui Gia Quang",
+        ///         "phoneNumber": "0931118342",
+        ///         "fullNameFor": "Quang Gia Bui",
+        ///         "phoneNumberFor": "0796118342"
         ///     }
         ///     
         /// </remarks>

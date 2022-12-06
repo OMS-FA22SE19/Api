@@ -7,7 +7,7 @@ namespace Core.Entities
     public sealed class Reservation : BaseAuditableEntity, IEquatable<Reservation>
     {
         [Required]
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
         [Range(1, 1000)]
         public int NumOfPeople { get; set; }
         public int TableTypeId { get; set; }
@@ -18,9 +18,13 @@ namespace Core.Entities
         public DateTime EndTime { get; set; }
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
+        public string Fullname { get; set; }
+        public string PhoneNumber { get; set; }
+        public string? FullnameFor { get; set; }
+        public string? PhoneNumberFor { get; set; }
 
         public Order Order { get; set; }
-        public ApplicationUser User { get; set; }
+        public ApplicationUser? User { get; set; }
         public Billing Billing { get; set; }
 
         public IList<ReservationTable> ReservationTables { get; set; }

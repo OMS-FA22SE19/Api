@@ -12,7 +12,7 @@ namespace Application.Reservations.Response
     public class ReservationDto : IMapFrom<Reservation>, IEquatable<ReservationDto>
     {
         public int Id { get; set; }
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
         public int NumOfPeople { get; set; }
         public int TableTypeId { get; set; }
         public string TableType { get; set; }
@@ -24,9 +24,13 @@ namespace Application.Reservations.Response
         public DateTime EndTime { get; set; }
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
+        public string FullName { get; set; }
+        public string PhoneNumber { get; set; }
+        public string? FullNameFor { get; set; }
+        public string? PhoneNumberFor { get; set; }
         public IList<ReservationTableDto> ReservationTables { get; set; }
         public IList<OrderDetailDto> OrderDetails { get; set; }
-        public UserDto User { get; set; }
+        public UserDto? User { get; set; }
 
         public void Mapping(Profile profile)
         {

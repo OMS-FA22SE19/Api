@@ -8,6 +8,8 @@ using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using Infrastructure.Repositories;
+using Microsoft.AspNetCore.Identity;
+using MockQueryable.Moq;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
@@ -27,6 +29,8 @@ namespace Application.UnitTests.Reservations.Queries
         private List<Order> _Orders;
         private List<OrderDetail> _OrderDetails;
         private List<Food> _Foods;
+        private List<ApplicationUser> _Users;
+        private UserManager<ApplicationUser> _UserManager;
 
         private IReservationRepository _ReservationRepository;
         private ITableRepository _TableRepository;
@@ -50,6 +54,7 @@ namespace Application.UnitTests.Reservations.Queries
             _Orders = DataSource.Orders;
             _OrderDetails = DataSource.OrderDetails;
             _Foods = DataSource.Foods;
+            _Users = DataSource.Users;
             foreach (Reservation reservation in _Reservations)
             {
                 reservation.ReservationTables = _ReservationTables.FindAll(ft => ft.ReservationId == reservation.Id);
@@ -85,6 +90,7 @@ namespace Application.UnitTests.Reservations.Queries
             _Orders = DataSource.Orders;
             _OrderDetails = DataSource.OrderDetails;
             _Foods = DataSource.Foods;
+            _Users= DataSource.Users;
             foreach (Reservation reservation in _Reservations)
             {
                 reservation.ReservationTables = _ReservationTables.FindAll(ft => ft.ReservationId == reservation.Id);
@@ -107,6 +113,7 @@ namespace Application.UnitTests.Reservations.Queries
                     }
                 }
             }
+            _UserManager = MockUserManager<ApplicationUser>(_Users).Object;
             _ReservationRepository = SetUpReservationRepository();
             _TableRepository = SetUpTableRepository();
             _ReservationTableRepository = SetUpReservationTableRepository();
@@ -180,7 +187,7 @@ namespace Application.UnitTests.Reservations.Queries
                 userId= userId,
                 Status= status
             };
-            var handler = new GetReservationWithPaginationQueryHandler(_unitOfWork, _mapper);
+            var handler = new GetReservationWithPaginationQueryHandler(_unitOfWork, _mapper, _UserManager);
             var conditionedList = _Reservations;
 
             if (!string.IsNullOrWhiteSpace(request.userId))
@@ -283,6 +290,28 @@ namespace Application.UnitTests.Reservations.Queries
                             : new PaginatedList<Reservation>(query.ToList(), query.Count(), pageIndex, pageSize);
                 });
             return mockReservationRepository.Object;
+        }
+
+        public static Mock<UserManager<TUser>> MockUserManager<TUser>(List<TUser> ls) where TUser : class
+        {
+            var store = new Mock<IUserStore<TUser>>();
+            var mgr = new Mock<UserManager<TUser>>(store.Object, null, null, null, null, null, null, null, null);
+            mgr.Object.UserValidators.Add(new UserValidator<TUser>());
+            mgr.Object.PasswordValidators.Add(new PasswordValidator<TUser>());
+
+            mgr.Setup(x => x.DeleteAsync(It.IsAny<TUser>())).ReturnsAsync(IdentityResult.Success);
+            mgr.Setup(x => x.CreateAsync(It.IsAny<TUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success).Callback<TUser, string>((x, y) => ls.Add(x));
+            mgr.Setup(x => x.UpdateAsync(It.IsAny<TUser>())).ReturnsAsync(IdentityResult.Success);
+            //mgr.Setup(x => x.Users).Returns(_Users);
+            var mock = ls.AsQueryable().BuildMock();
+
+            //3 - setup the mock as Queryable for Moq
+            mgr.Setup(x => x.Users).Returns(ls.AsQueryable().BuildMock());
+
+            //3 - setup the mock as Queryable for NSubstitute
+            //mgr.GetQueryable().Returns(mock);
+
+            return mgr;
         }
 
         private IOrderRepository SetUpOrderRepository()
