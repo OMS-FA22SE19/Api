@@ -1,5 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Mappings;
+using Application.Helpers;
 using Application.Models;
 using Application.Reservations.Response;
 using AutoMapper;
@@ -8,7 +9,6 @@ using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.Reservations.Commands
@@ -51,6 +51,9 @@ namespace Application.Reservations.Commands
 
         public async Task<Response<ReservationDto>> Handle(UpdateReservationCommand request, CancellationToken cancellationToken)
         {
+            bool isValid = true;
+            string errorMessage = string.Empty;
+
             var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.Id);
             if (reservation is null)
             {
@@ -74,10 +77,26 @@ namespace Application.Reservations.Commands
             {
                 throw new NotFoundException(nameof(TableType), request.TableTypeId);
             }
-            bool isValid = await validateStartEndTime(request);
+
+            var adminSettings = await _unitOfWork.AdminSettingRepository.GetAllAsync();
+
+            (isValid, errorMessage) = DateTimeHelpers.ValidateDateInAvailableTime(request.StartTime, request.EndTime, adminSettings);
+
             if (!isValid)
             {
-                return new Response<ReservationDto>($"This reservation is unavailable! Please try again!")
+                return new Response<ReservationDto>(errorMessage)
+                {
+                    StatusCode = System.Net.HttpStatusCode.BadRequest
+                };
+            }
+
+            var reservations = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.StartTime.Date, request.TableTypeId, request.NumOfSeats);
+            var tables = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
+
+            (isValid, errorMessage) = DateTimeHelpers.ValidateStartEndTime(request.StartTime, request.EndTime, request.Quantity, reservations, tables.Count, adminSettings);
+            if (!isValid)
+            {
+                return new Response<ReservationDto>(errorMessage)
                 {
                     StatusCode = System.Net.HttpStatusCode.BadRequest
                 };
@@ -116,52 +135,6 @@ namespace Application.Reservations.Commands
             entity.NumOfSeats = request.NumOfSeats;
             entity.TableTypeId = request.TableTypeId;
             entity.Quantity = request.Quantity;
-        }
-
-        private async Task<bool> validateStartEndTime(UpdateReservationCommand request)
-        {
-            var reservation = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.StartTime.Date, request.TableTypeId, request.NumOfSeats);
-            if (reservation.Any())
-            {
-                var currentReservation = reservation.SingleOrDefault(r => r.Id == request.Id);
-                if (currentReservation != null)
-                {
-                    reservation.Remove(currentReservation);
-                }
-            }
-
-            double availablePercentage = 1;
-            var reservationTables = await _unitOfWork.AdminSettingRepository.GetAsync(e => e.Name.Equals("ReservationTable"));
-            if (reservationTables is not null)
-            {
-                availablePercentage = double.Parse(reservationTables.Value) / 100;
-            }
-            var tables = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
-            var maxTables = tables.Count * availablePercentage - request.Quantity;
-            var times = reservation.Select(e => e.StartTime).Concat(reservation.Select(e => e.EndTime)).ToImmutableSortedSet();
-            var busyTimes = new List<BusyTimeDto>();
-
-            for (int i = 0; i < (times.Count - 1); i++)
-            {
-                var count = reservation.Where(e => e.StartTime <= times[i] && e.EndTime >= times[i + 1]).ToList().Sum(e => e.Quantity);
-                if (maxTables - count < 0)
-                {
-                    var time = busyTimes.FirstOrDefault(e => e.EndTime == times[i]);
-                    if (time is null)
-                    {
-                        busyTimes.Add(new BusyTimeDto
-                        {
-                            StartTime = times[i],
-                            EndTime = times[i + 1]
-                        });
-                    }
-                    else
-                    {
-                        time.EndTime = times[i + 1];
-                    }
-                }
-            }
-            return busyTimes.All(e => request.StartTime > e.EndTime || request.EndTime < e.StartTime);
         }
     }
 }

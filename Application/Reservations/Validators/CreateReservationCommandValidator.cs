@@ -14,7 +14,7 @@ namespace Application.Reservations.Validators
 
             RuleFor(e => e.EndTime)
                 .NotNull().WithMessage("{PropertyName} is not null")
-                .Must(BeAFutureDate).WithMessage("{PropertyName} is invalid");
+                .GreaterThan(e => e.StartTime).WithMessage("{PropertyName} must be after StartTime");
 
             RuleFor(e => e.NumOfPeople)
                 .NotEmpty().WithMessage("{PropertyName} is not empty")

@@ -52,7 +52,7 @@ namespace Application.Reservations.Commands
             List<Expression<Func<Table, bool>>> filters = new();
             filters.Add(e => !e.IsDeleted && e.Status == TableStatus.Available && e.NumOfSeats == entity.NumOfSeats && e.TableTypeId == entity.TableTypeId);
             var tables = await _unitOfWork.TableRepository.GetPaginatedListAsync(filters, pageSize: entity.Quantity);
-            if(tables.Count < entity.Quantity)
+            if (tables.Count < entity.Quantity)
             {
                 throw new BadRequestException("There are not enough available table, check again later");
             }
@@ -73,7 +73,6 @@ namespace Application.Reservations.Commands
                 tableIds.Add(table.Id);
 
                 await _unitOfWork.TableRepository.UpdateAsync(table);
-                table.TableType = tableType;
             }
 
             List<OrderDetailDto> orderDetailDtos = new List<OrderDetailDto>();
@@ -84,10 +83,10 @@ namespace Application.Reservations.Commands
                 await _unitOfWork.OrderRepository.UpdateAsync(entity.Order);
 
                 List<Expression<Func<OrderDetail, bool>>> orderDetailsFilter = new();
-                orderDetailsFilter.Add(od => od.OrderId.Equals(entity.Order.Id) && od.IsDeleted == false);
+                orderDetailsFilter.Add(od => od.OrderId.Equals(entity.Order.Id) && !od.IsDeleted);
 
                 var orderDetails = await _unitOfWork.OrderDetailRepository.GetAllAsync(orderDetailsFilter);
-                foreach(var orderDetail in orderDetails)
+                foreach (var orderDetail in orderDetails)
                 {
                     orderDetail.Status = OrderDetailStatus.Received;
                     await _unitOfWork.OrderDetailRepository.UpdateAsync(orderDetail);
