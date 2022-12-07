@@ -12,7 +12,6 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Customer")]
     public sealed class AdminSettingsController : ApiControllerBase
     {
         /// <summary>
