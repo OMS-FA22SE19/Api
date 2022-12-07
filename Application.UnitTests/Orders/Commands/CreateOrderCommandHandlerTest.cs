@@ -147,7 +147,7 @@ namespace Application.UnitTests.Orders.Commands
                     }
                 }
             }
-            _UserManager = MockUserManager<ApplicationUser>(_Users).Object;
+            _UserManager = MockUserManager(_Users).Object;
             _OrderRepository = SetUpOrderRepository();
             _OrderDetailRepository = SetUpOrderDetailRepository();
             _MenuRepository = SetUpMenuRepository();
@@ -325,24 +325,26 @@ namespace Application.UnitTests.Orders.Commands
             return mockOrderRepository.Object;
         }
 
-        public static Mock<UserManager<TUser>> MockUserManager<TUser>(List<TUser> ls) where TUser : class
+        private Mock<UserManager<ApplicationUser>> MockUserManager(List<ApplicationUser> ls)
         {
-            var store = new Mock<IUserStore<TUser>>();
-            var mgr = new Mock<UserManager<TUser>>(store.Object, null, null, null, null, null, null, null, null);
-            mgr.Object.UserValidators.Add(new UserValidator<TUser>());
-            mgr.Object.PasswordValidators.Add(new PasswordValidator<TUser>());
+            var store = new Mock<IUserStore<ApplicationUser>>();
+            var mgr = new Mock<UserManager<ApplicationUser>>(store.Object, null, null, null, null, null, null, null, null);
+            mgr.Object.UserValidators.Add(new UserValidator<ApplicationUser>());
+            mgr.Object.PasswordValidators.Add(new PasswordValidator<ApplicationUser>());
 
-            mgr.Setup(x => x.DeleteAsync(It.IsAny<TUser>())).ReturnsAsync(IdentityResult.Success);
-            mgr.Setup(x => x.CreateAsync(It.IsAny<TUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success).Callback<TUser, string>((x, y) => ls.Add(x));
-            mgr.Setup(x => x.UpdateAsync(It.IsAny<TUser>())).ReturnsAsync(IdentityResult.Success);
-            //mgr.Setup(x => x.Users).Returns(_Users);
+            mgr.Setup(x => x.DeleteAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(IdentityResult.Success);
+            mgr.Setup(x => x.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>())).ReturnsAsync(IdentityResult.Success).Callback<ApplicationUser, string>((x, y) => ls.Add(x));
+            mgr.Setup(x => x.UpdateAsync(It.IsAny<ApplicationUser>())).ReturnsAsync(IdentityResult.Success);
             var mock = ls.AsQueryable().BuildMock();
 
-            //3 - setup the mock as Queryable for Moq
             mgr.Setup(x => x.Users).Returns(ls.AsQueryable().BuildMock());
 
-            //3 - setup the mock as Queryable for NSubstitute
-            //mgr.GetQueryable().Returns(mock);
+            mgr.Setup(x => x.FindByIdAsync(It.IsAny<string>())).ReturnsAsync(
+                (string UserId)
+                =>
+                {
+                    return _Users.AsQueryable().FirstOrDefault(e => e.Id.Equals(UserId));
+                });
 
             return mgr;
         }

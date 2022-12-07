@@ -90,9 +90,9 @@ namespace Infrastructure.Persistence
             }
 
             var restaurantOwnerRole = new IdentityRole("Restaurant Owner");
-            if (_roleManager.Roles.All(r => r.Name != customerRole.Name))
+            if (_roleManager.Roles.All(r => r.Name != restaurantOwnerRole.Name))
             {
-                await _roleManager.CreateAsync(customerRole);
+                await _roleManager.CreateAsync(restaurantOwnerRole);
             }
 
             var topic = new Topic { Name = "Staff" };
