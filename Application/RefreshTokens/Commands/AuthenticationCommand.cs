@@ -27,7 +27,6 @@ namespace Application.RefreshTokens.Commands
     public class AuthenticationCommand : IMapFrom<RefreshToken>, IRequest<Response<AuthenticationResponse>>
     {
         [Required]
-        [EmailAddress]
         public string Email { get; set; }
         [Required]
         [DataType(DataType.Password)]
@@ -56,7 +55,15 @@ namespace Application.RefreshTokens.Commands
                 var user = await _userManager.FindByEmailAsync(request.Email);
                 if (user is null)
                 {
-                    throw new NotFoundException("Not found account");
+                    user = await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber.Equals(request.Email));
+                    if (user is null)
+                    {
+                        throw new NotFoundException("Not found account");
+                    }
+                }
+                if (user.EmailConfirmed == false && user.PhoneNumberConfirmed == false)
+                {
+                    throw new BadRequestException("Please confirm your email or your number");
                 }
                 if (!(await _userManager.CheckPasswordAsync(user, request.Password)))
                 {

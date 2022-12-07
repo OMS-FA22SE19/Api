@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Security;
 using Application.Models;
 using Application.Reservations.Commands;
 using Application.Reservations.Queries;
@@ -11,6 +12,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public sealed class ReservationsController : ApiControllerBase
     {
         /// <summary>
@@ -151,8 +153,7 @@ namespace Api.Controllers.V1
         ///         "numOfPeople":4,
         ///         "TableTypeId":1
         ///         "numOfSeats": 4,
-        ///         "quantity": 1,
-        ///         "isPriorFoodOrder": false
+        ///         "quantity": 1
         ///     }
         ///     
         /// </remarks>

@@ -90,9 +90,21 @@ namespace Infrastructure.Persistence
             }
 
             var restaurantOwnerRole = new IdentityRole("Restaurant Owner");
-            if (_roleManager.Roles.All(r => r.Name != customerRole.Name))
+            if (_roleManager.Roles.All(r => r.Name != restaurantOwnerRole.Name))
             {
-                await _roleManager.CreateAsync(customerRole);
+                await _roleManager.CreateAsync(restaurantOwnerRole);
+            }
+
+            var StaffRole = new IdentityRole("Staff");
+            if (_roleManager.Roles.All(r => r.Name != StaffRole.Name))
+            {
+                await _roleManager.CreateAsync(StaffRole);
+            }
+
+            var ChefRole = new IdentityRole("Chef");
+            if (_roleManager.Roles.All(r => r.Name != ChefRole.Name))
+            {
+                await _roleManager.CreateAsync(ChefRole);
             }
 
             var topic = new Topic { Name = "Staff" };
