@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Models;
 using Application.Reservations.Response;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Application.Reservations.Commands
 {
@@ -28,7 +30,8 @@ namespace Application.Reservations.Commands
         public int TableTypeId { get; set; }
         [Required]
         public int Quantity { get; set; }
-        public bool IsPriorFoodOrder { get; set; }
+        [JsonIgnore]
+        public bool IsPriorFoodOrder { get; set; } = false;
 
         public void Mapping(Profile profile)
         {
@@ -41,12 +44,14 @@ namespace Application.Reservations.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICurrentUserService _currentUserService;
 
-        public CreateReservationCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager)
+        public CreateReservationCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<ReservationDto>> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
@@ -65,7 +70,16 @@ namespace Application.Reservations.Commands
                 };
             }
             var entity = _mapper.Map<Reservation>(request);
-            var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
+            ApplicationUser user = null;
+            if (_currentUserService.UserId is not null)
+            {
+                user = await _userManager.FindByIdAsync(_currentUserService.UserId);
+            }
+            else
+            {
+                user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"));
+            }
+            
             entity.UserId = user.Id;
             entity.Status = ReservationStatus.Available;
             var result = await _unitOfWork.ReservationRepository.InsertAsync(entity);
@@ -74,6 +88,7 @@ namespace Application.Reservations.Commands
             {
                 return new Response<ReservationDto>("error");
             }
+            
             result.User = user;
             var mappedResult = _mapper.Map<ReservationDto>(result);
             mappedResult.PrePaid = entity.NumOfSeats * tableType.ChargePerSeat * entity.Quantity;

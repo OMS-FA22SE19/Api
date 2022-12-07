@@ -17,6 +17,7 @@ namespace Application.Reservations.Commands
 {
     public sealed class CheckinReservationCommand : IRequest<Response<ReservationDto>>
     {
+        public int reservationId { get; set; }
     }
 
     public sealed class CheckinReservationCommandHandler : IRequestHandler<CheckinReservationCommand, Response<ReservationDto>>
@@ -36,16 +37,18 @@ namespace Application.Reservations.Commands
 
         public async Task<Response<ReservationDto>> Handle(CheckinReservationCommand request, CancellationToken cancellationToken)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
-            var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.UserId.Equals(user.Id)
+            //var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
+            var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.reservationId
                 && _dateTime.Now >= e.StartTime.AddMinutes(-15) && _dateTime.Now <= e.EndTime
                 && e.Status == ReservationStatus.Reserved
                 && !e.IsDeleted,
                     $"{nameof(Reservation.ReservationTables)},{nameof(Reservation.Order)}");
             if (entity is null)
             {
-                throw new NotFoundException($"No reservation found for user {user.FullName}");
+                throw new NotFoundException($"No reservation with id {request.reservationId} was found");
             }
+
+            var user = await _userManager.FindByIdAsync(entity.UserId);
 
             entity.Status = ReservationStatus.CheckIn;
 
