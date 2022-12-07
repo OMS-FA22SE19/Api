@@ -50,6 +50,96 @@ namespace Api.Controllers.V1
         }
 
         /// <summary>
+        /// Create a User.
+        /// </summary>
+        /// <returns>New User.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Users/Confirm
+        ///     {
+        ///        "userId": "123",
+        ///        "code": "0931118342"
+        ///     }
+        ///     
+        /// </remarks>
+        [HttpGet("ConfirmEmail/confirm")]
+        [Consumes("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Response<UserDto>>> ConfirmEmail([FromQuery] ConfirmEmailCommand command)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await Mediator.Send(command);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<UserDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
+        /// Resent email confirm
+        /// </summary>
+        /// <returns>New User.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Users/ResentEmail
+        ///     {
+        ///        "userId": "123",
+        ///        "code": "0931118342"
+        ///     }
+        ///     
+        /// </remarks>
+        [HttpPost("ResentEmail")]
+        [Consumes("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Response<UserDto>>> ResentEmail([FromQuery] ResentEmailConfirmCommand command)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await Mediator.Send(command);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<UserDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
         /// Retrieve a specific User by Id.
         /// </summary>
         /// <returns>A User.</returns>
@@ -143,6 +233,7 @@ namespace Api.Controllers.V1
                 return StatusCode((int)response.StatusCode, response);
             }
         }
+        
 
         /// <summary>
         /// Update a specific User.

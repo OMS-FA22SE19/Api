@@ -41,17 +41,23 @@ namespace Api.Services
                 var user = await _userManager.FindByEmailAsync(request.Email);
                 if (user is null)
                 {
-                    throw new NullReferenceException("Not found account");
+                    user = await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber.Equals(request.Email));
+                    if (user is null)
+                    {
+                        throw new NotFoundException("Not found account");
+                    }
+                }
+                if (user.EmailConfirmed == false) {
+                    throw new BadRequestException("Please confirm your email");
                 }
                 if (!(await _userManager.CheckPasswordAsync(user, request.Password)))
                 {
-                    throw new NullReferenceException("Not valid login information");
+                    throw new NotFoundException("Not valid login information");
                 }
                 if (user.IsDeleted == true)
                 {
-                    throw new NullReferenceException("This user has been deleted");
+                    throw new BadRequestException("This user has been deleted");
                 }
-
 
                 var tokenHandler = new JwtSecurityTokenHandler();
                 // TODO: Remove this before demo

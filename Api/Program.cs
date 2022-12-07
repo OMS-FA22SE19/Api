@@ -2,6 +2,7 @@ using Api.Filters;
 using Api.Middlewares;
 using Api.Services;
 using Application;
+using Application.Common.Behaviours;
 using Application.Common.Interfaces;
 using Application.Helpers;
 using Application.Services;
@@ -55,6 +56,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 });
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddSingleton<ISendMailService, SendMailService>();
 builder.Services.AddSingleton<ICurrentUserService, CurrentUserService>();
 builder.Services.AddSingleton<IFirebaseMessagingService, FirebaseMessagingService>();
 builder.Services.AddHttpContextAccessor();
