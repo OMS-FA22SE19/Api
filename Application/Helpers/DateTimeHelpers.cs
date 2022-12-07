@@ -9,7 +9,7 @@ namespace Application.Helpers
     {
         public static (bool isValid, string errorMessage) ValidateDateInAvailableTime(DateTime startTime, DateTime endTime, List<AdminSetting> settings)
         {
-            var availableStartTime = settings.FirstOrDefault(e => e.Equals("StartTime"));
+            var availableStartTime = settings.FirstOrDefault(e => e.Name.Equals("StartTime"));
             if (availableStartTime is null || !DateTime.TryParse(availableStartTime?.Value, out DateTime startTimeLimit))
             {
                 return (false, "Invalid format");
@@ -19,8 +19,8 @@ namespace Application.Helpers
                 return (false, $"StartTime must be after {startTimeLimit.TimeOfDay}");
             }
 
-            var availableEndTime = settings.FirstOrDefault(e => e.Equals("EndTime"));
-            if (availableEndTime is null || !DateTime.TryParse(availableStartTime?.Value, out DateTime endTimeLimit))
+            var availableEndTime = settings.FirstOrDefault(e => e.Name.Equals("EndTime"));
+            if (availableEndTime is null || !DateTime.TryParse(availableEndTime?.Value, out DateTime endTimeLimit))
             {
                 return (false, "Invalid format");
             }
@@ -43,7 +43,7 @@ namespace Application.Helpers
         {
             var busyTimes = new List<BusyTimeDto>();
             double availablePercentage = 1;
-            var reservationTable = settings.FirstOrDefault(e => e.Equals("ReservationTable"));
+            var reservationTable = settings.FirstOrDefault(e => e.Name.Equals("ReservationTable"));
             if (reservationTable is not null && double.TryParse(reservationTable?.Value, out double reservationTablePercentage) && !isDefaultCustomer)
             {
                 availablePercentage = reservationTablePercentage / 100;
