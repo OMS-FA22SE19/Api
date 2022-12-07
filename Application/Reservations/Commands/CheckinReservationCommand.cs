@@ -10,14 +10,13 @@ using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Application.Reservations.Commands
 {
     public sealed class CheckinReservationCommand : IRequest<Response<ReservationDto>>
     {
-        public int reservationId { get; set; }
+        public int ReservationId { get; set; }
     }
 
     public sealed class CheckinReservationCommandHandler : IRequestHandler<CheckinReservationCommand, Response<ReservationDto>>
@@ -38,14 +37,14 @@ namespace Application.Reservations.Commands
         public async Task<Response<ReservationDto>> Handle(CheckinReservationCommand request, CancellationToken cancellationToken)
         {
             //var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
-            var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.reservationId
+            var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.ReservationId
                 && _dateTime.Now >= e.StartTime.AddMinutes(-15) && _dateTime.Now <= e.EndTime
                 && e.Status == ReservationStatus.Reserved
                 && !e.IsDeleted,
                     $"{nameof(Reservation.ReservationTables)},{nameof(Reservation.Order)}");
             if (entity is null)
             {
-                throw new NotFoundException($"No reservation with id {request.reservationId} was found");
+                throw new NotFoundException($"No reservation with id {request.ReservationId} was found");
             }
 
             var user = await _userManager.FindByIdAsync(entity.UserId);
