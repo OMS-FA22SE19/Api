@@ -61,9 +61,9 @@ namespace Application.RefreshTokens.Commands
                         throw new NotFoundException("Not found account");
                     }
                 }
-                if (user.EmailConfirmed == false)
+                if (user.EmailConfirmed == false && user.PhoneNumberConfirmed == false)
                 {
-                    throw new BadRequestException("Please confirm your email");
+                    throw new BadRequestException("Please confirm your email or your number");
                 }
                 if (!(await _userManager.CheckPasswordAsync(user, request.Password)))
                 {

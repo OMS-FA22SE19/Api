@@ -50,9 +50,9 @@ namespace Api.Controllers.V1
         }
 
         /// <summary>
-        /// Create a User.
+        /// Confirm a user email.
         /// </summary>
-        /// <returns>New User.</returns>
+        /// <returns>Confirm User.</returns>
         /// <remarks>
         /// Sample request:
         ///
