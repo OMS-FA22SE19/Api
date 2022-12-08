@@ -51,10 +51,10 @@ namespace Application.Reservations.Queries
                 switch (request.SearchBy)
                 {
                     case ReservationProperty.FullName:
-                        filters.Add(e => e.User.FullName.Contains(request.SearchValue));
+                        filters.Add(e => e.FullName.Contains(request.SearchValue) || e.User.FullName.Contains(request.SearchValue));
                         break;
                     case ReservationProperty.PhoneNumber:
-                        filters.Add(e => e.User.PhoneNumber.Contains(request.SearchValue));
+                        filters.Add(e => e.PhoneNumber.Contains(request.SearchValue) || e.User.PhoneNumber.Contains(request.SearchValue));
                         break;
                     case ReservationProperty.NumOfPeople:
                         if (int.TryParse(request.SearchValue, out var numberOfPeople))
