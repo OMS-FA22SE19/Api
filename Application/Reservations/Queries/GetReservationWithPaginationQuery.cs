@@ -16,7 +16,6 @@ namespace Application.Reservations.Queries
     public class GetReservationWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<ReservationDto>>>
     {
         public ReservationProperty SearchBy { get; set; }
-        public string? userId { get; set; }
         public ReservationStatus? Status { get; init; }
     }
 
@@ -39,21 +38,12 @@ namespace Application.Reservations.Queries
             Func<IQueryable<Reservation>, IOrderedQueryable<Reservation>> orderBy = null;
             string includeProperties = $"{nameof(Reservation.User)},{nameof(Reservation.ReservationTables)}.{nameof(ReservationTable.Table)}.{nameof(Table.TableType)}";
 
-            if (_currentUserService.UserName.Equals("defaultCustomer"))
+            if (_currentUserService.Role.Equals("Customer"))
             {
-                request.userId = null;
-            }
-            else
-            {
-                if (_currentUserService.Role.Equals("Customer"))
-                    request.userId = _currentUserService.UserId;
-                else
-                    request.userId = null;
-            }
-
-            if (!string.IsNullOrWhiteSpace(request.userId))
-            {
-                filters.Add(e => e.UserId.Contains(request.userId));
+                if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                {
+                    filters.Add(e => e.UserId.Contains(_currentUserService.UserId));
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
