@@ -30,6 +30,10 @@ namespace Application.Reservations.Commands
         public int TableTypeId { get; set; }
         [Required]
         public int Quantity { get; set; }
+        [Required]
+        public string FullName { get; set; }
+        [Required]
+        public string PhoneNumber { get; set; }
         [JsonIgnore]
         public bool IsPriorFoodOrder { get; set; } = false;
 

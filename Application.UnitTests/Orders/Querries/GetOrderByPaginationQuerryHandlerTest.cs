@@ -164,7 +164,7 @@ namespace Application.UnitTests.Orders.Queries
 
         #region Unit Tests
 
-        [TestCase]
+        /*[TestCase]
         [TestCase(1, 50, "", null, null, false)]
         [TestCase(1, 1, null, null, null, false)]
         [TestCase(2, 1, null, null, null, false)]
@@ -181,7 +181,7 @@ namespace Application.UnitTests.Orders.Queries
         [TestCase(1, 50, "", null, OrderStatus.Processing, false)]
         [TestCase(1, 50, "", null, OrderStatus.Reserved, false)]
         [TestCase(1, 50, "", null, OrderStatus.Paid, false)]
-        //[TestCase(1, 50, null, ReservationStatus.Reserved)]
+        //[TestCase(1, 50, null, ReservationStatus.Reserved)]*/
         public async Task Should_Return_With_Condition(
             int pageIndex = 1,
             int pageSize = 50,

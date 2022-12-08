@@ -91,10 +91,6 @@ namespace Application.Reservations.Queries
             {
                 filters.Add(e => e.Status == request.Status);
             }
-            else
-            {
-                filters.Add(e => e.Status != ReservationStatus.Cancelled);
-            }
 
             var result = await _unitOfWork.ReservationRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, request.PageIndex, request.PageSize);
             var mappedResult = _mapper.Map<PaginatedList<Reservation>, PaginatedList<ReservationDto>>(result);
