@@ -25,13 +25,15 @@ namespace Application.Reservations.Commands
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly IDateTime _dateTime;
+        private readonly ICurrentUserService _currentUserService;
 
-        public CheckinReservationCommandHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IDateTime dateTime)
+        public CheckinReservationCommandHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IDateTime dateTime, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
             _dateTime = dateTime;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<ReservationDto>> Handle(CheckinReservationCommand request, CancellationToken cancellationToken)
@@ -45,6 +47,17 @@ namespace Application.Reservations.Commands
             if (entity is null)
             {
                 throw new NotFoundException($"No reservation with id {request.ReservationId} was found");
+            }
+
+            if (_currentUserService.Role.Equals("Customer"))
+            {
+                if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                {
+                    if (!_currentUserService.UserId.Equals(entity.UserId))
+                    {
+                        throw new BadRequestException("This is not your reservation");
+                    }
+                }
             }
 
             var user = await _userManager.FindByIdAsync(entity.UserId);

@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Models;
 using Application.Orders.Response;
 using AutoMapper;
@@ -23,11 +24,13 @@ namespace Application.Orders.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUserService;
 
-        public CheckingBillCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public CheckingBillCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<OrderDto>> Handle(CheckingBillCommand request, CancellationToken cancellationToken)
@@ -37,6 +40,18 @@ namespace Application.Orders.Commands
             {
                 throw new NotFoundException(nameof(Order), request.Id);
             }
+
+            if (_currentUserService.Role.Equals("Customer"))
+            {
+                if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                {
+                    if (!_currentUserService.UserId.Equals(entity.UserId))
+                    {
+                        throw new BadRequestException("This is not your order");
+                    }
+                }
+            }
+
             var receivedOrderDetails = new List<OrderDetail>();
             foreach (var orderDetail in entity.OrderDetails)
             {

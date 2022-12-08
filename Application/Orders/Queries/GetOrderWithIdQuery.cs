@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Response;
@@ -21,11 +22,13 @@ namespace Application.Orders.Queries
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetOrderWithIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetOrderWithIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<OrderDto>> Handle(GetOrderWithIdQuery request, CancellationToken cancellationToken)
@@ -35,6 +38,18 @@ namespace Application.Orders.Queries
             {
                 throw new NotFoundException(nameof(Order), $"with {request.Id}");
             }
+
+            if (_currentUserService.Role.Equals("Customer"))
+            {
+                if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                {
+                    if (!_currentUserService.UserId.Equals(result.UserId))
+                    {
+                        throw new BadRequestException("This is not your reservation");
+                    }
+                }
+            }
+
             var mappedResult = _mapper.Map<OrderDto>(result);
             double total = 0;
 

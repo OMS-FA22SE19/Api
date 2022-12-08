@@ -180,16 +180,11 @@ namespace Application.UnitTests.Reservations.Queries
             {
                 PageIndex = pageIndex,
                 PageSize = pageSize,
-                userId= userId,
                 Status= status
             };
             var handler = new GetReservationWithPaginationQueryHandler(_unitOfWork, _mapper, _currentUserService);
             var conditionedList = _Reservations;
 
-            if (!string.IsNullOrWhiteSpace(request.userId))
-            {
-                conditionedList = conditionedList.Where(e => e.UserId.Contains(request.userId)).ToList();
-            }
             if (request.Status is not null)
             {
                 conditionedList = conditionedList.Where(e => e.Status == request.Status).ToList();
