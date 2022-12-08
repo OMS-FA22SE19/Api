@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Reservations.Response;
@@ -23,11 +24,13 @@ namespace Application.Reservations.Queries
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetReservationWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetReservationWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<PaginatedList<ReservationDto>>> Handle(GetReservationWithPaginationQuery request, CancellationToken cancellationToken)
@@ -35,6 +38,18 @@ namespace Application.Reservations.Queries
             List<Expression<Func<Reservation, bool>>> filters = new();
             Func<IQueryable<Reservation>, IOrderedQueryable<Reservation>> orderBy = null;
             string includeProperties = $"{nameof(Reservation.User)},{nameof(Reservation.ReservationTables)}.{nameof(ReservationTable.Table)}.{nameof(Table.TableType)}";
+
+            if (_currentUserService.UserName.Equals("defaultCustomer"))
+            {
+                request.userId = null;
+            }
+            else
+            {
+                if (_currentUserService.Role.Equals("Customer"))
+                    request.userId = _currentUserService.UserId;
+                else
+                    request.userId = null;
+            }
 
             if (!string.IsNullOrWhiteSpace(request.userId))
             {

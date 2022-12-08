@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Models;
 using Application.Reservations.Commands;
 using Application.Reservations.Response;
@@ -33,6 +34,7 @@ namespace Application.UnitTests.Reservations.Commands
         private IBillingRepository _BillingRepository;
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
+        private ICurrentUserService _currentUserService;
 
         [SetUp]
         public void ReInitializeTest()
@@ -68,6 +70,7 @@ namespace Application.UnitTests.Reservations.Commands
             unitOfWork.SetupGet(x => x.BillingRepository).Returns(_BillingRepository);
             _unitOfWork = unitOfWork.Object;
             _mapper = SetUpMapper();
+            _currentUserService = SetCurrentUserService();
         }
 
         [TearDown]
@@ -104,7 +107,7 @@ namespace Application.UnitTests.Reservations.Commands
                 Quantity = quantity,
                 TableTypeId = tableTypeId
             };
-            var handler = new UpdateReservationCommandHandler(_unitOfWork, _mapper, _UserManager);
+            var handler = new UpdateReservationCommandHandler(_unitOfWork, _mapper, _UserManager, _currentUserService);
             var reservation = _Reservations.FirstOrDefault(e => e.Id == id);
             var billing = _Billing.FirstOrDefault(b => b.ReservationId == reservation.Id);
             
@@ -156,7 +159,7 @@ namespace Application.UnitTests.Reservations.Commands
                 Quantity = quantity,
                 TableTypeId = tableTypeId
             };
-            var handler = new UpdateReservationCommandHandler(_unitOfWork, _mapper, _UserManager);
+            var handler = new UpdateReservationCommandHandler(_unitOfWork, _mapper, _UserManager, _currentUserService);
 
             //Act
             var ex = Assert.ThrowsAsync<NotFoundException>(async () => await handler.Handle(request, CancellationToken.None));
@@ -174,7 +177,7 @@ namespace Application.UnitTests.Reservations.Commands
             {
                 Id = id
             };
-            var handler = new UpdateReservationCommandHandler(_unitOfWork, _mapper, _UserManager);
+            var handler = new UpdateReservationCommandHandler(_unitOfWork, _mapper, _UserManager, _currentUserService);
 
             //Act
             var ex = Assert.ThrowsAsync<NotFoundException>(async () => await handler.Handle(request, CancellationToken.None));
@@ -341,6 +344,12 @@ namespace Application.UnitTests.Reservations.Commands
                     TableTypeId = command.TableTypeId
                 });
             return mapperMock.Object;
+        }
+
+        private ICurrentUserService SetCurrentUserService()
+        {
+            var currentUserMock = new Mock<ICurrentUserService>();
+            return currentUserMock.Object;
         }
         #endregion
     }

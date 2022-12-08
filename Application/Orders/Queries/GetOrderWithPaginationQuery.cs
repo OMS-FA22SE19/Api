@@ -23,11 +23,13 @@ namespace Application.Orders.Queries
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetOrderWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetOrderWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<PaginatedList<OrderDto>>> Handle(GetOrderWithPaginationQuery request, CancellationToken cancellationToken)
@@ -63,6 +65,14 @@ namespace Application.Orders.Queries
             if (request.Status != null)
             {
                 filters.Add(e => e.Status == request.Status);
+            }
+
+            if (_currentUserService.Role.Equals("Customer"))
+            {
+                if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                {
+                    filters.Add(e => e.UserId.Equals(_currentUserService.UserId));
+                }
             }
 
             switch (request.OrderBy)
