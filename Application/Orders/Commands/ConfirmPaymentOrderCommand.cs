@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Response;
@@ -25,11 +26,13 @@ namespace Application.Orders.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUserService;
 
-        public ConfirmPaymentOrderCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public ConfirmPaymentOrderCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<OrderDto>> Handle(ConfirmPaymentOrderCommand request, CancellationToken cancellationToken)
@@ -38,6 +41,17 @@ namespace Application.Orders.Commands
             if (entity is null)
             {
                 throw new NotFoundException(nameof(Order), request.Id);
+            }
+
+            if (_currentUserService.Role.Equals("Customer"))
+            {
+                if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                {
+                    if (!_currentUserService.UserId.Equals(entity.UserId))
+                    {
+                        throw new BadRequestException("This is not your order");
+                    }
+                }
             }
 
             foreach (var detail in entity.OrderDetails)

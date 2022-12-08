@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Helpers;
 using Application.Models;
@@ -41,12 +42,14 @@ namespace Application.Reservations.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICurrentUserService _currentUserService;
 
-        public UpdateReservationCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager)
+        public UpdateReservationCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<ReservationDto>> Handle(UpdateReservationCommand request, CancellationToken cancellationToken)
@@ -59,6 +62,19 @@ namespace Application.Reservations.Commands
             {
                 throw new NotFoundException(nameof(Reservation), request.Id);
             }
+
+            if (_currentUserService.UserId is null)
+            {
+                throw new BadRequestException("You have to log in");
+            }
+            if (!_currentUserService.UserName.Equals("defaultCustomer"))
+            {
+                if (!_currentUserService.UserId.Equals(reservation.UserId))
+                {
+                    throw new BadRequestException("This is not your reservation");
+                }
+            }
+
             var maxEdit = await _unitOfWork.AdminSettingRepository.GetAsync(e => e.Name.Equals("MaxEdit"));
             var editAmount = 0;
             if (maxEdit is not null)

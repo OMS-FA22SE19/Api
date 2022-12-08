@@ -18,6 +18,9 @@ namespace Core.Entities
         public DateTime EndTime { get; set; }
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
+        public string? ReasonForCancel { get; set; }
+        public string FullName { get; set; }
+        public string PhoneNumber { get; set; }
 
         public Order Order { get; set; }
         public ApplicationUser User { get; set; }

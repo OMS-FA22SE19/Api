@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Reservations.Response;
@@ -15,7 +16,6 @@ namespace Application.Reservations.Queries
     public class GetReservationWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<ReservationDto>>>
     {
         public ReservationProperty SearchBy { get; set; }
-        public string? userId { get; set; }
         public ReservationStatus? Status { get; init; }
     }
 
@@ -23,11 +23,13 @@ namespace Application.Reservations.Queries
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetReservationWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetReservationWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<PaginatedList<ReservationDto>>> Handle(GetReservationWithPaginationQuery request, CancellationToken cancellationToken)
@@ -36,9 +38,12 @@ namespace Application.Reservations.Queries
             Func<IQueryable<Reservation>, IOrderedQueryable<Reservation>> orderBy = null;
             string includeProperties = $"{nameof(Reservation.User)},{nameof(Reservation.ReservationTables)}.{nameof(ReservationTable.Table)}.{nameof(Table.TableType)}";
 
-            if (!string.IsNullOrWhiteSpace(request.userId))
+            if (_currentUserService.Role.Equals("Customer"))
             {
-                filters.Add(e => e.UserId.Contains(request.userId));
+                if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                {
+                    filters.Add(e => e.UserId.Contains(_currentUserService.UserId));
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
@@ -46,10 +51,10 @@ namespace Application.Reservations.Queries
                 switch (request.SearchBy)
                 {
                     case ReservationProperty.FullName:
-                        filters.Add(e => e.User.FullName.Contains(request.SearchValue));
+                        filters.Add(e => e.FullName.Contains(request.SearchValue) || e.User.FullName.Contains(request.SearchValue));
                         break;
                     case ReservationProperty.PhoneNumber:
-                        filters.Add(e => e.User.PhoneNumber.Contains(request.SearchValue));
+                        filters.Add(e => e.PhoneNumber.Contains(request.SearchValue) || e.User.PhoneNumber.Contains(request.SearchValue));
                         break;
                     case ReservationProperty.NumOfPeople:
                         if (int.TryParse(request.SearchValue, out var numberOfPeople))

@@ -24,6 +24,10 @@ namespace Application.Reservations.Response
         public DateTime EndTime { get; set; }
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
+        public DateTime Created { get; set; }
+        public string ReasonForCancel { get; set; }
+        public string FullName { get; set; }
+        public string PhoneNumber { get; set; }
         public IList<ReservationTableDto> ReservationTables { get; set; }
         public IList<OrderDetailDto> OrderDetails { get; set; }
         public UserDto User { get; set; }

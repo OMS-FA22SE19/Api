@@ -266,7 +266,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(int id, [FromBody] DeleteReservationCommand command)
         {
             try
             {
@@ -275,7 +275,16 @@ namespace Api.Controllers.V1
                     return BadRequest();
                 }
 
-                var result = await Mediator.Send(new DeleteReservationCommand { Id = id });
+                if (id != command.Id)
+                {
+                    var response = new Response<ReservationDto>("The Id do not match")
+                    {
+                        StatusCode = HttpStatusCode.BadRequest
+                    };
+                    return StatusCode((int)response.StatusCode, response);
+                }
+
+                var result = await Mediator.Send(command);
                 if (result.StatusCode == HttpStatusCode.NoContent)
                 {
                     return NoContent();
@@ -299,17 +308,15 @@ namespace Api.Controllers.V1
         /// <remarks>
         /// Sample request:
         ///
-        ///     Get /Reservations/Checkin
-        ///     {
-        ///     }
+        ///     Get /Reservations/1/Checkin
         ///     
         /// </remarks>
-        [HttpPost("CheckIn")]
+        [HttpGet("{id}/CheckIn")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> CheckIn(CheckinReservationCommand query)
+        public async Task<ActionResult> CheckIn(int id)
         {
             try
             {
@@ -317,7 +324,10 @@ namespace Api.Controllers.V1
                 {
                     return BadRequest();
                 }
-
+                var query = new CheckinReservationQuery()
+                {
+                    ReservationId = id
+                };
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
             }
