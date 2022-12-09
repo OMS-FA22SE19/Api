@@ -17,11 +17,11 @@ namespace Application.TableTypes.Validators
                 .Must(BeAValidName).WithMessage("{PropertyName} contains invalid characters");
 
             RuleFor(e => e.ChargePerSeat)
-                .NotEmpty().WithMessage("{PropertyName} is not empty")
-                .GreaterThan(0).WithMessage("{PropertyName} is invalid");
+                .NotNull().WithMessage("{PropertyName} is not empty")
+                .GreaterThanOrEqualTo(0).WithMessage("{PropertyName} is invalid");
 
             RuleFor(e => e.CanBeCombined)
-                .NotEmpty().WithMessage("{PropertyName} is not empty");
+                .NotNull().WithMessage("{PropertyName} is not null");
         }
     }
 }

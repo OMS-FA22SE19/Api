@@ -50,7 +50,7 @@ namespace Application.Helpers
             }
             var availalbleTables = maxTables * availablePercentage - quantity;
 
-            if (availalbleTables <= 0)
+            if (availalbleTables < 0)
             {
                 throw new BadRequestException("Insufficent amount of tables");
             }

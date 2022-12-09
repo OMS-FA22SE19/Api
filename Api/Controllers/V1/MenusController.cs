@@ -512,19 +512,19 @@ namespace Api.Controllers.V1
         }
 
         /// <summary>
-        /// Retrieve a list of Food in Menu with Id.
+        /// Remove Food from Menu
         /// </summary>
-        /// <returns>List of Foods.</returns>
+        /// <returns></returns>
         /// <remarks>
         /// Sample request:
         ///
-        ///     GET /Menus/Food
+        ///     DELETE /Menus/1/Food/1
         ///     
         /// </remarks>
         /// <param name="menuId">The desired id of Menu</param>
         /// <param name="foodId">The desired id of Food</param>
         [HttpDelete("{menuId}/Food/{foodId}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Response<List<MenuDto>>>> RemoveFoodFromMenuAsync(int menuId, int foodId)

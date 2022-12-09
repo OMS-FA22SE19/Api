@@ -34,7 +34,7 @@ namespace Application.CourseTypes.Queries
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
-                filters.Add(e => e.Name.Contains(request.SearchValue) || request.SearchValue.Contains(e.Id.ToString()));
+                filters.Add(e => e.Name.Contains(request.SearchValue) || request.SearchValue.Contains(e.Id.ToString()) || e.Description.Contains(request.SearchValue));
             }
 
             switch (request.OrderBy)
