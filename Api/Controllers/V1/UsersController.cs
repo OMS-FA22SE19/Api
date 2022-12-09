@@ -1,9 +1,12 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
+using Application.Common.Security;
 using Application.Models;
 using Application.Users.Commands;
 using Application.Users.Queries;
 using Application.Users.Response;
 using Core.Common;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -11,8 +14,14 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public sealed class UsersController : ApiControllerBase
     {
+        private readonly ISendMailService _sendMailService;
+        public UsersController(ISendMailService sendMailService) {
+            _sendMailService = sendMailService;
+        }
+
         /// <summary>
         /// Retrieve a list of User.
         /// </summary>
@@ -68,6 +77,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [AllowAnonymous]
         public async Task<ActionResult<Response<UserDto>>> ConfirmEmail([FromQuery] ConfirmEmailCommand command)
         {
             try
@@ -113,6 +123,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [AllowAnonymous]
         public async Task<ActionResult<Response<UserDto>>> ResentEmail([FromQuery] ResentEmailConfirmCommand command)
         {
             try
@@ -123,6 +134,17 @@ namespace Api.Controllers.V1
                 }
 
                 var result = await Mediator.Send(command);
+                var url = Request.Scheme + "://" + Request.Host + Url.Action("ConfirmEmail", "Users", new {email = command.email, code = result.Message});
+                var realUrl = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(url);
+                realUrl = realUrl.Replace('-', '+');
+                realUrl = realUrl.Replace('_', '/');
+                var content = new MailContent()
+                {
+                    To = command.email,
+                    Subject = "Access information to OMS",
+                    Body = CreateBodyMessage(result.Message, realUrl)
+                };
+                await _sendMailService.SendMail(content);
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (NotFoundException)
@@ -187,6 +209,65 @@ namespace Api.Controllers.V1
         }
 
         /// <summary>
+        /// Register a User.
+        /// </summary>
+        /// <returns>New User.</returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Users
+        ///     {
+        ///        "FullName": "Quang",
+        ///        "PhoneNumber": "0931118342",
+        ///        "Email": "customerEmail@gmail.com",
+        ///        "Password": "Password"
+        ///     }
+        ///     
+        /// </remarks>
+        [HttpPost("Register")]
+        [Consumes("application/json")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [AllowAnonymous]
+        public async Task<ActionResult<Response<UserDto>>> PostAsync([FromBody] RegisterUserCommand command)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                var result = await Mediator.Send(command);
+                var url = Request.Scheme + "://" + Request.Host + Url.Action("ConfirmEmail", "Users", new { email = command.Email, code = result.Message });
+                var realUrl = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(url);
+                realUrl = realUrl.Replace('-', '+');
+                realUrl = realUrl.Replace('_', '/');
+                var content = new MailContent()
+                {
+                    To = command.Email,
+                    Subject = "Access information to OMS",
+                    Body = CreateBodyMessage(result.Message, realUrl)
+                };
+                await _sendMailService.SendMail(content);
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<UserDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
         /// Create a User.
         /// </summary>
         /// <returns>New User.</returns>
@@ -218,6 +299,17 @@ namespace Api.Controllers.V1
                 }
 
                 var result = await Mediator.Send(command);
+                var url = Request.Scheme + "://" + Request.Host + Url.Action("ConfirmEmail", "Users", new { email = command.Email, code = result.Message });
+                var realUrl = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(url);
+                realUrl = realUrl.Replace('-', '+');
+                realUrl = realUrl.Replace('_', '/');
+                var content = new MailContent()
+                {
+                    To = command.Email,
+                    Subject = "Access information to OMS",
+                    Body = CreateBodyMessage(result.Message, realUrl)
+                };
+                await _sendMailService.SendMail(content);
                 return StatusCode((int)result.StatusCode, result);
             }
             catch (NotFoundException)
@@ -335,6 +427,15 @@ namespace Api.Controllers.V1
                 };
                 return StatusCode((int)response.StatusCode, response);
             }
+        }
+
+        private string CreateBodyMessage(string code, string url)
+        {
+            return "<div lang=\"EN-US\" link=\"blue\" vlink=\"#954F72\">" +
+                "<div class=\"m_-863817368153641209WordSection1\">" +
+                "<p style=\"line-height:150%\"><span style=\"font-size:13.5pt;line-height:150%;color:black\">Quý khách vui lòng ấn vào đường link này để xác nhận:" + url + " </span><b></p>" +
+                "</div>" +
+                "</div>";
         }
     }
 }

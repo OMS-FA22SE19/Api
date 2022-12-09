@@ -45,22 +45,12 @@ namespace Application.Users.Commands
             }
 
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var url = $"https://localhost:7246/api/v1/Users/ConfirmEmail/confirm?email=" + request.email + "&code=" + code;
-            var realUrl = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(url);
-            realUrl = realUrl.Replace('-', '+');
-            realUrl = realUrl.Replace('_', '/');
-            var content = new MailContent()
-            {
-                To = request.email,
-                Subject = "Access information to OMS",
-                Body = CreateBodyMessage(code, realUrl)
-            };
-            await _sendMailService.SendMail(content);
 
             var mappedResult = _mapper.Map<UserDto>(user);
             return new Response<UserDto>(mappedResult)
             {
-                StatusCode = System.Net.HttpStatusCode.Created
+                StatusCode = System.Net.HttpStatusCode.Created,
+                Message = code
             };
         }
 

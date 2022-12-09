@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Response;
+using Application.Reservations.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Enums;
@@ -96,6 +97,7 @@ namespace Application.Orders.Queries
 
             mappedResult.OrderDetails = orderDetails;
             mappedResult.Total = total;
+            mappedResult.Reservation = _mapper.Map<ReservationDto>(reservation);
             return new Response<OrderDto>(mappedResult);
         }
     }

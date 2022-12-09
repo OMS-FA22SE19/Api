@@ -13,14 +13,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Application.Users.Commands
 {
-    public class MailContent
-    {
-        public string To { get; set; }
-        public string Subject { get; set; }
-        public string Body { get; set; }
-
-    }
-    public class CreateUserCommand : IMapFrom<ApplicationUser>, IRequest<Response<UserDto>>
+    public class RegisterUserCommand : IMapFrom<ApplicationUser>, IRequest<Response<UserDto>>
     {
         [Required]
         public string FullName { get; set; }
@@ -30,23 +23,21 @@ namespace Application.Users.Commands
         public string PhoneNumber { get; set; }
         [Required]
         public string Password { get; set; }
-        [Required]
-        public string Role { get; set; }
 
         public void Mapping(Profile profile)
         {
-            profile.CreateMap<CreateUserCommand, ApplicationUser>();
+            profile.CreateMap<RegisterUserCommand, ApplicationUser>();
         }
     }
 
-    public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Response<UserDto>>
+    public class RegisterUserCommandHandler : IRequestHandler<RegisterUserCommand, Response<UserDto>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
 
-        public CreateUserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public RegisterUserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -54,20 +45,16 @@ namespace Application.Users.Commands
             _roleManager = roleManager;
         }
 
-        public async Task<Response<UserDto>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
+        public async Task<Response<UserDto>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
             var user = new ApplicationUser() { UserName = request.Email.Split('@')[0], Email = request.Email, FullName = request.FullName, PhoneNumber = request.PhoneNumber };
-            if (await _userManager.FindByNameAsync(request.Email.Split('@')[0]) is not null 
+            if (await _userManager.FindByNameAsync(request.Email.Split('@')[0]) is not null
                 || await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber.Equals(request.PhoneNumber)) is not null)
             {
                 throw new BadRequestException(nameof(user));
             }
 
-            var userRole = await _roleManager.FindByNameAsync(request.Role);
-            if (userRole is null)
-            {
-                throw new NotFoundException("Not found role: " + request.Role);
-            }
+            var userRole = await _roleManager.FindByNameAsync("Customer");
 
             var password = request.Password;
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
