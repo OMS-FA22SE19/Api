@@ -12,6 +12,7 @@ namespace Application.Users.Response
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public bool IsDeleted { get; set; }
+        public string Role { get; set; }
 
         public void Mapping(Profile profile) => profile.CreateMap<ApplicationUser, UserDto>();
     }
