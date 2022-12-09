@@ -34,7 +34,7 @@ namespace Application.Reservations.Commands
 
         public async Task<Response<ReservationDto>> Handle(DeleteReservationCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.Id);
+            var entity = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == request.Id && e.Status != ReservationStatus.Done);
             if (entity is null)
             {
                 throw new NotFoundException(nameof(Reservation), request.Id);

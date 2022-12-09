@@ -1,6 +1,7 @@
 ﻿using Application.Common.Mappings;
 using Application.Foods.Response;
 using Application.OrderDetails.Response;
+using Application.Reservations.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Enums;
@@ -22,6 +23,7 @@ namespace Application.Orders.Response
         public double Total { get; set; }
 
         public IList<OrderDetailDto> OrderDetails { get; set; }
+        public ReservationDto Reservation { get; set; }
 
         public void Mapping(Profile profile)
         {

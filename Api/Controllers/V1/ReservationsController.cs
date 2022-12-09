@@ -411,5 +411,64 @@ namespace Api.Controllers.V1
                 return StatusCode((int)response.StatusCode, response);
             }
         }
+
+        /// <summary>
+        /// Update status of a Reservation.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /Reservations/ReasonForCancel/1
+        ///     {
+        ///         "id": 1,
+        ///         "reasonForCancel": "Khách đến trễ hơn 15 phút"
+        ///     }
+        ///     
+        /// </remarks>
+        /// <param name="id">The id of updated Reservation</param>
+        [HttpPut("ReasonForCancel/{id}")]
+        [Consumes("application/json")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> ChangeReasonForCancel(int id, [FromBody] UpdateReservationForCancelCommand command)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                if (id != command.Id)
+                {
+                    var response = new Response<ReservationDto>("The Id do not match")
+                    {
+                        StatusCode = HttpStatusCode.BadRequest
+                    };
+                    return StatusCode((int)response.StatusCode, response);
+                }
+
+                var result = await Mediator.Send(command);
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<ReservationDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
     }
 }

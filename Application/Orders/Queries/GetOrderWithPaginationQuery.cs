@@ -2,6 +2,7 @@
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Response;
+using Application.Reservations.Response;
 using AutoMapper;
 using Core.Common;
 using Core.Entities;
@@ -193,6 +194,7 @@ namespace Application.Orders.Queries
                 total -= order.PrePaid;
                 orderDto.Total = total;
                 orderDto.OrderDetails = orderDetails;
+                orderDto.Reservation = _mapper.Map<ReservationDto>(reservation);
 
                 orderDtos.Add(orderDto);
             }
