@@ -6,6 +6,7 @@ using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
 using System.Linq.Expressions;
 
 namespace Application.Users.Queries
@@ -19,11 +20,13 @@ namespace Application.Users.Queries
     public sealed class GetUserWithPaginationQueryHandler : IRequestHandler<GetUserWithPaginationQuery, Response<PaginatedList<UserDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
 
-        public GetUserWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetUserWithPaginationQueryHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
             _mapper = mapper;
         }
 
@@ -100,6 +103,12 @@ namespace Application.Users.Queries
 
             var result = await _unitOfWork.UserRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, request.PageIndex, request.PageSize);
             var mappedResult = _mapper.Map<PaginatedList<ApplicationUser>, PaginatedList<UserDto>>(result);
+            foreach (var user in mappedResult)
+            {
+                var applicationUser = result.FirstOrDefault(e => e.Id == user.Id);
+                var role = (await _userManager.GetRolesAsync(applicationUser)).FirstOrDefault();
+                user.Role = role;
+            }
             return new Response<PaginatedList<UserDto>>(mappedResult);
         }
     }
