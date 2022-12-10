@@ -3,24 +3,17 @@ using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Models;
-using Application.RefreshTokens.Response;
-using AutoMapper;
 using Core.Entities;
-using Core.Enums;
 using Core.Interfaces;
-using FirebaseAdmin.Auth.Hash;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
 using System.Net;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
-using System.Threading;
 
 namespace Application.RefreshTokens.Commands
 {
@@ -67,7 +60,7 @@ namespace Application.RefreshTokens.Commands
                 }
                 if (!(await _userManager.CheckPasswordAsync(user, request.Password)))
                 {
-                    throw new BadRequestException("Not valid login information");
+                    throw new UnauthorizedAccessException("Wrong account information");
                 }
                 if (user.IsDeleted == true)
                 {
@@ -136,7 +129,7 @@ namespace Application.RefreshTokens.Commands
                     }
                 }
             }
-            
+
         }
     }
 }

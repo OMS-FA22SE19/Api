@@ -1,21 +1,16 @@
 ﻿using Application.Common.Exceptions;
 using Application.Models;
+using Application.OrderDetails.Queries;
+using Application.OrderDetails.Response;
 using Application.Tables.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
-using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Net;
-using Application.Orders.Queries;
-using Application.Orders.Response;
-using Microsoft.EntityFrameworkCore;
-using Application.OrderDetails.Response;
-using Core.Enums;
-using Microsoft.AspNetCore.Mvc;
-using Application.OrderDetails.Queries;
 
 namespace Application.UnitTests.Orders.Queries
 {
@@ -57,7 +52,7 @@ namespace Application.UnitTests.Orders.Queries
                 detail.Food = _Foods.Find(t => t.Id == detail.FoodId);
                 if (detail.Order is not null)
                 {
-                    detail.Order.User = _Users.Find(t => t.Id == detail.Order.UserId);
+                    detail.Order.Reservation.User = _Users.Find(t => t.Id == detail.Order.Reservation.UserId);
                 }
             }
             foreach (Reservation reservation in _Reservations)
@@ -90,7 +85,7 @@ namespace Application.UnitTests.Orders.Queries
                 detail.Food = _Foods.Find(t => t.Id == detail.FoodId);
                 if (detail.Order is not null)
                 {
-                    detail.Order.User = _Users.Find(t => t.Id == detail.Order.UserId);
+                    detail.Order.Reservation.User = _Users.Find(t => t.Id == detail.Order.Reservation.UserId);
                 }
             }
             foreach (Reservation reservation in _Reservations)
@@ -170,11 +165,11 @@ namespace Application.UnitTests.Orders.Queries
             var expected = new Response<DishDto>(new DishDto
             {
                 Id = inDatabase.Id,
-                UserId = inDatabase.Order.UserId,
+                UserId = inDatabase.Order.Reservation.UserId,
                 Date = inDatabase.Order.Date,
                 OrderId = inDatabase.OrderId,
                 Status = inDatabase.Status,
-                PhoneNumber = inDatabase.Order.User.PhoneNumber,
+                PhoneNumber = inDatabase.Order.Reservation.User.PhoneNumber,
                 TableId = 0,
                 FoodId = inDatabase.FoodId,
                 Note = inDatabase.Note,
@@ -318,11 +313,11 @@ namespace Application.UnitTests.Orders.Queries
                     new DishDto
                     {
                         Id = detail.Id,
-                        UserId = detail.Order.UserId,
+                        UserId = detail.Order.Reservation.UserId,
                         Date = detail.Order.Date,
                         OrderId = detail.OrderId,
                         Status = detail.Status,
-                        PhoneNumber = detail.Order.User.PhoneNumber,
+                        PhoneNumber = detail.Order.Reservation.User.PhoneNumber,
                         TableId = 0,
                         FoodId = detail.FoodId,
                         Note = detail.Note,

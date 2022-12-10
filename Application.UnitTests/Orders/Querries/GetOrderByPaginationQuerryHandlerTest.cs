@@ -3,7 +3,6 @@ using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Queries;
 using Application.Orders.Response;
-using Application.Reservations.Response;
 using Application.Tables.Response;
 using AutoMapper;
 using Core.Common;
@@ -14,7 +13,6 @@ using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Net;
-using System.Web.Mvc;
 
 namespace Application.UnitTests.Orders.Queries
 {
@@ -56,7 +54,7 @@ namespace Application.UnitTests.Orders.Queries
             _Foods = DataSource.Foods;
             foreach (Order order in _Orders)
             {
-                order.User = _Users.Find(ft => ft.Id == order.UserId);
+                order.Reservation.User = _Users.Find(ft => ft.Id == order.Reservation.UserId);
                 order.OrderDetails = _OrderDetails.FindAll(od => od.OrderId.Equals(order.Id));
                 if (order.OrderDetails is not null)
                 {
@@ -93,7 +91,7 @@ namespace Application.UnitTests.Orders.Queries
             _Foods = DataSource.Foods;
             foreach (Order order in _Orders)
             {
-                order.User = _Users.Find(ft => ft.Id == order.UserId);
+                order.Reservation.User = _Users.Find(ft => ft.Id == order.Reservation.UserId);
                 order.OrderDetails = _OrderDetails.FindAll(od => od.OrderId.Equals(order.Id));
                 if (order.OrderDetails is not null)
                 {
@@ -206,7 +204,7 @@ namespace Application.UnitTests.Orders.Queries
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
                 conditionedList = conditionedList.Where(e => e.Id.Contains(request.SearchValue)
-                    || e.UserId.Contains(request.SearchValue)
+                    || e.Reservation.UserId.Contains(request.SearchValue)
                     || e.Date.ToString().Contains(request.SearchValue)).ToList();
             }
             if (request.Status is not null)
@@ -227,10 +225,10 @@ namespace Application.UnitTests.Orders.Queries
                 case (OrderProperty.UserId):
                     if (request.IsDescending)
                     {
-                        conditionedList = conditionedList.OrderByDescending(x => x.UserId).ToList();
+                        conditionedList = conditionedList.OrderByDescending(x => x.Reservation.UserId).ToList();
                         break;
                     }
-                    conditionedList = conditionedList.OrderBy(x => x.UserId).ToList();
+                    conditionedList = conditionedList.OrderBy(x => x.Reservation.UserId).ToList();
                     break;
                 case (OrderProperty.Status):
                     if (request.IsDescending)
@@ -256,17 +254,16 @@ namespace Application.UnitTests.Orders.Queries
             var expectedList = new List<OrderDto>();
             foreach (var orderDto in conditionedList)
             {
-                var user = _Users.Find(ft => ft.Id == orderDto.UserId);
+                var user = _Users.Find(ft => ft.Id == orderDto.Reservation.UserId);
 
                 var reservation = _Reservations.Find(r => r.Id == orderDto.ReservationId);
                 var expectedDto = new OrderDto
                 {
                     Id = orderDto.Id,
-                    UserId = orderDto.UserId,
+                    UserId = orderDto.Reservation.UserId,
                     Date = orderDto.Date,
                     PrePaid = orderDto.PrePaid,
                     Status = orderDto.Status,
-                    NumOfEdits = orderDto.NumOfEdits,
                     FullName = user.FullName,
                     PhoneNumber = user.PhoneNumber,
                     OrderDetails = new List<OrderDetailDto>()
@@ -284,7 +281,7 @@ namespace Application.UnitTests.Orders.Queries
                             orderDetails.Add(new OrderDetailDto
                             {
                                 OrderId = orderDto.Id,
-                                UserId = orderDto.UserId,
+                                UserId = orderDto.Reservation.UserId,
                                 Date = orderDto.Date,
                                 FoodId = detail.FoodId,
                                 FoodName = detail.Food.Name,
@@ -473,13 +470,12 @@ namespace Application.UnitTests.Orders.Queries
                         dtos.Add(new OrderDto
                         {
                             Id = entity.Id,
-                            UserId = entity.UserId,
+                            UserId = entity.Reservation.UserId,
                             Date = entity.Date,
                             PrePaid = entity.PrePaid,
                             Status = entity.Status,
-                            NumOfEdits = entity.NumOfEdits,
-                            FullName = entity.User.FullName,
-                            PhoneNumber = entity.User.PhoneNumber
+                            FullName = entity.Reservation.User.FullName,
+                            PhoneNumber = entity.Reservation.User.PhoneNumber
                         });
                     }
                     return new PaginatedList<OrderDto>(entities.PageNumber, entities.TotalPages, entities.TotalPages, dtos);

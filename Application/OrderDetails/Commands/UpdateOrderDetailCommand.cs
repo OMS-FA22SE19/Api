@@ -79,7 +79,7 @@ namespace Application.OrderDetails.Commands
             var result = await _unitOfWork.OrderDetailRepository.UpdateAsync(entity);
             var food = await _unitOfWork.FoodRepository.GetAsync(f => f.Id == entity.FoodId);
             var order = await _unitOfWork.OrderRepository.GetAsync(o => o.Id.Equals(entity.OrderId), $"{nameof(Order.Reservation)}.{nameof(Reservation.ReservationTables)}");
-            var token = await _unitOfWork.UserDeviceTokenRepository.GetAsync(t => t.userId.Equals(order.UserId));
+            var token = await _unitOfWork.UserDeviceTokenRepository.GetAsync(t => t.userId.Equals(order.Reservation.UserId));
             if (token is not null)
             {
                 entity.AddDomainEvent(new UpdateOrderDetailEvent

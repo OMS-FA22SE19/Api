@@ -6,7 +6,6 @@ using Application.Users.Commands;
 using Application.Users.Queries;
 using Application.Users.Response;
 using Core.Common;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -18,7 +17,8 @@ namespace Api.Controllers.V1
     public sealed class UsersController : ApiControllerBase
     {
         private readonly ISendMailService _sendMailService;
-        public UsersController(ISendMailService sendMailService) {
+        public UsersController(ISendMailService sendMailService)
+        {
             _sendMailService = sendMailService;
         }
 
@@ -134,7 +134,7 @@ namespace Api.Controllers.V1
                 }
 
                 var result = await Mediator.Send(command);
-                var url = Request.Scheme + "://" + Request.Host + Url.Action("ConfirmEmail", "Users", new {email = command.email, code = result.Message});
+                var url = Request.Scheme + "://" + Request.Host + Url.Action("ConfirmEmail", "Users", new { email = command.email, code = result.Message });
                 var realUrl = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(url);
                 realUrl = realUrl.Replace('-', '+');
                 realUrl = realUrl.Replace('_', '/');
@@ -325,7 +325,7 @@ namespace Api.Controllers.V1
                 return StatusCode((int)response.StatusCode, response);
             }
         }
-        
+
 
         /// <summary>
         /// Update a specific User.

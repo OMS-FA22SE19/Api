@@ -97,7 +97,7 @@ namespace Application.Reservations.Queries
                 await _unitOfWork.OrderRepository.UpdateAsync(entity.Order);
 
                 List<Expression<Func<OrderDetail, bool>>> orderDetailsFilter = new();
-                orderDetailsFilter.Add(od => od.OrderId.Equals(entity.Order.Id) && !od.IsDeleted);
+                orderDetailsFilter.Add(od => od.OrderId.Equals(entity.Order.Id));
 
                 var orderDetails = await _unitOfWork.OrderDetailRepository.GetAllAsync(orderDetailsFilter);
                 foreach (var orderDetail in orderDetails)

@@ -37,7 +37,7 @@ namespace Application.Orders.Queries
             filters.Add(o => o.Status.Equals(OrderStatus.Processing));
             orderBy = o => o.OrderBy(or => or.Date);
 
-            var result = await _unitOfWork.OrderRepository.GetAllAsync(filters, orderBy, $"{nameof(Order.OrderDetails)}.{nameof(OrderDetail.Food)},{nameof(Order.User)}");
+            var result = await _unitOfWork.OrderRepository.GetAllAsync(filters, orderBy, $"{nameof(Order.OrderDetails)}.{nameof(OrderDetail.Food)},{nameof(Order.Reservation)}");
             if (!result.Any())
             {
                 throw new NotFoundException("There is no order for this table");
@@ -69,7 +69,7 @@ namespace Application.Orders.Queries
             }
             foreach (var detail in tableOrder.OrderDetails)
             {
-                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted && e.Status == detail.Status);
+                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && e.Status == detail.Status);
                 if (element is null)
                 {
                     if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
@@ -77,7 +77,7 @@ namespace Application.Orders.Queries
                         orderDetails.Add(new OrderDetailDto
                         {
                             OrderId = tableOrder.Id,
-                            UserId = tableOrder.UserId,
+                            UserId = tableOrder.Reservation.UserId,
                             Date = tableOrder.Date,
                             FoodId = detail.FoodId,
                             FoodName = detail.Food.Name,
@@ -92,7 +92,7 @@ namespace Application.Orders.Queries
                         orderDetails.Add(new OrderDetailDto
                         {
                             OrderId = tableOrder.Id,
-                            UserId = tableOrder.UserId,
+                            UserId = tableOrder.Reservation.UserId,
                             Date = tableOrder.Date,
                             FoodId = detail.FoodId,
                             FoodName = detail.Food.Name,

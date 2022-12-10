@@ -12,7 +12,6 @@ using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Orders.Commands
 {
@@ -63,7 +62,6 @@ namespace Application.Orders.Commands
             var entity = new Order
             {
                 Id = $"{reservation.Id}-{user.PhoneNumber}-{_dateTime.Now.ToString("dd-MM-yyyy-HH:mm:ss")}",
-                UserId = user.Id,
                 ReservationId = reservation.Id,
                 Date = _dateTime.Now,
                 Status = OrderStatus.Reserved,
@@ -139,7 +137,7 @@ namespace Application.Orders.Commands
                         Quantity = 1,
                         Price = detail.Price,
                         Amount = detail.Price,
-                        Note= detail.Note,
+                        Note = detail.Note,
                     });
                 }
                 else

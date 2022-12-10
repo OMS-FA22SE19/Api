@@ -12,8 +12,6 @@ using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.Web.Mvc;
 
 namespace Application.Orders.Commands
 {
@@ -54,7 +52,7 @@ namespace Application.Orders.Commands
             {
                 throw new NotFoundException(nameof(Menu), $"No available {nameof(Menu)}");
             }
-            var order = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.OrderId && !e.IsDeleted && e.Status == OrderStatus.Processing, $"{nameof(Order.OrderDetails)}");
+            var order = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.OrderId && !e.IsDeleted && e.Status == OrderStatus.Processing, $"{nameof(Order.OrderDetails)}, {nameof(Order.Reservation)}");
             if (order is null)
             {
                 throw new NotFoundException(nameof(Order), request.OrderId);
@@ -64,14 +62,14 @@ namespace Application.Orders.Commands
             {
                 if (!_currentUserService.UserName.Equals("defaultCustomer"))
                 {
-                    if (!_currentUserService.UserId.Equals(order.UserId))
+                    if (!_currentUserService.UserId.Equals(order.Reservation.UserId))
                     {
                         throw new BadRequestException("This is not your order");
                     }
                 }
             }
 
-            var user = await _userManager.FindByIdAsync(order.UserId);
+            var user = await _userManager.FindByIdAsync(order.Reservation.UserId);
 
             foreach (var dish in request.OrderDetails)
             {
@@ -87,7 +85,8 @@ namespace Application.Orders.Commands
                         FoodId = dish.Key,
                         Price = food.Price,
                         Note = string.IsNullOrWhiteSpace(dish.Value.Note) ? string.Empty : dish.Value.Note,
-                        Status = OrderDetailStatus.Received
+                        Status = OrderDetailStatus.Received,
+                        Created = _dateTime.Now
                     });
                 }
             }

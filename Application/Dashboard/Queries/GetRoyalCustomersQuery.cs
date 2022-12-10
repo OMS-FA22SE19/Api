@@ -27,20 +27,20 @@ namespace Application.Dashboard.Queries
         public async Task<Response<List<RoyalCustomer>>> Handle(GetRoyalCustomersQuery request, CancellationToken cancellationToken)
         {
             List<Expression<Func<ApplicationUser, bool>>> filters = new();
-            Func<IQueryable<ApplicationUser>, IOrderedQueryable<ApplicationUser>> orderBy = e => e.OrderByDescending(e => e.Orders.Count);
-            string includeProperties = $"{nameof(ApplicationUser.Orders)}.{nameof(Order.OrderDetails)}";
+            Func<IQueryable<ApplicationUser>, IOrderedQueryable<ApplicationUser>> orderBy = e => e.OrderByDescending(e => e.Reservations.Where(e => e.Status == ReservationStatus.Done));
+            string includeProperties = "";
 
             var dateOfFirstMonth = new DateTime(_dateTime.Now.Year, 1, 1);
             filters.Add(e => !e.IsDeleted);
-            filters.Add(e => e.Orders.Any(e => e.Date >= dateOfFirstMonth && e.Status == OrderStatus.Paid));
+            //filters.Add(e => e.Reservations.Any(e => e.StartTime >= dateOfFirstMonth && e.Status == ReservationStatus.Done));
 
             var customers = await _unitOfWork.UserRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, 1, 10);
             var result = customers.Select(e => new RoyalCustomer
             {
                 Name = e.FullName,
                 PhoneNumber = e.PhoneNumber,
-                Quantity = e.Orders.Count,
-                Cost = e.Orders.Sum(e => e.OrderDetails.Sum(e => e.Price) - e.PrePaid)
+                Quantity = e.Reservations.Count,
+                Cost = 0
             }).ToList();
 
             return new Response<List<RoyalCustomer>>(result);

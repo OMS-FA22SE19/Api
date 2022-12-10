@@ -1,21 +1,19 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Models;
+using Application.OrderDetails.Response;
+using Application.Orders.Queries;
+using Application.Orders.Response;
 using Application.Tables.Response;
 using AutoMapper;
 using Core.Entities;
+using Core.Enums;
 using Core.Interfaces;
-using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Net;
-using Application.Orders.Queries;
-using Application.Orders.Response;
-using Microsoft.EntityFrameworkCore;
-using Application.OrderDetails.Response;
-using Core.Enums;
-using Microsoft.AspNetCore.Mvc;
-using Application.Common.Interfaces;
 
 namespace Application.UnitTests.Orders.Queries
 {
@@ -57,7 +55,7 @@ namespace Application.UnitTests.Orders.Queries
             _Foods = DataSource.Foods;
             foreach (Order order in _Orders)
             {
-                order.User = _Users.Find(ft => ft.Id == order.UserId);
+                order.Reservation.User = _Users.Find(ft => ft.Id == order.Reservation.UserId);
                 order.OrderDetails = _OrderDetails.FindAll(od => od.OrderId.Equals(order.Id));
                 if (order.OrderDetails is not null)
                 {
@@ -94,7 +92,7 @@ namespace Application.UnitTests.Orders.Queries
             _Foods = DataSource.Foods;
             foreach (Order order in _Orders)
             {
-                order.User = _Users.Find(ft => ft.Id == order.UserId);
+                order.Reservation.User = _Users.Find(ft => ft.Id == order.Reservation.UserId);
                 order.OrderDetails = _OrderDetails.FindAll(od => od.OrderId.Equals(order.Id));
                 if (order.OrderDetails is not null)
                 {
@@ -180,17 +178,16 @@ namespace Application.UnitTests.Orders.Queries
             var inDatabase = _Orders.FirstOrDefault(x => x.Id == id);
             Assert.NotNull(inDatabase);
 
-            var user = _Users.Find(ft => ft.Id == inDatabase.UserId);
+            var user = _Users.Find(ft => ft.Id == inDatabase.Reservation.UserId);
 
             var reservation = _Reservations.Find(r => r.Id == inDatabase.ReservationId);
             var expected = new Response<OrderDto>(new OrderDto
             {
                 Id = inDatabase.Id,
-                UserId = inDatabase.UserId,
+                UserId = inDatabase.Reservation.UserId,
                 Date = inDatabase.Date,
                 PrePaid = inDatabase.PrePaid,
                 Status = inDatabase.Status,
-                NumOfEdits = inDatabase.NumOfEdits,
                 FullName = user.FullName,
                 PhoneNumber = user.PhoneNumber,
                 OrderDetails = new List<OrderDetailDto>()
@@ -208,7 +205,7 @@ namespace Application.UnitTests.Orders.Queries
                         orderDetails.Add(new OrderDetailDto
                         {
                             OrderId = inDatabase.Id,
-                            UserId = inDatabase.UserId,
+                            UserId = inDatabase.Reservation.UserId,
                             Date = inDatabase.Date,
                             FoodId = detail.FoodId,
                             FoodName = detail.Food.Name,
@@ -380,25 +377,24 @@ namespace Application.UnitTests.Orders.Queries
         {
             var mapperMock = new Mock<IMapper>();
             mapperMock.Setup(m => m.Map<OrderDto>(It.IsAny<Order>()))
-                .Returns((Order Order) => 
-                //(
-                //    string fullname = null;
-                //    string phoneNumber = null;
-                //    if (Order.User != null)
-                //    {
-                //        fullname = Order.User.FullName;
-                //        phoneNumber = Order.User.PhoneNumber;
-                //    }
+                .Returns((Order Order) =>
+                    //(
+                    //    string fullname = null;
+                    //    string phoneNumber = null;
+                    //    if (Order.User != null)
+                    //    {
+                    //        fullname = Order.User.FullName;
+                    //        phoneNumber = Order.User.PhoneNumber;
+                    //    }
                     new OrderDto
                     {
                         Id = Order.Id,
-                        UserId = Order.UserId,
+                        UserId = Order.Reservation.UserId,
                         Date = Order.Date,
                         PrePaid = Order.PrePaid,
                         Status = Order.Status,
-                        NumOfEdits = Order.NumOfEdits,
-                        FullName = Order.User.FullName,
-                        PhoneNumber = Order.User.PhoneNumber
+                        FullName = Order.Reservation.User.FullName,
+                        PhoneNumber = Order.Reservation.User.PhoneNumber
                     }
                 );
             mapperMock.Setup(m => m.Map<TableDto>(It.IsAny<Table>()))

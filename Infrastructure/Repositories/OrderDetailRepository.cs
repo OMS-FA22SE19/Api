@@ -4,7 +4,7 @@ using Core.Interfaces;
 
 namespace Infrastructure.Repositories
 {
-    public class OrderDetailRepository : AuditableEntityRepository<OrderDetail>, IOrderDetailRepository
+    public class OrderDetailRepository : EntityRepository<OrderDetail>, IOrderDetailRepository
     {
         public OrderDetailRepository(IApplicationDbContext context) : base(context, context.OrderDetails)
         {

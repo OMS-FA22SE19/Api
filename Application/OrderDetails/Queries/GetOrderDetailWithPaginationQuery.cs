@@ -35,9 +35,8 @@ namespace Application.OrderDetails.Queries
         {
             List<Expression<Func<OrderDetail, bool>>> filters = new();
             Func<IQueryable<OrderDetail>, IOrderedQueryable<OrderDetail>> orderBy = null;
-            string includeProperties = $"{nameof(OrderDetail.Order)}.{nameof(Order.User)},{nameof(OrderDetail.Order)}.{nameof(Order.Reservation)}.{nameof(Reservation.ReservationTables)},{nameof(OrderDetail.Food)}";
+            string includeProperties = $"{nameof(OrderDetail.Order)}.{nameof(Order.Reservation)}.{nameof(Reservation.ReservationTables)},{nameof(OrderDetail.Food)}";
 
-            //filters.Add(e => e.Order.Date <= _dateTime.Now.AddHours(-3));
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
@@ -54,7 +53,7 @@ namespace Application.OrderDetails.Queries
                         }
                         break;
                     case OrderDetailProperty.PhoneNumber:
-                        filters.Add(e => e.Order.User.PhoneNumber.Contains(request.SearchValue));
+                        filters.Add(e => e.Order.Reservation.PhoneNumber.Contains(request.SearchValue));
                         break;
                     case OrderDetailProperty.OrderId:
                         filters.Add(e => e.Order.Id.Contains(request.SearchValue));
@@ -92,8 +91,6 @@ namespace Application.OrderDetails.Queries
                 filters.Add(e => e.Status == request.Status);
             }
 
-            filters.Add(e => !e.IsDeleted);
-
             switch (request.OrderBy)
             {
                 case OrderDetailProperty.OrderId:
@@ -129,7 +126,7 @@ namespace Application.OrderDetails.Queries
                     orderBy = e => e.OrderBy(x => x.Status);
                     break;
                 default:
-                    orderBy = e => e.OrderBy(x => x.Status).ThenBy(e => e.Created);
+                    orderBy = e => e.OrderBy(x => x.Status).ThenBy(e => e.Order.Date);
                     break;
             }
 

@@ -1,7 +1,6 @@
 ﻿using Application.Helpers;
 using Application.Models;
 using Application.Reservations.Response;
-using AutoMapper;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
@@ -24,12 +23,10 @@ namespace Application.Reservations.Queries
     public class GetBusyTimeOfDateQueryHandler : IRequestHandler<GetBusyTimeOfDateQuery, Response<List<BusyTimeDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
 
-        public GetBusyTimeOfDateQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetBusyTimeOfDateQueryHandler(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
         }
 
         public async Task<Response<List<BusyTimeDto>>> Handle(GetBusyTimeOfDateQuery request, CancellationToken cancellationToken)

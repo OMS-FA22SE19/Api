@@ -50,7 +50,11 @@ namespace Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
-
+            builder.Entity<ApplicationUser>(e =>
+            {
+                e.HasIndex(x => x.PhoneNumber)
+                .IsUnique();
+            });
             base.OnModelCreating(builder);
         }
 

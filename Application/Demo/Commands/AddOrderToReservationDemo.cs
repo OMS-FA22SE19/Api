@@ -1,12 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Interfaces;
-using Application.Common.Mappings;
 using Application.Demo.Responses;
 using Application.Models;
-using Application.OrderDetails.Response;
-using Application.Orders.Events;
-using Application.Orders.Helpers;
-using Application.Orders.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Enums;
@@ -78,7 +73,6 @@ namespace Application.Orders.Commands
                 var entity = new Order
                 {
                     Id = $"demo-{reservation.ReservationTables[0].TableId}-{user.PhoneNumber}-{_dateTime.Now.ToString("dd-MM-yyyy-HH:mm:ss")}",
-                    UserId = user.Id,
                     ReservationId = reservation.Id,
                     Date = _dateTime.Now,
                     Status = OrderStatus.Processing,
@@ -103,7 +97,7 @@ namespace Application.Orders.Commands
                 }
 
                 int randomQuantity = rnd.Next(1, 5);
-                for(int i = 0; i < randomQuantity; i++)
+                for (int i = 0; i < randomQuantity; i++)
                 {
                     int r = rnd.Next(availableFood.Count());
                     var food = availableFood[r];
