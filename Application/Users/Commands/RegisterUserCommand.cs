@@ -1,5 +1,4 @@
 ﻿using Application.Common.Exceptions;
-using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Models;
 using Application.Users.Response;
@@ -51,7 +50,7 @@ namespace Application.Users.Commands
             if (await _userManager.FindByNameAsync(request.Email.Split('@')[0]) is not null
                 || await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber.Equals(request.PhoneNumber)) is not null)
             {
-                throw new BadRequestException(nameof(user));
+                throw new BadRequestException("Phonenumber or Email has already existed!");
             }
 
             var userRole = await _roleManager.FindByNameAsync("Customer");

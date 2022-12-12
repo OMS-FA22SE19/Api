@@ -91,6 +91,8 @@ namespace Application.Reservations.Commands
                     StartTime = startTime,
                     EndTime = endTime, //add day +1
                     Status = ReservationStatus.CheckIn,
+                    FullName = "Demo",
+                    PhoneNumber = "Demo",
                     ReservationTables = new List<ReservationTable>()
                 };
 
@@ -156,6 +158,8 @@ namespace Application.Reservations.Commands
                     StartTime = availableStartTime,
                     EndTime = availableEndTime,
                     Status = ReservationStatus.Available,
+                    FullName = "Demo",
+                    PhoneNumber = "Demo",
                     ReservationTables = new List<ReservationTable>()
                 };
 
@@ -198,6 +202,8 @@ namespace Application.Reservations.Commands
                     StartTime = cancelStartTime,
                     EndTime = cancelEndTime,
                     Status = ReservationStatus.Cancelled,
+                    FullName = "Demo",
+                    PhoneNumber = "Demo",
                     ReservationTables = new List<ReservationTable>()
                 };
 

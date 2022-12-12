@@ -12,7 +12,6 @@ using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Orders.Commands
 {
@@ -58,12 +57,13 @@ namespace Application.Orders.Commands
                 throw new NotFoundException(nameof(Reservation), $"with reservation {request.ReservationId}");
             }
 
+            var tableId = reservation.ReservationTables[0].TableId;
+
             var user = await _userManager.FindByIdAsync(reservation.UserId);
 
             var entity = new Order
             {
-                Id = $"{reservation.ReservationTables[0].TableId}-{user.PhoneNumber}-{_dateTime.Now.ToString("dd-MM-yyyy-HH:mm:ss")}",
-                UserId = user.Id,
+                Id = $"{tableId}-{user.PhoneNumber}-{_dateTime.Now.ToString("dd-MM-yyyy-HH:mm:ss")}",
                 ReservationId = reservation.Id,
                 Date = _dateTime.Now,
                 Status = OrderStatus.Processing,
@@ -101,7 +101,8 @@ namespace Application.Orders.Commands
                         FoodId = dish.Key,
                         Price = food.Price,
                         Note = string.IsNullOrWhiteSpace(dish.Value.Note) ? string.Empty : dish.Value.Note,
-                        Status = OrderDetailStatus.Received
+                        Status = OrderDetailStatus.Received,
+                        Created = _dateTime.Now,
                     });
                 }
             }
@@ -117,9 +118,10 @@ namespace Application.Orders.Commands
             }
 
             var mappedResult = _mapper.Map<OrderDto>(result);
+            mappedResult.UserId = reservation.UserId;
             mappedResult.FullName = user.FullName;
             mappedResult.PhoneNumber = user.PhoneNumber;
-
+            mappedResult.TableId = tableId;
             var orderDetails = new List<OrderDetailDto>();
             double total = 0;
             foreach (var detail in result.OrderDetails)
@@ -131,6 +133,9 @@ namespace Application.Orders.Commands
                     orderDetails.Add(new OrderDetailDto
                     {
                         OrderId = result.Id,
+                        UserId = reservation.UserId,
+                        Date = _dateTime.Now,
+                        Note = detail.Note,
                         FoodId = detail.FoodId,
                         FoodName = food.Name,
                         Status = OrderDetailStatus.Received,

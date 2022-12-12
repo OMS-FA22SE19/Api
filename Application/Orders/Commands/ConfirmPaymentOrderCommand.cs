@@ -37,7 +37,7 @@ namespace Application.Orders.Commands
 
         public async Task<Response<OrderDto>> Handle(ConfirmPaymentOrderCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Order.OrderDetails)},{nameof(Order.User)}");
+            var entity = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Order.OrderDetails)},{nameof(Order.Reservation)}");
             if (entity is null)
             {
                 throw new NotFoundException(nameof(Order), request.Id);
@@ -47,7 +47,7 @@ namespace Application.Orders.Commands
             {
                 if (!_currentUserService.UserName.Equals("defaultCustomer"))
                 {
-                    if (!_currentUserService.UserId.Equals(entity.UserId))
+                    if (!_currentUserService.UserId.Equals(entity.Reservation.UserId))
                     {
                         throw new BadRequestException("This is not your order");
                     }
@@ -70,11 +70,14 @@ namespace Application.Orders.Commands
                 table.Status = TableStatus.Available;
                 await _unitOfWork.TableRepository.UpdateAsync(table);
             }
-            reservation.Status = ReservationStatus.Done;
-            await _unitOfWork.ReservationRepository.UpdateAsync(reservation);
+            
 
             MapToEntity(entity);
             var result = await _unitOfWork.OrderRepository.UpdateAsync(entity);
+            await _unitOfWork.CompleteAsync(cancellationToken);
+
+            entity.Reservation.Status = ReservationStatus.Done;
+            await _unitOfWork.ReservationRepository.UpdateAsync(entity.Reservation);
             await _unitOfWork.CompleteAsync(cancellationToken);
 
             List<Expression<Func<OrderDetail, bool>>> filters = new();
@@ -97,7 +100,7 @@ namespace Application.Orders.Commands
                         orderDetails.Add(new OrderDetailDto
                         {
                             OrderId = result.Id,
-                            UserId = result.UserId,
+                            UserId = result.Reservation.UserId,
                             Date = result.Date,
                             FoodId = detail.FoodId,
                             FoodName = detail.Food.Name,
@@ -121,7 +124,7 @@ namespace Application.Orders.Commands
             {
                 Id = entity.Id,
                 Date = entity.Date,
-                PhoneNumber = entity.User.PhoneNumber,
+                PhoneNumber = entity.Reservation.PhoneNumber,
                 Status = OrderStatus.Paid,
                 OrderDetails = orderDetails,
                 PrePaid = entity.PrePaid,

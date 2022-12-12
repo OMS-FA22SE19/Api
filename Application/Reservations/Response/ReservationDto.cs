@@ -1,11 +1,9 @@
 ﻿using Application.Common.Mappings;
 using Application.OrderDetails.Response;
-using Application.Types.Response;
 using Application.Users.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Enums;
-using System.Linq;
 
 namespace Application.Reservations.Response
 {
@@ -25,6 +23,7 @@ namespace Application.Reservations.Response
         public ReservationStatus Status { get; set; }
         public bool IsPriorFoodOrder { get; set; }
         public DateTime Created { get; set; }
+        public int NumOfEdits { get; set; }
         public string ReasonForCancel { get; set; }
         public string FullName { get; set; }
         public string PhoneNumber { get; set; }
@@ -165,7 +164,7 @@ namespace Application.Reservations.Response
 
             int hashMenuId = ReservationDto.Id.GetHashCode();
 
-            return hashReservationDtoUserId ^ hashReservationDtoNumOfPeople ^ hashReservationDtoTableTypeId ^ hashReservationDtoTableType 
+            return hashReservationDtoUserId ^ hashReservationDtoNumOfPeople ^ hashReservationDtoTableTypeId ^ hashReservationDtoTableType
                 ^ hashReservationDtoNumOfSeats ^ hashReservationDtoQuantity ^ hashReservationDtoPrePaid ^ hashReservationDtoPaid
                 ^ hashReservationDtoStartTime ^ hashReservationDtoEndTime ^ hashReservationDtoStatus ^ hashReservationDtoIsPriorFoodOrder
                 ^ hashMenuId;

@@ -2,9 +2,6 @@
 using Application.Models;
 using Application.OrderDetails.Queries;
 using Application.OrderDetails.Response;
-using Application.Orders.Queries;
-using Application.Orders.Response;
-using Application.Reservations.Response;
 using Application.Tables.Response;
 using AutoMapper;
 using Core.Common;
@@ -15,8 +12,6 @@ using Moq;
 using NUnit.Framework;
 using System.Linq.Expressions;
 using System.Net;
-using System.Web.Mvc;
-using static Duende.IdentityServer.Models.IdentityResources;
 
 namespace Application.UnitTests.Orders.Queries
 {
@@ -59,7 +54,7 @@ namespace Application.UnitTests.Orders.Queries
                 detail.Food = _Foods.Find(t => t.Id == detail.FoodId);
                 if (detail.Order is not null)
                 {
-                    detail.Order.User = _Users.Find(t => t.Id == detail.Order.UserId);
+                    detail.Order.Reservation.User = _Users.Find(t => t.Id == detail.Order.Reservation.UserId);
                 }
             }
             foreach (Reservation reservation in _Reservations)
@@ -92,7 +87,7 @@ namespace Application.UnitTests.Orders.Queries
                 detail.Food = _Foods.Find(t => t.Id == detail.FoodId);
                 if (detail.Order is not null)
                 {
-                    detail.Order.User = _Users.Find(t => t.Id == detail.Order.UserId);
+                    detail.Order.Reservation.User = _Users.Find(t => t.Id == detail.Order.Reservation.UserId);
                 }
             }
             foreach (Reservation reservation in _Reservations)
@@ -249,11 +244,11 @@ namespace Application.UnitTests.Orders.Queries
                 var expectedDto = new DishDto
                 {
                     Id = dishDto.Id,
-                    UserId = dishDto.Order.UserId,
+                    UserId = dishDto.Order.Reservation.UserId,
                     Date = dishDto.Order.Date,
                     OrderId = dishDto.OrderId,
                     Status = dishDto.Status,
-                    PhoneNumber = dishDto.Order.User.PhoneNumber,
+                    PhoneNumber = dishDto.Order.Reservation.User.PhoneNumber,
                     FoodId = dishDto.FoodId,
                     Note = dishDto.Note,
                     FoodName = dishDto.Food.Name,
@@ -422,11 +417,11 @@ namespace Application.UnitTests.Orders.Queries
                         dtos.Add(new DishDto
                         {
                             Id = entity.Id,
-                            UserId = entity.Order.UserId,
+                            UserId = entity.Order.Reservation.UserId,
                             Date = entity.Order.Date,
                             OrderId = entity.OrderId,
                             Status = entity.Status,
-                            PhoneNumber = entity.Order.User.PhoneNumber,
+                            PhoneNumber = entity.Order.Reservation.User.PhoneNumber,
                             TableId = 0,
                             FoodId = entity.FoodId,
                             Note = entity.Note,
@@ -441,11 +436,11 @@ namespace Application.UnitTests.Orders.Queries
                     new DishDto
                     {
                         Id = detail.Id,
-                        UserId = detail.Order.UserId,
+                        UserId = detail.Order.Reservation.UserId,
                         Date = detail.Order.Date,
                         OrderId = detail.OrderId,
                         Status = detail.Status,
-                        PhoneNumber = detail.Order.User.PhoneNumber,
+                        PhoneNumber = detail.Order.Reservation.User.PhoneNumber,
                         TableId = 0,
                         FoodId = detail.FoodId,
                         Note = detail.Note,

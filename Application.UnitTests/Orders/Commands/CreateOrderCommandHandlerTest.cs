@@ -6,11 +6,9 @@ using Application.Orders.Commands;
 using Application.Orders.Helpers;
 using Application.Orders.Response;
 using AutoMapper;
-using Core.Common;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
-using Firebase.Auth;
 using Microsoft.AspNetCore.Identity;
 using MockQueryable.Moq;
 using Moq;
@@ -61,8 +59,8 @@ namespace Application.UnitTests.Orders.Commands
             _Billing = DataSource.Billings;
             _Users = DataSource.Users;
             _Foods = DataSource.Foods;
-            _Menus= DataSource.Menus;
-            _MenuFoods= DataSource.MenuFoods;
+            _Menus = DataSource.Menus;
+            _MenuFoods = DataSource.MenuFoods;
             foreach (Menu menu in _Menus)
             {
                 menu.MenuFoods = _MenuFoods.FindAll(od => od.MenuId.Equals(menu.Id));
@@ -76,7 +74,7 @@ namespace Application.UnitTests.Orders.Commands
             }
             foreach (Order order in _Orders)
             {
-                order.User = _Users.Find(ft => ft.Id == order.UserId);
+                order.Reservation.User = _Users.Find(ft => ft.Id == order.Reservation.UserId);
                 order.OrderDetails = _OrderDetails.FindAll(od => od.OrderId.Equals(order.Id));
                 if (order.OrderDetails is not null)
                 {
@@ -126,7 +124,7 @@ namespace Application.UnitTests.Orders.Commands
             }
             foreach (Order order in _Orders)
             {
-                order.User = _Users.Find(ft => ft.Id == order.UserId);
+                order.Reservation.User = _Users.Find(ft => ft.Id == order.Reservation.UserId);
                 order.OrderDetails = _OrderDetails.FindAll(od => od.OrderId.Equals(order.Id));
                 if (order.OrderDetails is not null)
                 {
@@ -208,7 +206,7 @@ namespace Application.UnitTests.Orders.Commands
             orderDetails.Add(1, new FoodInfo() { Quantity = 1, Note = "fast" });
             var request = new CreateOrderCommand()
             {
-                ReservationId= reservationId,
+                ReservationId = reservationId,
                 OrderDetails = orderDetails
             };
 
@@ -230,7 +228,7 @@ namespace Application.UnitTests.Orders.Commands
                 StatusCode = HttpStatusCode.Created
             };
 
-            var billing = _Billing.Find(b => b.ReservationId== reservationId);
+            var billing = _Billing.Find(b => b.ReservationId == reservationId);
             if (billing is not null)
             {
                 expected.Data.PrePaid = billing.ReservationAmount;
@@ -268,7 +266,7 @@ namespace Application.UnitTests.Orders.Commands
                 total += 100000;
             }
 
-            expected.Data.OrderDetails= list;
+            expected.Data.OrderDetails = list;
             expected.Data.Total = total - expected.Data.PrePaid;
             var count = _Orders.Count + 1;
             //Act
@@ -315,7 +313,7 @@ namespace Application.UnitTests.Orders.Commands
                     Order.Id = _Orders.Max(e => e.Id) + 1;
                     var count = _Orders.Count;
                     _Orders.Add(Order);
-                    foreach(OrderDetail detail in _Orders[count].OrderDetails)
+                    foreach (OrderDetail detail in _Orders[count].OrderDetails)
                     {
                         detail.Id = _OrderDetails.Max(e => e.Id) + 1;
                         _OrderDetails.Add(detail);
@@ -487,19 +485,18 @@ namespace Application.UnitTests.Orders.Commands
                 .Returns((Order Order) => new OrderDto
                 {
                     Id = Order.Id,
-                    UserId = Order.UserId,
+                    UserId = Order.Reservation.UserId,
                     Date = Order.Date,
                     PrePaid = Order.PrePaid,
                     Status = Order.Status,
-                    NumOfEdits = Order.NumOfEdits,
                     //FullName = Order.User.FullName,
                     //PhoneNumber = Order.User.PhoneNumber
                 });
             return mapperMock.Object;
         }
 
-        private IDateTime SetUpDatetime() 
-        { 
+        private IDateTime SetUpDatetime()
+        {
             var dateTimeMock = new Mock<IDateTime>();
             dateTimeMock.Setup(d => d.Now).Returns(DateTime.UtcNow.AddHours(7));
             return dateTimeMock.Object;

@@ -35,7 +35,7 @@ namespace Application.Orders.Commands
 
         public async Task<Response<OrderDto>> Handle(CheckingBillCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Order.OrderDetails)},{nameof(Order.User)}");
+            var entity = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Order.OrderDetails)},{nameof(Order.Reservation)}");
             if (entity is null)
             {
                 throw new NotFoundException(nameof(Order), request.Id);
@@ -45,7 +45,7 @@ namespace Application.Orders.Commands
             {
                 if (!_currentUserService.UserName.Equals("defaultCustomer"))
                 {
-                    if (!_currentUserService.UserId.Equals(entity.UserId))
+                    if (!_currentUserService.UserId.Equals(entity.Reservation.UserId))
                     {
                         throw new BadRequestException("This is not your order");
                     }
@@ -57,7 +57,6 @@ namespace Application.Orders.Commands
             {
                 if (orderDetail.Status == OrderDetailStatus.Reserved)
                 {
-                    orderDetail.IsDeleted = true;
                     receivedOrderDetails.Add(orderDetail);
                 }
             }

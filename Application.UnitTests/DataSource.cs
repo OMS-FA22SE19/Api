@@ -353,19 +353,17 @@ namespace Application.UnitTests
                 {
                     Id = "1",
                     ReservationId = 3,
-                    UserId = "123",
+                    Reservation = new Reservation{ UserId = "123"},
                     Status = OrderStatus.Processing,
                     Date = DateTime.UtcNow,
-                    NumOfEdits=  3
                 },
                 new Order()
                 {
                     Id = "2",
                     ReservationId = 1,
-                    UserId = "456",
+                    Reservation = new Reservation{ UserId = "456"},
                     Status = OrderStatus.Reserved,
                     Date = DateTime.UtcNow,
-                    NumOfEdits=  3
                 }
             };
 

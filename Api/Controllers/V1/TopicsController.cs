@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Security;
 using Application.Models;
 using Application.Topics.Commands;
 using Application.Topics.Queries;
@@ -11,6 +12,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public sealed class TopicsController : ApiControllerBase
     {
         /// <summary>

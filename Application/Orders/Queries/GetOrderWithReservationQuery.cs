@@ -30,7 +30,7 @@ namespace Application.Orders.Queries
 
         public async Task<Response<OrderDto>> Handle(GetOrderWithReservationQuery request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.OrderRepository.GetAsync(e => e.ReservationId.Equals(request.reservationId), $"{nameof(Order.OrderDetails)}.{nameof(OrderDetail.Food)},{nameof(Order.User)}");
+            var result = await _unitOfWork.OrderRepository.GetAsync(e => e.ReservationId.Equals(request.reservationId), $"{nameof(Order.OrderDetails)}.{nameof(OrderDetail.Food)},{nameof(Order.Reservation)}");
             if (result is null)
             {
                 throw new NotFoundException(nameof(Order), $"with Reservation Id {request.reservationId}");
@@ -51,7 +51,7 @@ namespace Application.Orders.Queries
             }
             foreach (var detail in result.OrderDetails)
             {
-                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted && e.Status == detail.Status);
+                var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && e.Status == detail.Status);
                 if (element is null)
                 {
                     if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
@@ -59,7 +59,7 @@ namespace Application.Orders.Queries
                         orderDetails.Add(new OrderDetailDto
                         {
                             OrderId = result.Id,
-                            UserId = result.UserId,
+                            UserId = result.Reservation.UserId,
                             Date = result.Date,
                             FoodId = detail.FoodId,
                             FoodName = detail.Food.Name,
@@ -74,7 +74,7 @@ namespace Application.Orders.Queries
                         orderDetails.Add(new OrderDetailDto
                         {
                             OrderId = result.Id,
-                            UserId = result.UserId,
+                            UserId = result.Reservation.UserId,
                             Date = result.Date,
                             FoodId = detail.FoodId,
                             FoodName = detail.Food.Name,

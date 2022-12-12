@@ -3,13 +3,14 @@ using Domain.Common;
 
 namespace Core.Entities
 {
-    public sealed class OrderDetail : BaseAuditableEntity, IEquatable<OrderDetail>
+    public sealed class OrderDetail : BaseEntity, IEquatable<OrderDetail>
     {
         public string OrderId { get; set; }
         public int FoodId { get; set; }
         public double Price { get; set; }
         public OrderDetailStatus Status { get; set; }
         public string Note { get; set; }
+        public DateTime Created { get; set; }
 
         public Order Order { get; set; }
         public Food Food { get; set; }

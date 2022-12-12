@@ -34,7 +34,7 @@ namespace Application.Orders.Queries
 
         public async Task<Response<OrderDto>> Handle(GetOrderWithIdQuery request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.OrderRepository.GetAsync(e => e.Id.Equals(request.Id), $"{nameof(Order.OrderDetails)}.{nameof(OrderDetail.Food)},{nameof(Order.User)}");
+            var result = await _unitOfWork.OrderRepository.GetAsync(e => e.Id.Equals(request.Id), $"{nameof(Order.OrderDetails)}.{nameof(OrderDetail.Food)},{nameof(Order.Reservation)}");
             if (result is null)
             {
                 throw new NotFoundException(nameof(Order), $"with {request.Id}");
@@ -44,7 +44,7 @@ namespace Application.Orders.Queries
             {
                 if (!_currentUserService.UserName.Equals("defaultCustomer"))
                 {
-                    if (!_currentUserService.UserId.Equals(result.UserId))
+                    if (!_currentUserService.UserId.Equals(result.Reservation.UserId))
                     {
                         throw new BadRequestException("This is not your reservation");
                     }
@@ -75,7 +75,7 @@ namespace Application.Orders.Queries
                         orderDetails.Add(new OrderDetailDto
                         {
                             OrderId = result.Id,
-                            UserId = result.UserId,
+                            UserId = result.Reservation.UserId,
                             Date = result.Date,
                             FoodId = detail.FoodId,
                             FoodName = detail.Food.Name,

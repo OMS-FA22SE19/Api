@@ -1,4 +1,5 @@
-﻿using Application.Dashboard.Queries;
+﻿using Application.Common.Security;
+using Application.Dashboard.Queries;
 using Application.Dashboard.Response;
 using Application.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -8,6 +9,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public sealed class DashboardController : ApiControllerBase
     {
         /// <summary>

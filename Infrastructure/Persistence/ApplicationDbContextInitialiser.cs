@@ -1,6 +1,5 @@
 ﻿using Core.Entities;
 using Core.Interfaces;
-using Infrastructure.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -64,7 +63,7 @@ namespace Infrastructure.Persistence
             }
 
             // Default users
-            var administrator = new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost", FullName = "Administrator", EmailConfirmed = true };
+            var administrator = new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost.com", FullName = "Administrator", EmailConfirmed = true };
 
             if (_userManager.Users.All(u => u.UserName != administrator.UserName))
             {

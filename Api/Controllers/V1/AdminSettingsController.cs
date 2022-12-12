@@ -12,6 +12,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public sealed class AdminSettingsController : ApiControllerBase
     {
         /// <summary>
@@ -29,7 +30,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        
+
         public async Task<ActionResult<Response<List<AdminSettingDto>>>> GetAdminSettingAsync([FromQuery] GetAdminSettingQuery query)
         {
             try

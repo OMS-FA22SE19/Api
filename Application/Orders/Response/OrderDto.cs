@@ -1,5 +1,4 @@
 ﻿using Application.Common.Mappings;
-using Application.Foods.Response;
 using Application.OrderDetails.Response;
 using Application.Reservations.Response;
 using AutoMapper;
@@ -18,7 +17,6 @@ namespace Application.Orders.Response
         public DateTime Date { get; set; }
         public OrderStatus Status { get; set; }
         public double PrePaid { get; set; } = 0;
-        public int NumOfEdits { get; set; }
         public double Amount { get; set; }
         public double Total { get; set; }
 
@@ -28,8 +26,8 @@ namespace Application.Orders.Response
         public void Mapping(Profile profile)
         {
             profile.CreateMap<Order, OrderDto>()
-                .ForMember(dto => dto.FullName, opt => opt.MapFrom(e => e.User.FullName))
-                .ForMember(dto => dto.PhoneNumber, opt => opt.MapFrom(e => e.User.PhoneNumber))
+                .ForMember(dto => dto.FullName, opt => opt.MapFrom(e => e.Reservation.FullName))
+                .ForMember(dto => dto.PhoneNumber, opt => opt.MapFrom(e => e.Reservation.PhoneNumber))
                 .ReverseMap();
         }
 

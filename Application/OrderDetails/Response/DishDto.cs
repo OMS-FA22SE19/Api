@@ -1,5 +1,4 @@
 ﻿using Application.Common.Mappings;
-using Application.Orders.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Enums;
@@ -21,10 +20,10 @@ namespace Application.OrderDetails.Response
         public OrderDetailStatus Status { get; set; }
 
         public void Mapping(Profile profile) => profile.CreateMap<OrderDetail, DishDto>()
-                .ForMember(e => e.UserId, opt => opt.MapFrom(e => e.Order.UserId))
-                .ForMember(e => e.Date, opt => opt.MapFrom(e => e.Created))
+                .ForMember(e => e.UserId, opt => opt.MapFrom(e => e.Order.Reservation.UserId))
+                .ForMember(e => e.Date, opt => opt.MapFrom(e => e.Order.Date))
                 .ForMember(e => e.FoodName, opt => opt.MapFrom(e => e.Food.Name))
-                .ForMember(e => e.PhoneNumber, opt => opt.MapFrom(e => e.Order.User.PhoneNumber))
+                .ForMember(e => e.PhoneNumber, opt => opt.MapFrom(e => e.Order.Reservation.User.PhoneNumber))
                 .ReverseMap();
 
         public bool Equals(DishDto? other)

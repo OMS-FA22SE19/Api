@@ -3,17 +3,14 @@ using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Models;
 using Application.OrderDetails.Response;
-using Application.Orders.Events;
 using Application.Orders.Helpers;
 using Application.Orders.Response;
-using Application.Reservations.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace Application.Orders.Commands
@@ -60,6 +57,9 @@ namespace Application.Orders.Commands
                 throw new NotFoundException(nameof(Reservation), $"with reservation id {request.ReservationId}");
             }
 
+            reservation.NumOfEdits++;
+            await _unitOfWork.ReservationRepository.UpdateAsync(reservation);
+
             var entity = await _unitOfWork.OrderRepository.GetAsync(o => o.ReservationId == request.ReservationId);
             if (entity is null)
             {
@@ -67,14 +67,6 @@ namespace Application.Orders.Commands
             }
 
             var user = await _userManager.FindByIdAsync(reservation.UserId);
-
-            if (entity.NumOfEdits >= 3)
-            {
-                return new Response<OrderDto>($"This Order is can not be edited more!")
-                {
-                    StatusCode = System.Net.HttpStatusCode.BadRequest
-                };
-            }
 
             //Comment until online payment complete
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => !e.IsDeleted && e.Id == reservation.TableTypeId);
@@ -116,7 +108,6 @@ namespace Application.Orders.Commands
                 }
             }
 
-            entity.NumOfEdits++;
             var result = await _unitOfWork.OrderRepository.UpdateAsync(entity);
 
             reservation.IsPriorFoodOrder = true;
@@ -148,7 +139,7 @@ namespace Application.Orders.Commands
                         Quantity = 1,
                         Price = detail.Price,
                         Amount = detail.Price,
-                        Note= detail.Note
+                        Note = detail.Note
                     });
                 }
                 else
