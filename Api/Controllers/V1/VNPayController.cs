@@ -1,4 +1,5 @@
-﻿using Application.Models;
+﻿using Application.Common.Security;
+using Application.Models;
 using Application.Orders.Commands;
 using Application.Orders.Response;
 using Application.Types.Response;
@@ -11,6 +12,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public sealed class VNPayController : ApiControllerBase
     {
         /// <summary>

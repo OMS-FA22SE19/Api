@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Security;
 using Application.Foods.Queries;
 using Application.Foods.Response;
 using Application.MenuFoods.Commands;
@@ -16,6 +17,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public sealed class MenusController : ApiControllerBase
     {
         /// <summary>

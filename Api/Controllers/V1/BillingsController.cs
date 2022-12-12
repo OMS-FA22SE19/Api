@@ -1,7 +1,7 @@
-﻿using Application.Models;
+﻿using Application.Common.Security;
+using Application.Models;
 using Application.Types.Response;
 using Application.VNPay.Commands;
-using Application.VNPay.Response;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -9,6 +9,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public sealed class BillingsController : ApiControllerBase
     {
         /// <summary>

@@ -1,8 +1,6 @@
-﻿using Application.AdminSettings.Commands;
-using Application.AdminSettings.Queries;
-using Application.AdminSettings.Response;
+﻿using Application.AdminSettings.Response;
 using Application.Common.Exceptions;
-using Application.CourseTypes.Response;
+using Application.Common.Security;
 using Application.Demo.Commands;
 using Application.Models;
 using Application.Orders.Commands;
@@ -15,6 +13,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public sealed class DemoController : ApiControllerBase
     {
         /// <summary>

@@ -1,10 +1,9 @@
 ﻿using Application.Common.Exceptions;
-using Application.Menus.Commands;
+using Application.Common.Security;
 using Application.Menus.Response;
 using Application.Models;
 using Application.Notifications.Commands;
 using Application.Notifications.Responses;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -12,6 +11,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public class NotificationController : ApiControllerBase
     {
         /// <summary>

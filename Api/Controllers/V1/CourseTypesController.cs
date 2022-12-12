@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Security;
 using Application.CourseTypes.Commands;
 using Application.CourseTypes.Queries;
 using Application.CourseTypes.Response;
@@ -11,6 +12,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public sealed class CourseTypesController : ApiControllerBase
     {
         /// <summary>
