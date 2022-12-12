@@ -70,11 +70,14 @@ namespace Application.Orders.Commands
                 table.Status = TableStatus.Available;
                 await _unitOfWork.TableRepository.UpdateAsync(table);
             }
-            reservation.Status = ReservationStatus.Done;
-            await _unitOfWork.ReservationRepository.UpdateAsync(reservation);
+            
 
             MapToEntity(entity);
             var result = await _unitOfWork.OrderRepository.UpdateAsync(entity);
+            await _unitOfWork.CompleteAsync(cancellationToken);
+
+            entity.Reservation.Status = ReservationStatus.Done;
+            await _unitOfWork.ReservationRepository.UpdateAsync(entity.Reservation);
             await _unitOfWork.CompleteAsync(cancellationToken);
 
             List<Expression<Func<OrderDetail, bool>>> filters = new();
