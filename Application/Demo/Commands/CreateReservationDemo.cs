@@ -55,7 +55,7 @@ namespace Application.Reservations.Commands
                 endTime = startTime.AddHours(1);
             }
 
-            var users = _userManager.Users.ToList();
+            var users = _userManager.Users.Where(u => !u.UserName.Equals("administrator@localhost")).ToList();
             var tables = await _unitOfWork.TableRepository.GetAllAsync();
             var tableTypes = await _unitOfWork.TableTypeRepository.GetAllAsync();
 
