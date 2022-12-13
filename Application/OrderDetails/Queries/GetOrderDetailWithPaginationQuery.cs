@@ -136,9 +136,10 @@ namespace Application.OrderDetails.Queries
             {
                 var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => orderDetail.Order.ReservationId == e.Id, $"{nameof(Reservation.ReservationTables)}");
                 var mappedEntity = _mapper.Map<DishDto>(orderDetail);
+                var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == reservation.TableTypeId);
                 if (reservation.ReservationTables.Any())
                 {
-                    mappedEntity.TableId = reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId;
+                    mappedEntity.TableId = tableType.Name + " - " + reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId;
                 }
                 mappedResult.Add(mappedEntity);
             }

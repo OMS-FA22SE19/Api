@@ -11,7 +11,7 @@ namespace Application.Orders.Response
     {
         public string Id { get; set; }
         public string UserId { get; set; }
-        public int TableId { get; set; }
+        public string TableId { get; set; }
         public string FullName { get; set; }
         public string PhoneNumber { get; set; }
         public DateTime Date { get; set; }

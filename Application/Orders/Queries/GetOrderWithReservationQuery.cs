@@ -39,9 +39,10 @@ namespace Application.Orders.Queries
             double total = 0;
 
             var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => result.ReservationId == e.Id, $"{nameof(Reservation.ReservationTables)}");
+            var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == reservation.TableTypeId);
             if (reservation.ReservationTables.Any())
             {
-                mappedResult.TableId = reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId;
+                mappedResult.TableId = tableType.Name + " - " + reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId;
             }
 
             List<OrderDetailDto> orderDetails = new();

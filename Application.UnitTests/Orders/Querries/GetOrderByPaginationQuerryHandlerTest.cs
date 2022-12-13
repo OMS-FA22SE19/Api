@@ -306,7 +306,7 @@ namespace Application.UnitTests.Orders.Queries
                 expectedDto.Total = total;
                 if (reservation.ReservationTables.Any())
                 {
-                    expectedDto.TableId = reservation.ReservationTables[0].TableId;
+                    expectedDto.TableId = reservation.ReservationTables[0].TableId.ToString();
                 }
                 expectedList.Add(expectedDto);
             }
