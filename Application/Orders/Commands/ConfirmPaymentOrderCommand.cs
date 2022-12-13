@@ -43,13 +43,16 @@ namespace Application.Orders.Commands
                 throw new NotFoundException(nameof(Order), request.Id);
             }
 
-            if (_currentUserService.Role.Equals("Customer"))
+            if (_currentUserService.UserId is not null)
             {
-                if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                if (_currentUserService.Role.Equals("Customer"))
                 {
-                    if (!_currentUserService.UserId.Equals(entity.Reservation.UserId))
+                    if (!_currentUserService.UserName.Equals("defaultCustomer"))
                     {
-                        throw new BadRequestException("This is not your order");
+                        if (!_currentUserService.UserId.Equals(entity.Reservation.UserId))
+                        {
+                            throw new BadRequestException("This is not your order");
+                        }
                     }
                 }
             }

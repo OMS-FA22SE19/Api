@@ -485,7 +485,7 @@ namespace Application.UnitTests.Orders.Commands
                 .Returns((Order Order) => new OrderDto
                 {
                     Id = Order.Id,
-                    UserId = Order.Reservation.UserId,
+                    //UserId = Order.Reservation.UserId,
                     Date = Order.Date,
                     PrePaid = Order.PrePaid,
                     Status = Order.Status,

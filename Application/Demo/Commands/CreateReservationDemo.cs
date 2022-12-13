@@ -204,6 +204,7 @@ namespace Application.Reservations.Commands
                     Status = ReservationStatus.Cancelled,
                     FullName = "Demo",
                     PhoneNumber = "Demo",
+                    ReasonForCancel = "Demo",
                     ReservationTables = new List<ReservationTable>()
                 };
 
