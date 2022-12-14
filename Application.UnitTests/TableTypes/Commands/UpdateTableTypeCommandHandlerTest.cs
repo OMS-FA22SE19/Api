@@ -40,6 +40,11 @@ namespace Application.UnitTests.TableTypes.Commands
 
         #region Unit Tests
         [TestCase(2, "abcdef", 12345, false)]
+        [TestCase(1, "abcdef", 12345, true)]
+        [TestCase(3, "random name", 0, true)]
+        [TestCase(1, "random name", 0, false)]
+        [TestCase(2, "abcdef", 12345, false)]
+        [TestCase(3, "abcdef", 100000, false)]
         public async Task Should_Update_TableType(int id, string name, double chargePerSeat, bool canBeCombined)
         {
             //Arrange

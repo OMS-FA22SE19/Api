@@ -71,6 +71,8 @@ namespace Application.UnitTests.Tables.Queries
 
         #region Unit Tests
         [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(5)]
         public async Task Should_Return_Table(int id)
         {
             //Arrange

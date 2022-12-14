@@ -1,5 +1,7 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Common.Mappings;
+using Application.Helpers;
 using Application.Models;
 using Application.Reservations.Response;
 using AutoMapper;
@@ -9,8 +11,8 @@ using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Collections.Immutable;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Application.Reservations.Commands
 {
@@ -28,7 +30,12 @@ namespace Application.Reservations.Commands
         public int TableTypeId { get; set; }
         [Required]
         public int Quantity { get; set; }
-        public bool IsPriorFoodOrder { get; set; }
+        [Required]
+        public string FullName { get; set; }
+        [Required]
+        public string PhoneNumber { get; set; }
+        [JsonIgnore]
+        public bool IsPriorFoodOrder { get; set; } = false;
 
         public void Mapping(Profile profile)
         {
@@ -41,31 +48,60 @@ namespace Application.Reservations.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ICurrentUserService _currentUserService;
 
-        public CreateReservationCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager)
+        public CreateReservationCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<ReservationDto>> Handle(CreateReservationCommand request, CancellationToken cancellationToken)
         {
+            bool isValid = true;
+            string errorMessage = string.Empty;
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == request.TableTypeId && !e.IsDeleted);
             if (tableType is null)
             {
                 throw new NotFoundException(nameof(TableType), request.TableTypeId);
             }
-            bool isValid = await validateStartEndTime(request);
+            var adminSettings = await _unitOfWork.AdminSettingRepository.GetAllAsync();
+
+            (isValid, errorMessage) = DateTimeHelpers.ValidateDateInAvailableTime(request.StartTime, request.EndTime, adminSettings);
+
             if (!isValid)
             {
-                return new Response<ReservationDto>($"This reservation is unavailable! Please try again!")
+                return new Response<ReservationDto>(errorMessage)
                 {
                     StatusCode = System.Net.HttpStatusCode.BadRequest
                 };
             }
+
+            var reservations = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.StartTime.Date, request.TableTypeId, request.NumOfSeats);
+            var tables = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
+
+            (isValid, errorMessage) = DateTimeHelpers.ValidateStartEndTime(request.StartTime, request.EndTime, request.Quantity, reservations, tables.Count, adminSettings);
+            if (!isValid)
+            {
+                return new Response<ReservationDto>(errorMessage)
+                {
+                    StatusCode = System.Net.HttpStatusCode.BadRequest
+                };
+            }
+
             var entity = _mapper.Map<Reservation>(request);
-            var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
+            ApplicationUser user = null;
+            if (_currentUserService.UserId is not null)
+            {
+                user = await _userManager.FindByIdAsync(_currentUserService.UserId);
+            }
+            else
+            {
+                user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"));
+            }
+            
             entity.UserId = user.Id;
             entity.Status = ReservationStatus.Available;
             var result = await _unitOfWork.ReservationRepository.InsertAsync(entity);
@@ -74,6 +110,7 @@ namespace Application.Reservations.Commands
             {
                 return new Response<ReservationDto>("error");
             }
+            
             result.User = user;
             var mappedResult = _mapper.Map<ReservationDto>(result);
             mappedResult.PrePaid = entity.NumOfSeats * tableType.ChargePerSeat * entity.Quantity;
@@ -82,38 +119,6 @@ namespace Application.Reservations.Commands
             {
                 StatusCode = System.Net.HttpStatusCode.Created
             };
-        }
-
-        private async Task<bool> validateStartEndTime(CreateReservationCommand request)
-        {
-            var reservation = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.StartTime.Date, request.TableTypeId, request.NumOfSeats);
-
-            var tables = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
-            var maxTables = tables.Count - request.Quantity;
-            var times = reservation.Select(e => e.StartTime).Concat(reservation.Select(e => e.EndTime)).ToImmutableSortedSet();
-            var busyTimes = new List<BusyTimeDto>();
-
-            for (int i = 0; i < (times.Count - 1); i++)
-            {
-                var count = reservation.Where(e => e.StartTime <= times[i] && e.EndTime >= times[i + 1]).ToList().Sum(e => e.Quantity);
-                if (maxTables - count < 0)
-                {
-                    var time = busyTimes.FirstOrDefault(e => e.EndTime == times[i]);
-                    if (time is null)
-                    {
-                        busyTimes.Add(new BusyTimeDto
-                        {
-                            StartTime = times[i],
-                            EndTime = times[i + 1]
-                        });
-                    }
-                    else
-                    {
-                        time.EndTime = times[i + 1];
-                    }
-                }
-            }
-            return busyTimes.All(e => request.StartTime > e.EndTime || request.EndTime < e.StartTime);
         }
     }
 }

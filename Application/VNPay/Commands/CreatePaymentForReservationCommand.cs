@@ -23,12 +23,10 @@ namespace Application.VNPay.Commands
     {
         private readonly IConfiguration _config;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMapper _mapper;
         public CreatePaymentForReservationCommandHandler(IConfiguration configuration, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _config = configuration;
             _unitOfWork = unitOfWork;
-            _mapper = mapper;
         }
 
         public async Task<Response<PaymentUrlDto>> Handle(CreatePaymentForReservationCommand request, CancellationToken cancellationToken)

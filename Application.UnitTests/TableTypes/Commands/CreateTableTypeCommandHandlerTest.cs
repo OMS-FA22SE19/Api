@@ -39,6 +39,10 @@ namespace Application.UnitTests.TableTypes.Commands
 
         #region Unit Tests
         [TestCase("abcdef", 12345, true)]
+        [TestCase("random name", 0, true)]
+        [TestCase("random name", 0, false)]
+        [TestCase("abcdef", 12345, false)]
+        [TestCase("abcdef", 100000, false)]
         public async Task Should_Create_TableType(string name, int chargePerSeat, bool canBeCombined)
         {
             //Arrange

@@ -27,6 +27,9 @@ namespace Infrastructure.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -118,6 +121,10 @@ namespace Infrastructure.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("PhoneNumber")
+                        .IsUnique()
+                        .HasFilter("[PhoneNumber] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -359,9 +366,6 @@ namespace Infrastructure.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
-                    b.Property<int>("NumOfEdits")
-                        .HasColumnType("int");
-
                     b.Property<double>("PrePaid")
                         .HasColumnType("float");
 
@@ -374,16 +378,10 @@ namespace Infrastructure.Migrations
                     b.Property<int>("TableId")
                         .HasColumnType("int");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(300)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ReservationId")
                         .IsUnique();
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Orders", (string)null);
                 });
@@ -399,22 +397,8 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("CreatedBy")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
-
                     b.Property<int>("FoodId")
                         .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("LastModified")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("Note")
                         .HasMaxLength(500)
@@ -504,6 +488,10 @@ namespace Infrastructure.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(1000)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -526,8 +514,15 @@ namespace Infrastructure.Migrations
                     b.Property<int>("NumOfSeats")
                         .HasColumnType("int");
 
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(15)");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("ReasonForCancel")
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
@@ -679,6 +674,9 @@ namespace Infrastructure.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Topics", (string)null);
                 });
@@ -1108,15 +1106,7 @@ namespace Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Core.Entities.ApplicationUser", "User")
-                        .WithMany("Orders")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Reservation");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Core.Entities.OrderDetail", b =>
@@ -1273,8 +1263,6 @@ namespace Infrastructure.Migrations
 
             modelBuilder.Entity("Core.Entities.ApplicationUser", b =>
                 {
-                    b.Navigation("Orders");
-
                     b.Navigation("RefreshTokens");
 
                     b.Navigation("Reservations");

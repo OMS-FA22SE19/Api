@@ -50,8 +50,16 @@ namespace Api.ApiControllers.V1
                 {
                     setTokenCookie(result.Data.RefreshToken);
                 }
-                
+
                 return StatusCode((int)result.StatusCode, result);
+            }
+            catch (BadRequestException)
+            {
+                throw;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -77,7 +85,7 @@ namespace Api.ApiControllers.V1
                 }
 
                 var user = (ApplicationUser)HttpContext.Items["User"];
-                
+
                 if (user is null)
                 {
                     throw new NotFoundException(nameof(ApplicationUser));

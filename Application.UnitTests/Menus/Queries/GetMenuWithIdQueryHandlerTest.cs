@@ -51,6 +51,7 @@ namespace Application.UnitTests.Menus.Queries
 
         #region Unit Tests
         [TestCase(1)]
+        [TestCase(2)]
         public async Task Should_Return_Menu(int id)
         {
             //Arrange
@@ -78,6 +79,8 @@ namespace Application.UnitTests.Menus.Queries
         }
 
         [TestCase(10)]
+        [TestCase(0)]
+        [TestCase(3)]
         public async Task Should_Return_Throw_NotFound_Exception(int id)
         {
             //Arrange

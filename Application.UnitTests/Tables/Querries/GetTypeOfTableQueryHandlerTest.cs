@@ -72,7 +72,7 @@ namespace Application.UnitTests.Tables.Queries
             {
                 NumsOfPeople = NumsOfPeople
             };
-            var handler = new GetTypeOfTableQueryHandler(_unitOfWork, _mapper);
+            var handler = new GetTypeOfTableQueryHandler(_unitOfWork);
 
             var ListTableType = new List<TableByTypeDto>();
 

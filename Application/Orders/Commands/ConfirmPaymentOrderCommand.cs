@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Response;
@@ -25,19 +26,35 @@ namespace Application.Orders.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUserService;
 
-        public ConfirmPaymentOrderCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public ConfirmPaymentOrderCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<OrderDto>> Handle(ConfirmPaymentOrderCommand request, CancellationToken cancellationToken)
         {
-            var entity = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Order.OrderDetails)},{nameof(Order.User)}");
+            var entity = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.Id, $"{nameof(Order.OrderDetails)},{nameof(Order.Reservation)}");
             if (entity is null)
             {
                 throw new NotFoundException(nameof(Order), request.Id);
+            }
+
+            if (_currentUserService.UserId is not null)
+            {
+                if (_currentUserService.Role.Equals("Customer"))
+                {
+                    if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                    {
+                        if (!_currentUserService.UserId.Equals(entity.Reservation.UserId))
+                        {
+                            throw new BadRequestException("This is not your order");
+                        }
+                    }
+                }
             }
 
             foreach (var detail in entity.OrderDetails)
@@ -56,11 +73,14 @@ namespace Application.Orders.Commands
                 table.Status = TableStatus.Available;
                 await _unitOfWork.TableRepository.UpdateAsync(table);
             }
-            reservation.Status = ReservationStatus.Done;
-            await _unitOfWork.ReservationRepository.UpdateAsync(reservation);
+            
 
             MapToEntity(entity);
             var result = await _unitOfWork.OrderRepository.UpdateAsync(entity);
+            await _unitOfWork.CompleteAsync(cancellationToken);
+
+            entity.Reservation.Status = ReservationStatus.Done;
+            await _unitOfWork.ReservationRepository.UpdateAsync(entity.Reservation);
             await _unitOfWork.CompleteAsync(cancellationToken);
 
             List<Expression<Func<OrderDetail, bool>>> filters = new();
@@ -83,7 +103,7 @@ namespace Application.Orders.Commands
                         orderDetails.Add(new OrderDetailDto
                         {
                             OrderId = result.Id,
-                            UserId = result.UserId,
+                            UserId = result.Reservation.UserId,
                             Date = result.Date,
                             FoodId = detail.FoodId,
                             FoodName = detail.Food.Name,
@@ -107,7 +127,7 @@ namespace Application.Orders.Commands
             {
                 Id = entity.Id,
                 Date = entity.Date,
-                PhoneNumber = entity.User.PhoneNumber,
+                PhoneNumber = entity.Reservation.PhoneNumber,
                 Status = OrderStatus.Paid,
                 OrderDetails = orderDetails,
                 PrePaid = entity.PrePaid,

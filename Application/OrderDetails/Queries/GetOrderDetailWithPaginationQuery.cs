@@ -35,9 +35,8 @@ namespace Application.OrderDetails.Queries
         {
             List<Expression<Func<OrderDetail, bool>>> filters = new();
             Func<IQueryable<OrderDetail>, IOrderedQueryable<OrderDetail>> orderBy = null;
-            string includeProperties = $"{nameof(OrderDetail.Order)}.{nameof(Order.User)},{nameof(OrderDetail.Order)}.{nameof(Order.Reservation)}.{nameof(Reservation.ReservationTables)},{nameof(OrderDetail.Food)}";
+            string includeProperties = $"{nameof(OrderDetail.Order)}.{nameof(Order.Reservation)}.{nameof(Reservation.ReservationTables)},{nameof(OrderDetail.Food)}";
 
-            //filters.Add(e => e.Order.Date <= _dateTime.Now.AddHours(-3));
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
@@ -54,7 +53,7 @@ namespace Application.OrderDetails.Queries
                         }
                         break;
                     case OrderDetailProperty.PhoneNumber:
-                        filters.Add(e => e.Order.User.PhoneNumber.Contains(request.SearchValue));
+                        filters.Add(e => e.Order.Reservation.PhoneNumber.Contains(request.SearchValue));
                         break;
                     case OrderDetailProperty.OrderId:
                         filters.Add(e => e.Order.Id.Contains(request.SearchValue));
@@ -92,14 +91,13 @@ namespace Application.OrderDetails.Queries
                 filters.Add(e => e.Status == request.Status);
             }
 
-            filters.Add(e => !e.IsDeleted);
-
             switch (request.OrderBy)
             {
                 case OrderDetailProperty.OrderId:
                     if (request.IsDescending)
                     {
                         orderBy = e => e.OrderByDescending(x => x.OrderId);
+                        break;
                     }
                     orderBy = e => e.OrderBy(x => x.OrderId);
                     break;
@@ -107,6 +105,7 @@ namespace Application.OrderDetails.Queries
                     if (request.IsDescending)
                     {
                         orderBy = e => e.OrderByDescending(x => x.FoodId);
+                        break;
                     }
                     orderBy = e => e.OrderBy(x => x.FoodId);
                     break;
@@ -114,6 +113,7 @@ namespace Application.OrderDetails.Queries
                     if (request.IsDescending)
                     {
                         orderBy = e => e.OrderByDescending(x => x.Price);
+                        break;
                     }
                     orderBy = e => e.OrderBy(x => x.Price);
                     break;
@@ -121,11 +121,12 @@ namespace Application.OrderDetails.Queries
                     if (request.IsDescending)
                     {
                         orderBy = e => e.OrderByDescending(x => x.Status);
+                        break;
                     }
                     orderBy = e => e.OrderBy(x => x.Status);
                     break;
                 default:
-                    orderBy = e => e.OrderBy(x => x.Status).ThenBy(e => e.Created);
+                    orderBy = e => e.OrderBy(x => x.Status).ThenBy(e => e.Order.Date);
                     break;
             }
 

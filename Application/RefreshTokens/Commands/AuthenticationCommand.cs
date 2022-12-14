@@ -3,31 +3,23 @@ using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Common.Mappings;
 using Application.Models;
-using Application.RefreshTokens.Response;
-using AutoMapper;
 using Core.Entities;
-using Core.Enums;
 using Core.Interfaces;
-using FirebaseAdmin.Auth.Hash;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
 using System.Net;
 using System.Security.Claims;
 using System.Text.Json.Serialization;
-using System.Threading;
 
 namespace Application.RefreshTokens.Commands
 {
     public class AuthenticationCommand : IMapFrom<RefreshToken>, IRequest<Response<AuthenticationResponse>>
     {
         [Required]
-        [EmailAddress]
         public string Email { get; set; }
         [Required]
         [DataType(DataType.Password)]
@@ -56,11 +48,19 @@ namespace Application.RefreshTokens.Commands
                 var user = await _userManager.FindByEmailAsync(request.Email);
                 if (user is null)
                 {
-                    throw new NotFoundException("Not found account");
+                    user = await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber.Equals(request.Email));
+                    if (user is null)
+                    {
+                        throw new NotFoundException("Not found account");
+                    }
+                }
+                if (user.EmailConfirmed == false && user.PhoneNumberConfirmed == false)
+                {
+                    throw new BadRequestException("Please confirm your email or your number");
                 }
                 if (!(await _userManager.CheckPasswordAsync(user, request.Password)))
                 {
-                    throw new BadRequestException("Not valid login information");
+                    throw new UnauthorizedAccessException("Wrong account information");
                 }
                 if (user.IsDeleted == true)
                 {
@@ -129,7 +129,7 @@ namespace Application.RefreshTokens.Commands
                     }
                 }
             }
-            
+
         }
     }
 }

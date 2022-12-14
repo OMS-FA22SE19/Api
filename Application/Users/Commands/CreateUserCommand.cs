@@ -1,4 +1,6 @@
-﻿using Application.Common.Mappings;
+﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
+using Application.Common.Mappings;
 using Application.Models;
 using Application.Users.Response;
 using AutoMapper;
@@ -6,10 +8,18 @@ using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace Application.Users.Commands
 {
+    public class MailContent
+    {
+        public string To { get; set; }
+        public string Subject { get; set; }
+        public string Body { get; set; }
+
+    }
     public class CreateUserCommand : IMapFrom<ApplicationUser>, IRequest<Response<UserDto>>
     {
         [Required]
@@ -47,24 +57,28 @@ namespace Application.Users.Commands
         public async Task<Response<UserDto>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
         {
             var user = new ApplicationUser() { UserName = request.Email.Split('@')[0], Email = request.Email, FullName = request.FullName, PhoneNumber = request.PhoneNumber };
-            if (await _userManager.FindByNameAsync(request.PhoneNumber) is not null)
+            if (await _userManager.FindByNameAsync(request.Email.Split('@')[0]) is not null 
+                || await _userManager.Users.FirstOrDefaultAsync(e => e.PhoneNumber.Equals(request.PhoneNumber)) is not null)
             {
-                throw new ArgumentNullException(nameof(user));
+                throw new BadRequestException(nameof(user));
             }
 
             var userRole = await _roleManager.FindByNameAsync(request.Role);
             if (userRole is null)
             {
-                throw new ArgumentNullException("Not found role: " + request.Role);
+                throw new NotFoundException("Not found role: " + request.Role);
             }
 
             var password = request.Password;
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
             var result = await _userManager.CreateAsync(user, password);
             await _userManager.AddToRoleAsync(user, userRole.Name);
             var mappedResult = _mapper.Map<UserDto>(user);
             return new Response<UserDto>(mappedResult)
             {
-                StatusCode = System.Net.HttpStatusCode.Created
+                StatusCode = System.Net.HttpStatusCode.Created,
+                Message = code
             };
         }
     }

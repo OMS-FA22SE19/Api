@@ -49,6 +49,8 @@ namespace Application.UnitTests.Tables.Commands
 
         #region Unit Tests
         [TestCase(4, 1)]
+        [TestCase(8, 3)]
+        [TestCase(12, 2)]
         public async Task Should_Create_Table(int numOfSeat, int tableTypeId)
         {
             //Arrange
@@ -83,6 +85,7 @@ namespace Application.UnitTests.Tables.Commands
         }
 
         [TestCase(4, 10)]
+        [TestCase(4, 0)]
         public async Task Should_Return_Throw_NotFound_Exception(int numOfSeat, int tableTypeId)
         {
             //Arrange

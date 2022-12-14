@@ -2,6 +2,7 @@
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Response;
+using Application.Reservations.Response;
 using AutoMapper;
 using Core.Common;
 using Core.Entities;
@@ -23,20 +24,20 @@ namespace Application.Orders.Queries
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IDateTime _dateTime;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetOrderWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, IDateTime dateTime)
+        public GetOrderWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _dateTime = dateTime;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<PaginatedList<OrderDto>>> Handle(GetOrderWithPaginationQuery request, CancellationToken cancellationToken)
         {
             List<Expression<Func<Order, bool>>> filters = new();
             Func<IQueryable<Order>, IOrderedQueryable<Order>> orderBy = null;
-            string includeProperties = $"{nameof(Order.OrderDetails)}.{nameof(OrderDetail.Food)},{nameof(Order.User)}";
+            string includeProperties = $"{nameof(Order.OrderDetails)}.{nameof(OrderDetail.Food)},{nameof(Order.Reservation)}";
 
             if (!string.IsNullOrWhiteSpace(request.SearchValue))
             {
@@ -53,10 +54,10 @@ namespace Application.Orders.Queries
                         }
                         break;
                     case OrderProperty.User:
-                        filters.Add(e => e.User.FullName.Contains(request.SearchValue));
+                        filters.Add(e => e.Reservation.FullName.Contains(request.SearchValue));
                         break;
                     case OrderProperty.PhoneNumber:
-                        filters.Add(e => e.User.PhoneNumber.Contains(request.SearchValue));
+                        filters.Add(e => e.Reservation.PhoneNumber.Contains(request.SearchValue));
                         break;
                     default:
                         break;
@@ -65,6 +66,14 @@ namespace Application.Orders.Queries
             if (request.Status != null)
             {
                 filters.Add(e => e.Status == request.Status);
+            }
+
+            if (_currentUserService.Role.Equals("Customer"))
+            {
+                if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                {
+                    filters.Add(e => e.Reservation.UserId.Equals(_currentUserService.UserId));
+                }
             }
 
             switch (request.OrderBy)
@@ -80,10 +89,10 @@ namespace Application.Orders.Queries
                 case (OrderProperty.UserId):
                     if (request.IsDescending)
                     {
-                        orderBy = e => e.OrderByDescending(x => x.UserId);
+                        orderBy = e => e.OrderByDescending(x => x.Reservation.UserId);
                         break;
                     }
-                    orderBy = e => e.OrderBy(x => x.UserId);
+                    orderBy = e => e.OrderBy(x => x.Reservation.UserId);
                     break;
                 case (OrderProperty.Status):
                     if (request.IsDescending)
@@ -114,9 +123,9 @@ namespace Application.Orders.Queries
                 var orderDto = new OrderDto
                 {
                     Id = order.Id,
-                    UserId = order.UserId,
-                    FullName = order.User.FullName,
-                    PhoneNumber = order.User.PhoneNumber,
+                    UserId = order.Reservation.UserId,
+                    FullName = order.Reservation.FullName,
+                    PhoneNumber = order.Reservation.PhoneNumber,
                     Date = order.Date,
                     Status = order.Status,
                     PrePaid = order.PrePaid
@@ -131,7 +140,7 @@ namespace Application.Orders.Queries
 
                 foreach (var detail in order.OrderDetails)
                 {
-                    var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && !detail.IsDeleted && e.Status == detail.Status);
+                    var element = orderDetails.FirstOrDefault(e => e.FoodId.Equals(detail.FoodId) && e.Status == detail.Status);
                     if (element is null)
                     {
                         if (detail.Status != OrderDetailStatus.Cancelled && detail.Status != OrderDetailStatus.Reserved)
@@ -139,7 +148,7 @@ namespace Application.Orders.Queries
                             orderDetails.Add(new OrderDetailDto
                             {
                                 OrderId = order.Id,
-                                UserId = order.UserId,
+                                UserId = order.Reservation.UserId,
                                 Date = order.Date,
                                 FoodId = detail.FoodId,
                                 FoodName = detail.Food.Name,
@@ -154,7 +163,7 @@ namespace Application.Orders.Queries
                             orderDetails.Add(new OrderDetailDto
                             {
                                 OrderId = order.Id,
-                                UserId = order.UserId,
+                                UserId = order.Reservation.UserId,
                                 Date = order.Date,
                                 FoodId = detail.FoodId,
                                 FoodName = detail.Food.Name,
@@ -185,6 +194,7 @@ namespace Application.Orders.Queries
                 total -= order.PrePaid;
                 orderDto.Total = total;
                 orderDto.OrderDetails = orderDetails;
+                orderDto.Reservation = _mapper.Map<ReservationDto>(reservation);
 
                 orderDtos.Add(orderDto);
             }

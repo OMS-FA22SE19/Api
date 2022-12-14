@@ -1,7 +1,6 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Security;
 using Application.Models;
-using Application.Orders.Commands;
-using Application.Orders.Response;
 using Application.Reservations.Commands;
 using Application.Reservations.Queries;
 using Application.Reservations.Response;
@@ -13,6 +12,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public sealed class ReservationsController : ApiControllerBase
     {
         /// <summary>
@@ -153,8 +153,7 @@ namespace Api.Controllers.V1
         ///         "numOfPeople":4,
         ///         "TableTypeId":1
         ///         "numOfSeats": 4,
-        ///         "quantity": 1,
-        ///         "isPriorFoodOrder": false
+        ///         "quantity": 1
         ///     }
         ///     
         /// </remarks>
@@ -267,7 +266,7 @@ namespace Api.Controllers.V1
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Delete(int id)
+        public async Task<ActionResult> Delete(int id, [FromBody] DeleteReservationCommand command)
         {
             try
             {
@@ -276,7 +275,16 @@ namespace Api.Controllers.V1
                     return BadRequest();
                 }
 
-                var result = await Mediator.Send(new DeleteReservationCommand { Id = id });
+                if (id != command.Id)
+                {
+                    var response = new Response<ReservationDto>("The Id do not match")
+                    {
+                        StatusCode = HttpStatusCode.BadRequest
+                    };
+                    return StatusCode((int)response.StatusCode, response);
+                }
+
+                var result = await Mediator.Send(command);
                 if (result.StatusCode == HttpStatusCode.NoContent)
                 {
                     return NoContent();
@@ -300,17 +308,15 @@ namespace Api.Controllers.V1
         /// <remarks>
         /// Sample request:
         ///
-        ///     Get /Reservations/Checkin
-        ///     {
-        ///     }
+        ///     Get /Reservations/1/Checkin
         ///     
         /// </remarks>
-        [HttpPost("CheckIn")]
+        [HttpGet("{id}/CheckIn")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> CheckIn(CheckinReservationCommand query)
+        public async Task<ActionResult> CheckIn(int id)
         {
             try
             {
@@ -318,7 +324,10 @@ namespace Api.Controllers.V1
                 {
                     return BadRequest();
                 }
-
+                var query = new CheckinReservationQuery()
+                {
+                    ReservationId = id
+                };
                 var result = await Mediator.Send(query);
                 return StatusCode((int)result.StatusCode, result);
             }
@@ -390,6 +399,65 @@ namespace Api.Controllers.V1
                 throw;
             }
             catch (ValidationException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<ReservationDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        /// <summary>
+        /// Update status of a Reservation.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     PUT /Reservations/ReasonForCancel/1
+        ///     {
+        ///         "id": 1,
+        ///         "reasonForCancel": "Khách đến trễ hơn 15 phút"
+        ///     }
+        ///     
+        /// </remarks>
+        /// <param name="id">The id of updated Reservation</param>
+        [HttpPut("ReasonForCancel/{id}")]
+        [Consumes("application/json")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> ChangeReasonForCancel(int id, [FromBody] UpdateReservationForCancelCommand command)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest();
+                }
+
+                if (id != command.Id)
+                {
+                    var response = new Response<ReservationDto>("The Id do not match")
+                    {
+                        StatusCode = HttpStatusCode.BadRequest
+                    };
+                    return StatusCode((int)response.StatusCode, response);
+                }
+
+                var result = await Mediator.Send(command);
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (NotFoundException)
             {
                 throw;
             }

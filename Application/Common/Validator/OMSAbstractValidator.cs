@@ -1,6 +1,4 @@
 ﻿using FluentValidation;
-using System;
-using System.Linq;
 
 namespace Application.Common.Validator
 {
@@ -8,7 +6,8 @@ namespace Application.Common.Validator
     {
         protected virtual bool BeAValidName(string name)
         {
-            name = name.Replace("  ", "");
+            name = name.Trim();
+            name = name.Replace(" ", "");
             name = name.Replace("-", "");
             return name.All(Char.IsLetter);
         }

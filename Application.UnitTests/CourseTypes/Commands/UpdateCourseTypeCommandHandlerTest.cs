@@ -40,6 +40,10 @@ namespace Application.UnitTests.CourseTypes.Commands
 
         #region Unit Tests
         [TestCase(2, "abcdef")]
+        [TestCase(1, "abcdef")]
+        [TestCase(3, "random name")]
+        [TestCase(1, "random name")]
+        [TestCase(2, "random name")]
         public async Task Should_Update_CourseType(int id, string name)
         {
             //Arrange
@@ -65,6 +69,7 @@ namespace Application.UnitTests.CourseTypes.Commands
             Assert.That(inDatabase, Is.EqualTo(expected));
         }
         [TestCase(10)]
+        [TestCase(0)]
         public async Task Should_Return_Throw_NotFound_Exception(int id)
         {
             //Arrange

@@ -1,4 +1,5 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Reservations.Response;
@@ -22,11 +23,13 @@ namespace Application.Reservations.Queries
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetReservationWithIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetReservationWithIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<ReservationDto>> Handle(GetReservationWithIdQuery request, CancellationToken cancellationToken)
@@ -36,6 +39,21 @@ namespace Application.Reservations.Queries
             {
                 throw new NotFoundException(nameof(Reservation), $"with {request.Id}");
             }
+            if (_currentUserService.UserId is null)
+            {
+                throw new BadRequestException("You have to log in");
+            }
+            if (_currentUserService.Role.Equals("Customer"))
+            {
+                if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                {
+                    if (!_currentUserService.UserId.Equals(result.UserId))
+                    {
+                        throw new BadRequestException("This is not your reservation");
+                    }
+                }
+            }
+            
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == result.TableTypeId);
             if (tableType is null)
             {

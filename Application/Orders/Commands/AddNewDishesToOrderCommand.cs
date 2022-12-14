@@ -12,7 +12,6 @@ using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Orders.Commands
 {
@@ -34,28 +33,43 @@ namespace Application.Orders.Commands
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IMapper _mapper;
         private readonly IDateTime _dateTime;
+        private readonly ICurrentUserService _currentUserService;
 
-        public AddNewDishesToOrderCommandHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IDateTime dateTime)
+        public AddNewDishesToOrderCommandHandler(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IMapper mapper, IDateTime dateTime, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _mapper = mapper;
             _dateTime = dateTime;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<OrderDto>> Handle(AddNewDishesToOrderCommand request, CancellationToken cancellationToken)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
+            //var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
             var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => e.Available);
             if (availableMenu is null)
             {
                 throw new NotFoundException(nameof(Menu), $"No available {nameof(Menu)}");
             }
-            var order = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.OrderId && !e.IsDeleted && e.Status == OrderStatus.Processing, $"{nameof(Order.OrderDetails)}");
+            var order = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.OrderId && !e.IsDeleted && e.Status == OrderStatus.Processing, $"{nameof(Order.OrderDetails)}, {nameof(Order.Reservation)}");
             if (order is null)
             {
                 throw new NotFoundException(nameof(Order), request.OrderId);
             }
+
+            if (_currentUserService.Role.Equals("Customer"))
+            {
+                if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                {
+                    if (!_currentUserService.UserId.Equals(order.Reservation.UserId))
+                    {
+                        throw new BadRequestException("This is not your order");
+                    }
+                }
+            }
+
+            var user = await _userManager.FindByIdAsync(order.Reservation.UserId);
 
             foreach (var dish in request.OrderDetails)
             {
@@ -71,7 +85,8 @@ namespace Application.Orders.Commands
                         FoodId = dish.Key,
                         Price = food.Price,
                         Note = string.IsNullOrWhiteSpace(dish.Value.Note) ? string.Empty : dish.Value.Note,
-                        Status = OrderDetailStatus.Received
+                        Status = OrderDetailStatus.Received,
+                        Created = _dateTime.Now
                     });
                 }
             }

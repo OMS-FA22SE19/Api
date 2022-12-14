@@ -45,6 +45,18 @@ namespace Infrastructure.Persistence.Configurations
                 .IsRequired()
                 .HasColumnType("nvarchar(300)");
 
+            builder.Property<string>("ReasonForCancel")
+                .IsRequired(false)
+                .HasColumnType("nvarchar(300)");
+
+            builder.Property<string>("FullName")
+                .IsRequired()
+                .HasColumnType("nvarchar(1000)");
+
+            builder.Property<string>("PhoneNumber")
+               .IsRequired()
+               .HasColumnType("nvarchar(15)");
+
             builder.HasOne(e => e.User)
                 .WithMany(e => e.Reservations)
                 .HasForeignKey(e => e.UserId);

@@ -12,7 +12,6 @@ using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace Application.Orders.Commands
 {
@@ -45,7 +44,7 @@ namespace Application.Orders.Commands
 
         public async Task<Response<OrderDto>> Handle(CreatePreOrderFoodForReservationCommand request, CancellationToken cancellationToken)
         {
-            var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
+            //var user = await _userManager.Users.FirstOrDefaultAsync(e => e.UserName.Equals("defaultCustomer"), cancellationToken);
             var availableMenu = await _unitOfWork.MenuRepository.GetAsync(e => e.Available);
             if (availableMenu is null)
             {
@@ -58,10 +57,11 @@ namespace Application.Orders.Commands
                 throw new NotFoundException(nameof(Reservation), $"with reservation id {request.ReservationId}");
             }
 
+            var user = await _userManager.FindByIdAsync(reservation.UserId);
+
             var entity = new Order
             {
                 Id = $"{reservation.Id}-{user.PhoneNumber}-{_dateTime.Now.ToString("dd-MM-yyyy-HH:mm:ss")}",
-                UserId = user.Id,
                 ReservationId = reservation.Id,
                 Date = _dateTime.Now,
                 Status = OrderStatus.Reserved,
@@ -137,7 +137,7 @@ namespace Application.Orders.Commands
                         Quantity = 1,
                         Price = detail.Price,
                         Amount = detail.Price,
-                        Note= detail.Note,
+                        Note = detail.Note,
                     });
                 }
                 else

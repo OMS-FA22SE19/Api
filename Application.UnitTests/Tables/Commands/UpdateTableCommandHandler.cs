@@ -46,7 +46,9 @@ namespace Application.UnitTests.Tables.Commands
         }
 
         #region Unit Tests
-        [TestCase(2, 10, TableStatus.Available, 1)]
+        [TestCase(2, 4, TableStatus.Available, 1)]
+        [TestCase(3, 8, TableStatus.Reserved, 2)]
+        [TestCase(4, 12, TableStatus.Occupied, 3)]
         public async Task Should_Update_Table(int id, int numOfSeat, TableStatus status, int tableTypeId)
         {
             //Arrange
@@ -75,7 +77,9 @@ namespace Application.UnitTests.Tables.Commands
             var inDatabase = _tables.FirstOrDefault(e => e.Id == id);
             Assert.That(inDatabase, Is.EqualTo(expected));
         }
+
         [TestCase(2, 10)]
+        [TestCase(2, 0)]
         public async Task Should_Return_Throw_NotFound_TableId_Exception(int id, int tableTypeId)
         {
             //Arrange
@@ -94,6 +98,7 @@ namespace Application.UnitTests.Tables.Commands
         }
 
         [TestCase(10)]
+        [TestCase(0)]
         public async Task Should_Return_Throw_NotFound_TableTypeId_Exception(int id)
         {
             //Arrange

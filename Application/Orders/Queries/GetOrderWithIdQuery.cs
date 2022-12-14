@@ -1,7 +1,9 @@
 ﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Orders.Response;
+using Application.Reservations.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Enums;
@@ -21,20 +23,34 @@ namespace Application.Orders.Queries
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUserService;
 
-        public GetOrderWithIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public GetOrderWithIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<OrderDto>> Handle(GetOrderWithIdQuery request, CancellationToken cancellationToken)
         {
-            var result = await _unitOfWork.OrderRepository.GetAsync(e => e.Id.Equals(request.Id), $"{nameof(Order.OrderDetails)}.{nameof(OrderDetail.Food)},{nameof(Order.User)}");
+            var result = await _unitOfWork.OrderRepository.GetAsync(e => e.Id.Equals(request.Id), $"{nameof(Order.OrderDetails)}.{nameof(OrderDetail.Food)},{nameof(Order.Reservation)}");
             if (result is null)
             {
-                throw new NotFoundException(nameof(Order), $"with TableId {request.Id}");
+                throw new NotFoundException(nameof(Order), $"with {request.Id}");
             }
+
+            if (_currentUserService.Role.Equals("Customer"))
+            {
+                if (!_currentUserService.UserName.Equals("defaultCustomer"))
+                {
+                    if (!_currentUserService.UserId.Equals(result.Reservation.UserId))
+                    {
+                        throw new BadRequestException("This is not your reservation");
+                    }
+                }
+            }
+
             var mappedResult = _mapper.Map<OrderDto>(result);
             double total = 0;
 
@@ -59,7 +75,7 @@ namespace Application.Orders.Queries
                         orderDetails.Add(new OrderDetailDto
                         {
                             OrderId = result.Id,
-                            UserId = result.UserId,
+                            UserId = result.Reservation.UserId,
                             Date = result.Date,
                             FoodId = detail.FoodId,
                             FoodName = detail.Food.Name,
@@ -81,6 +97,7 @@ namespace Application.Orders.Queries
 
             mappedResult.OrderDetails = orderDetails;
             mappedResult.Total = total;
+            mappedResult.Reservation = _mapper.Map<ReservationDto>(reservation);
             return new Response<OrderDto>(mappedResult);
         }
     }

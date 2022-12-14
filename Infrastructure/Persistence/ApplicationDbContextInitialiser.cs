@@ -1,6 +1,5 @@
 ﻿using Core.Entities;
 using Core.Interfaces;
-using Infrastructure.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -64,7 +63,7 @@ namespace Infrastructure.Persistence
             }
 
             // Default users
-            var administrator = new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost", FullName = "Administrator" };
+            var administrator = new ApplicationUser { UserName = "administrator@localhost", Email = "administrator@localhost.com", FullName = "Administrator", EmailConfirmed = true };
 
             if (_userManager.Users.All(u => u.UserName != administrator.UserName))
             {
@@ -81,7 +80,7 @@ namespace Infrastructure.Persistence
             }
 
             // Default users
-            var customer = new ApplicationUser { UserName = "defaultCustomer", Email = "longpnhse150499@fpt.edu.vn", PhoneNumber = "0939758999", FullName = "Default Customer" };
+            var customer = new ApplicationUser { UserName = "defaultCustomer", Email = "longpnhse150499@fpt.edu.vn", PhoneNumber = "0939758999", FullName = "Default Customer", EmailConfirmed = true };
 
             if (_userManager.Users.All(u => u.UserName != customer.UserName))
             {
@@ -90,9 +89,21 @@ namespace Infrastructure.Persistence
             }
 
             var restaurantOwnerRole = new IdentityRole("Restaurant Owner");
-            if (_roleManager.Roles.All(r => r.Name != customerRole.Name))
+            if (_roleManager.Roles.All(r => r.Name != restaurantOwnerRole.Name))
             {
-                await _roleManager.CreateAsync(customerRole);
+                await _roleManager.CreateAsync(restaurantOwnerRole);
+            }
+
+            var StaffRole = new IdentityRole("Staff");
+            if (_roleManager.Roles.All(r => r.Name != StaffRole.Name))
+            {
+                await _roleManager.CreateAsync(StaffRole);
+            }
+
+            var ChefRole = new IdentityRole("Chef");
+            if (_roleManager.Roles.All(r => r.Name != ChefRole.Name))
+            {
+                await _roleManager.CreateAsync(ChefRole);
             }
 
             var topic = new Topic { Name = "Staff" };

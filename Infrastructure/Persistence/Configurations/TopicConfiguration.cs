@@ -40,6 +40,8 @@ namespace Infrastructure.Persistence.Configurations
 
             builder.HasKey("Id");
 
+            builder.HasIndex("Name").IsUnique();
+
             builder.ToTable("Topics");
         }
     }

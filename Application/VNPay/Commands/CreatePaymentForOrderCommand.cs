@@ -34,7 +34,7 @@ namespace Application.VNPay.Commands
 
         public async Task<Response<PaymentUrlDto>> Handle(CreatePaymentForOrderCommand request, CancellationToken cancellationToken)
         {
-            var order = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.OrderId, $"{nameof(Order.OrderDetails)},{nameof(Order.User)}");
+            var order = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.OrderId, $"{nameof(Order.OrderDetails)},{nameof(Order.Reservation)}");
             if (order is null)
             {
                 throw new NotFoundException(nameof(Order), request.OrderId);

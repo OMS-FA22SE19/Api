@@ -56,6 +56,8 @@ namespace Application.UnitTests.TableTypes.Queries
 
         #region Unit Tests
         [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(3)]
         public async Task Should_Return_TableType(int id)
         {
             //Arrange
@@ -83,6 +85,7 @@ namespace Application.UnitTests.TableTypes.Queries
         }
 
         [TestCase(10)]
+        [TestCase(0)]
         public async Task Should_Return_Throw_NotFound_Exception(int id)
         {
             //Arrange

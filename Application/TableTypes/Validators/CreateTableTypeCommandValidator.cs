@@ -10,12 +10,10 @@ namespace Application.TableTypes.Validators
         {
             RuleFor(e => e.Name)
                 .NotEmpty().WithMessage("{PropertyName} is not empty")
-                .Length(2, 256).WithMessage("Length {PropertyName} must between 2 and 256")
-                .Must(BeAValidName).WithMessage("{PropertyName} contains invalid characters");
+                .Length(2, 256).WithMessage("Length {PropertyName} must be between 2 and 256");
 
             RuleFor(e => e.ChargePerSeat)
-                .NotEmpty().WithMessage("{PropertyName} is not empty")
-                .GreaterThan(0).WithMessage("{PropertyName} is invalid");
+                .GreaterThanOrEqualTo(0).WithMessage("{PropertyName} must be greater than 0");
 
             RuleFor(e => e.CanBeCombined)
                 .NotNull().WithMessage("{PropertyName} is not empty");

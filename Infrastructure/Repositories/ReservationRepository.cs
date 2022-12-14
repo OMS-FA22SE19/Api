@@ -21,7 +21,6 @@ namespace Infrastructure.Repositories
             query = query.Where(r =>
             r.StartTime.Date == date.Date
             && r.EndTime.Date == date.Date
-            && r.Status != ReservationStatus.Available
             && r.Status != ReservationStatus.Cancelled
             && r.Status != ReservationStatus.Done
             && !r.IsDeleted).OrderBy(r => r.StartTime)
