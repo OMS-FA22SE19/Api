@@ -16,16 +16,11 @@ namespace Api.Pages
         [FromQuery(Name = "Vnp_SecureHash")]
         public string Vnp_SecureHash { get; set; }
 
+        public string message;
+
         static HttpClient myAppHTTPClient = new HttpClient();
         public async Task OnGet()
         {
-            Console.WriteLine("test");
-            Console.WriteLine(Vnp_TxnRef);
-            Console.WriteLine(Vnp_Amount);
-            Console.WriteLine(Vnp_ResponseCode);
-            Console.WriteLine(Vnp_TransactionStatus);
-            Console.WriteLine(Vnp_SecureHash);
-
             string host = Request.Scheme + "://" + Request.Host;
             string pathname = Url.Action("GetPaymentForReservationResponse", "VNPay");
 
@@ -40,11 +35,17 @@ namespace Api.Pages
                 HttpContent content = responseMessage.Content;
                 string message = await content.ReadAsStringAsync();
                 Console.WriteLine("The output from thirdparty is: {0}", message);
+                this.message = message;
+                if (responseMessage.StatusCode != System.Net.HttpStatusCode.OK)
+                {
+                    this.message = "Something went wrong";
+                }
                 RedirectToPage();
             }
             catch (HttpRequestException exception)
             {
                 Console.WriteLine("An HTTP request exception occurred. {0}", exception.Message);
+                this.message = exception.Message;
             }
         }
     }
