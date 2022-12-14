@@ -136,8 +136,6 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(command);
                 var url = Request.Scheme + "://" + Request.Host + Url.Action("ConfirmEmail", "Users", new { email = command.email, code = result.Message });
                 var realUrl = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(url);
-                realUrl = realUrl.Replace('-', '+');
-                realUrl = realUrl.Replace('_', '/');
                 var content = new MailContent()
                 {
                     To = command.email,
@@ -242,8 +240,6 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(command);
                 var url = Request.Scheme + "://" + Request.Host + Url.Action("ConfirmEmail", "Users", new { email = command.Email, code = result.Message });
                 var realUrl = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(url);
-                realUrl = realUrl.Replace('-', '+');
-                realUrl = realUrl.Replace('_', '/');
                 var content = new MailContent()
                 {
                     To = command.Email,
@@ -301,8 +297,6 @@ namespace Api.Controllers.V1
                 var result = await Mediator.Send(command);
                 var url = Request.Scheme + "://" + Request.Host + Url.Action("ConfirmEmail", "Users", new { email = command.Email, code = result.Message });
                 var realUrl = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(url);
-                realUrl = realUrl.Replace('-', '+');
-                realUrl = realUrl.Replace('_', '/');
                 var content = new MailContent()
                 {
                     To = command.Email,
@@ -433,7 +427,7 @@ namespace Api.Controllers.V1
         {
             return "<div lang=\"EN-US\" link=\"blue\" vlink=\"#954F72\">" +
                 "<div class=\"m_-863817368153641209WordSection1\">" +
-                "<p style=\"line-height:150%\"><span style=\"font-size:13.5pt;line-height:150%;color:black\">Quý khách vui lòng ấn vào đường link này để xác nhận:" + url + " </span><b></p>" +
+                "<p style=\"line-height:150%\"><span style=\"font-size:13.5pt;line-height:150%;color:black\">Quý khách vui lòng ấn vào đường link này để xác nhận: " + url + " </span><b></p>" +
                 "</div>" +
                 "</div>";
         }
