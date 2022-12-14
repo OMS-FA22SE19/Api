@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace Api.Pages
 {
-    public class ReservationResponseModel : PageModel
+    public class OrderResponseModel : PageModel
     {
         [FromQuery(Name = "Vnp_TxnRef")]
         public string Vnp_TxnRef { get; set; }
@@ -27,7 +27,7 @@ namespace Api.Pages
             Console.WriteLine(Vnp_SecureHash);
 
             string host = Request.Scheme + "://" + Request.Host;
-            string pathname = Url.Action("GetPaymentForReservationResponse", "VNPay");
+            string pathname = Url.Action("GetPaymentForOrderResponse", "VNPay");
 
             string path = pathname + "?Vnp_TxnRef=" + Vnp_TxnRef + "&Vnp_Amount=" + Vnp_Amount + "&Vnp_ResponseCode=" + Vnp_ResponseCode + "&Vnp_TransactionStatus=" + Vnp_TransactionStatus + "&Vnp_SecureHash=" + Vnp_SecureHash;
             string requestUrl = host + path;

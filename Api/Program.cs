@@ -54,6 +54,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
                     };
                 });
+builder.Services.AddRazorPages();
 
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddSingleton<ISendMailService, SendMailService>();
@@ -131,5 +132,6 @@ app.UseAuthorization();
 app.UseMiddleware<JwtMiddleware>();
 
 app.MapControllers();
+app.MapRazorPages();
 
 app.Run();

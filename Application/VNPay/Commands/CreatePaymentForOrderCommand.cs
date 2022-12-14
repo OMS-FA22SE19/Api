@@ -81,7 +81,7 @@ namespace Application.VNPay.Commands
 
 
             //Get Config Info
-            string vnp_Returnurl = _config.GetSection("vnpay")["vnp_Returnurl"] + "/Order/Response"; //URL nhan ket qua tra ve
+            string vnp_Returnurl = _config.GetSection("vnpay")["vnp_Returnurl"] + "/OrderResponse"; //"/Order/Response"; //URL nhan ket qua tra ve
             string vnp_Url = _config.GetSection("vnpay")["vnp_Url"]; //URL thanh toan cua VNPAY 
             string vnp_TmnCode = _config.GetSection("vnpay")["vnp_TmnCode"]; //Ma website
             string vnp_HashSecret = _config.GetSection("vnpay")["vnp_HashSecret"]; //Chuoi bi mat
