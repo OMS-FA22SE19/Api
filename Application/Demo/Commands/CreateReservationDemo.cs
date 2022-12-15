@@ -1,6 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Mappings;
 using Application.Demo.Response;
+using Application.Helpers;
 using Application.Models;
 using Application.Reservations.Response;
 using AutoMapper;
@@ -96,7 +97,15 @@ namespace Application.Reservations.Commands
                     ReservationTables = new List<ReservationTable>()
                 };
 
-                bool isValid = await validateStartEndTime(reservation);
+                bool isValid = true;
+                string errorMessage = string.Empty;
+
+                var adminSettings = await _unitOfWork.AdminSettingRepository.GetAllAsync();
+
+                var reservations = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(startTime.Date, reservation.TableTypeId, reservation.NumOfSeats);
+                var tablesTypes = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(reservation.NumOfSeats, reservation.TableTypeId);
+                (isValid, errorMessage) = DateTimeHelpers.ValidateStartEndTime(startTime, endTime, reservation.Quantity, reservations, tablesTypes.Count, adminSettings);
+                //bool isValid = await validateStartEndTime(reservation);
                 if (!isValid)
                 {
                     i--;
@@ -270,7 +279,16 @@ namespace Application.Reservations.Commands
 
         private async Task validTime(Reservation request)
         {
-            bool isValid = await validateStartEndTime(request);
+            //bool isValid = await validateStartEndTime(request);
+            bool isValid = true;
+            string errorMessage = string.Empty;
+
+            var adminSettings = await _unitOfWork.AdminSettingRepository.GetAllAsync();
+
+            var reservations = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.StartTime.Date, request.TableTypeId, request.NumOfSeats);
+            var tables = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
+
+            (isValid, errorMessage) = DateTimeHelpers.ValidateStartEndTime(request.StartTime, request.EndTime, request.Quantity, reservations, tables.Count, adminSettings);
             if (!isValid)
             {
                 int time = rnd.Next(10, 20);
