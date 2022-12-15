@@ -229,7 +229,7 @@ namespace Application.UnitTests.Orders.Queries
             expected.Data.Total = total;
             if (reservation.ReservationTables.Any())
             {
-                expected.Data.TableId = reservation.ReservationTables[0].TableId;
+                expected.Data.TableId = reservation.ReservationTables[0].TableId.ToString();
             }
 
             Assert.That(actual.StatusCode, Is.EqualTo(HttpStatusCode.OK));

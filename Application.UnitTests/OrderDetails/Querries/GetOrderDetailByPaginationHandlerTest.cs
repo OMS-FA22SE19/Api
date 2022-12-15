@@ -258,7 +258,7 @@ namespace Application.UnitTests.Orders.Queries
                 var reservation = _Reservations.Find(e => e.Id == dishDto.Order.ReservationId);
                 if (reservation.ReservationTables.Any())
                 {
-                    expectedDto.TableId = reservation.ReservationTables[0].TableId;
+                    expectedDto.TableId = reservation.ReservationTables[0].TableId.ToString();
                 }
 
                 expectedList.Add(expectedDto);
@@ -422,7 +422,7 @@ namespace Application.UnitTests.Orders.Queries
                             OrderId = entity.OrderId,
                             Status = entity.Status,
                             PhoneNumber = entity.Order.Reservation.User.PhoneNumber,
-                            TableId = 0,
+                            TableId = "0",
                             FoodId = entity.FoodId,
                             Note = entity.Note,
                             FoodName = entity.Food.Name,
@@ -441,7 +441,7 @@ namespace Application.UnitTests.Orders.Queries
                         OrderId = detail.OrderId,
                         Status = detail.Status,
                         PhoneNumber = detail.Order.Reservation.User.PhoneNumber,
-                        TableId = 0,
+                        TableId = "0",
                         FoodId = detail.FoodId,
                         Note = detail.Note,
                         FoodName = detail.Food.Name,

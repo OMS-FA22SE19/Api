@@ -57,7 +57,13 @@ namespace Application.Orders.Commands
                 throw new NotFoundException(nameof(Reservation), $"with reservation {request.ReservationId}");
             }
 
-            var tableId = reservation.ReservationTables[0].TableId;
+            var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => !e.IsDeleted && e.Id == reservation.TableTypeId);
+            if (tableType is null)
+            {
+                throw new NotFoundException(nameof(TableType), reservation.TableTypeId);
+            }
+
+            var tableId = tableType.Name + " - " + reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId;
 
             var user = await _userManager.FindByIdAsync(reservation.UserId);
 
@@ -69,13 +75,6 @@ namespace Application.Orders.Commands
                 Status = OrderStatus.Processing,
                 OrderDetails = new List<OrderDetail>(),
             };
-
-            //Comment until online payment complete
-            var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => !e.IsDeleted && e.Id == reservation.TableTypeId);
-            if (tableType is null)
-            {
-                throw new NotFoundException(nameof(TableType), reservation.TableTypeId);
-            }
 
             var billing = await _unitOfWork.BillingRepository.GetAsync(b => b.ReservationId == reservation.Id);
             if (billing is not null)
@@ -121,7 +120,7 @@ namespace Application.Orders.Commands
             mappedResult.UserId = reservation.UserId;
             mappedResult.FullName = user.FullName;
             mappedResult.PhoneNumber = user.PhoneNumber;
-            mappedResult.TableId = tableId;
+            mappedResult.TableId = tableType.Name + " - " + tableId;
             var orderDetails = new List<OrderDetailDto>();
             double total = 0;
             foreach (var detail in result.OrderDetails)

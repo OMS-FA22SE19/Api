@@ -132,9 +132,10 @@ namespace Application.Orders.Queries
                 };
 
                 var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => order.ReservationId == e.Id, $"{nameof(Reservation.ReservationTables)}");
+                var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == reservation.TableTypeId);
                 if (reservation.ReservationTables.Any())
                 {
-                    orderDto.TableId = reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId;
+                    orderDto.TableId = tableType.Name + " - " + reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId;
                 }
 
 
