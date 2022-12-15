@@ -6,6 +6,7 @@ using Application.OrderDetails.Response;
 using Application.Orders.Events;
 using Application.Orders.Helpers;
 using Application.Orders.Response;
+using Application.Reservations.Response;
 using AutoMapper;
 using Core.Entities;
 using Core.Enums;
@@ -52,24 +53,26 @@ namespace Application.Orders.Commands
             {
                 throw new NotFoundException(nameof(Menu), $"No available {nameof(Menu)}");
             }
-            var order = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.OrderId && !e.IsDeleted && e.Status == OrderStatus.Processing, $"{nameof(Order.OrderDetails)}, {nameof(Order.Reservation)}");
+            var order = await _unitOfWork.OrderRepository.GetAsync(e => e.Id == request.OrderId && !e.IsDeleted && e.Status == OrderStatus.Processing, $"{nameof(Order.OrderDetails)}");
             if (order is null)
             {
                 throw new NotFoundException(nameof(Order), request.OrderId);
             }
 
+            var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == order.ReservationId);
+
             if (_currentUserService.Role.Equals("Customer"))
             {
                 if (!_currentUserService.UserName.Equals("defaultCustomer"))
                 {
-                    if (!_currentUserService.UserId.Equals(order.Reservation.UserId))
+                    if (!_currentUserService.UserId.Equals(reservation.UserId))
                     {
                         throw new BadRequestException("This is not your order");
                     }
                 }
             }
 
-            var user = await _userManager.FindByIdAsync(order.Reservation.UserId);
+            var user = await _userManager.FindByIdAsync(reservation.UserId);
 
             foreach (var dish in request.OrderDetails)
             {
@@ -137,6 +140,7 @@ namespace Application.Orders.Commands
             total -= result.PrePaid;
 
             mappedResult.OrderDetails = orderDetails;
+            mappedResult.Reservation = _mapper.Map<ReservationDto>(reservation);
             return new Response<OrderDto>(mappedResult)
             {
                 StatusCode = System.Net.HttpStatusCode.Created
