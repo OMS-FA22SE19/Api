@@ -12,6 +12,7 @@ namespace Api.Controllers.V1
 {
     [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public sealed class CourseTypesController : ApiControllerBase
     {
         /// <summary>
