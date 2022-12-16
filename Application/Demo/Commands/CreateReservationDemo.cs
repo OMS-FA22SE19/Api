@@ -1,6 +1,6 @@
 ﻿using Application.Common.Exceptions;
 using Application.Common.Mappings;
-using Application.Demo.Response;
+using Application.Demo.Responses;
 using Application.Helpers;
 using Application.Models;
 using Application.Reservations.Response;
@@ -66,7 +66,7 @@ namespace Application.Reservations.Commands
                 ReservationReserved = new List<int>(),
                 ReservationAvailable = new List<int>(),
                 ReservationCancelled = new List<int>(),
-                Error = ""
+                Error = new List<string>()
             };
 
             //checkin
@@ -75,7 +75,7 @@ namespace Application.Reservations.Commands
             {
                 if (tableForCheckIn.Count == 0)
                 {
-                    ReservationDemoDTO.Error = $"Can not add {request.numOfCheckInReservation - i} check in Reservation because there are not enough available table";
+                    ReservationDemoDTO.Error.Add($"Can not add {request.numOfCheckInReservation - i} check in Reservation because there are not enough available table");
                     break;
                 }
 
@@ -188,7 +188,6 @@ namespace Application.Reservations.Commands
                 }
 
                 ReservationDemoDTO.ReservationAvailable.Add(result.Id);
-                Console.WriteLine(result.Id);
             }
 
             //Cancalled
