@@ -56,7 +56,7 @@ namespace Application.Demo.Commands
                     dto.ReservationCancelled.Add(id);
                 }
             }
-            
+
             //Checkin
             var tables = await _unitOfWork.TableRepository.GetAllAsync();
             var tableTypes = await _unitOfWork.TableTypeRepository.GetAllAsync();
@@ -110,17 +110,32 @@ namespace Application.Demo.Commands
             //Reserved
             foreach (var id in request.ReservationIdsToReserved)
             {
-                var ReservationDemoForReserved = await _unitOfWork.ReservationRepository.GetAsync(r => r.Status == ReservationStatus.Available && r.Id.Equals(id));
-                if (ReservationDemoForReserved is null)
+                var reservationDemoForReserved = await _unitOfWork.ReservationRepository.GetAsync(r => r.Status == ReservationStatus.Available && r.Id.Equals(id));
+                if (reservationDemoForReserved is null)
                 {
                     dto.Error.Add($"Cannot update {id} because it does not exist or not available");
                 }
                 else
                 {
-                    ReservationDemoForReserved.Status = ReservationStatus.Reserved;
-                    await _unitOfWork.ReservationRepository.UpdateAsync(ReservationDemoForReserved);
+                    reservationDemoForReserved.Status = ReservationStatus.Reserved;
+                    await _unitOfWork.ReservationRepository.UpdateAsync(reservationDemoForReserved);
                     await _unitOfWork.CompleteAsync(cancellationToken);
                     dto.ReservationReserved.Add(id);
+
+                    var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == reservationDemoForReserved.TableTypeId && !e.IsDeleted);
+                    if (tableType is null)
+                    {
+                        throw new NotFoundException(nameof(TableType), reservationDemoForReserved.TableTypeId);
+                    }
+
+                    var billing = new Billing
+                    {
+                        Id = "Demo-" + id,
+                        ReservationAmount = reservationDemoForReserved.NumOfSeats * tableType.ChargePerSeat,
+                        ReservationId = id
+                    };
+                    await _unitOfWork.BillingRepository.InsertAsync(billing);
+                    await _unitOfWork.CompleteAsync(cancellationToken);
                 }
             }
 
