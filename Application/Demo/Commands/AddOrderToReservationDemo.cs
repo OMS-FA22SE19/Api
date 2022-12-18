@@ -16,13 +16,6 @@ namespace Application.Orders.Commands
     public sealed class AddOrderToReservationDemo : IRequest<Response<OrderReservationDemoDto>>
     {
         public List<int> ReservationIds { get; set; }
-        //public Dictionary<int, FoodInfo> OrderDetails { get; set; }
-
-        //public void Mapping(Profile profile)
-        //{
-        //    profile.CreateMap<AddOrderToReservationDemo, Order>()
-        //        .ForSourceMember(dto => dto.OrderDetails, opt => opt.DoNotValidate());
-        //}
     }
 
     public sealed class AddOrderToReservationDemoHandler : IRequestHandler<AddOrderToReservationDemo, Response<OrderReservationDemoDto>>
