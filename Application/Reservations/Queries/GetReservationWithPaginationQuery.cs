@@ -3,6 +3,7 @@ using Application.Common.Interfaces;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Reservations.Response;
+using Application.Users.Response;
 using AutoMapper;
 using Core.Common;
 using Core.Entities;
@@ -39,7 +40,7 @@ namespace Application.Reservations.Queries
         {
             List<Expression<Func<Reservation, bool>>> filters = new();
             Func<IQueryable<Reservation>, IOrderedQueryable<Reservation>> orderBy = null;
-            string includeProperties = $"{nameof(Reservation.User)},{nameof(Reservation.ReservationTables)}.{nameof(ReservationTable.Table)}.{nameof(Table.TableType)}";
+            string includeProperties = $"{nameof(Reservation.ReservationTables)}.{nameof(ReservationTable.Table)}.{nameof(Table.TableType)}";
 
             if (_currentUserService.Role.Equals("Customer"))
             {
@@ -156,6 +157,11 @@ namespace Application.Reservations.Queries
                 item.OrderDetails = orderDetails;
                 item.PrePaid = item.NumOfSeats * tableType.ChargePerSeat * item.Quantity;
                 item.TableType = tableType.Name;
+                var user = await _unitOfWork.UserRepository.GetAsync(u=>u.Id.Equals(item.UserId));
+                if (user is not null)
+                {
+                    item.User = _mapper.Map<ApplicationUser, UserDto>(user);
+                }
                 if (item.ReservationTables.Any())
                 {
                     item.tableId = tableType.Name + " - " + item.ReservationTables.OrderBy(e => e.TableId).First().TableId;
