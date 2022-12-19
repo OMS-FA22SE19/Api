@@ -9,6 +9,7 @@ using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
+using System;
 using System.Linq.Expressions;
 
 namespace Application.Reservations.Queries
@@ -24,12 +25,14 @@ namespace Application.Reservations.Queries
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IDateTime _dateTime;
 
-        public GetReservationWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
+        public GetReservationWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService, IDateTime dateTime)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _currentUserService = currentUserService;
+            _dateTime = dateTime;
         }
 
         public async Task<Response<PaginatedList<ReservationDto>>> Handle(GetReservationWithPaginationQuery request, CancellationToken cancellationToken)
@@ -93,6 +96,19 @@ namespace Application.Reservations.Queries
             }
 
             var result = await _unitOfWork.ReservationRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, request.PageIndex, request.PageSize);
+
+            foreach (var item in result)
+            {
+                if (item.StartTime < _dateTime.Now.AddMinutes(-15) && item.Status == ReservationStatus.Available)
+                {
+                    item.Status = ReservationStatus.Cancelled;
+                    item.ReasonForCancel = "Reservation is have not Paid 15 minutes before start time";
+                    await _unitOfWork.ReservationRepository.UpdateAsync(item);
+                    await _unitOfWork.CompleteAsync(cancellationToken);
+                }
+            }
+            
+
             var mappedResult = _mapper.Map<PaginatedList<Reservation>, PaginatedList<ReservationDto>>(result);
             foreach (var item in mappedResult)
             {
@@ -140,6 +156,10 @@ namespace Application.Reservations.Queries
                 item.OrderDetails = orderDetails;
                 item.PrePaid = item.NumOfSeats * tableType.ChargePerSeat * item.Quantity;
                 item.TableType = tableType.Name;
+                if (item.ReservationTables.Any())
+                {
+                    item.tableId = tableType.Name + " - " + item.ReservationTables.OrderBy(e => e.TableId).First().TableId;
+                }
             }
             return new Response<PaginatedList<ReservationDto>>(mappedResult);
         }
