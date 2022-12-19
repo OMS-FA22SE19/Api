@@ -258,7 +258,8 @@ namespace Application.UnitTests.Orders.Queries
                 var reservation = _Reservations.Find(e => e.Id == dishDto.Order.ReservationId);
                 if (reservation.ReservationTables.Any())
                 {
-                    expectedDto.TableId = reservation.ReservationTables[0].TableId.ToString();
+                    //expectedDto.TableId = reservation.ReservationTables[0].TableId.ToString();
+                    expectedDto.TableId = _TableTypes.FirstOrDefault(t => t.Id == reservation.ReservationTables[0].TableId).Name + " - " + reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId;
                 }
 
                 expectedList.Add(expectedDto);

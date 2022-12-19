@@ -44,7 +44,7 @@ namespace Application.Demo.Commands
                 startTime = DateTime.UtcNow.Date.AddHours(time);
             }
 
-            var users = _userManager.Users.Where(u => !u.UserName.Equals("administrator@localhost")).ToList();
+            var users = _userManager.Users.Where(u => !u.UserName.Equals("administrator@localhost") && !u.UserName.Equals("woodiequan")).ToList();
             var tables = await _unitOfWork.TableRepository.GetAllAsync();
             var tableTypes = await _unitOfWork.TableTypeRepository.GetAllAsync();
 

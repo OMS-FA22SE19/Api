@@ -106,6 +106,10 @@ namespace Application.Reservations.Queries
             mappedResult.OrderDetails = orderDetails;
             mappedResult.PrePaid = result.NumOfSeats * tableType.ChargePerSeat * result.Quantity;
             mappedResult.TableType = tableType.Name;
+            if (result.ReservationTables.Any())
+            {
+                mappedResult.tableId = tableType.Name + " - " + result.ReservationTables.OrderBy(e => e.TableId).First().TableId;
+            }
             return new Response<ReservationDto>(mappedResult);
         }
     }
