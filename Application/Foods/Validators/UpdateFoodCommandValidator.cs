@@ -21,9 +21,6 @@ namespace Application.Foods.Validators
                 .NotEmpty().WithMessage("{PropertyName} is not empty")
                 .Length(2, 2000).WithMessage("Length {PropertyName} must between 2 and 256");
 
-            RuleFor(e => e.Picture)
-                .NotEmpty().WithMessage("{PropertyName} is not empty");
-
             RuleFor(e => e.CourseTypeId)
                 .NotEmpty().WithMessage("{PropertyName} is not empty");
         }
