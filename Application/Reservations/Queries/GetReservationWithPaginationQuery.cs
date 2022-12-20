@@ -102,10 +102,14 @@ namespace Application.Reservations.Queries
             {
                 if (item.Created < _dateTime.Now.AddMinutes(-15) && item.Status == ReservationStatus.Available)
                 {
-                    item.Status = ReservationStatus.Cancelled;
-                    item.ReasonForCancel = "Reservation is have not Paid 15 minutes after create";
-                    await _unitOfWork.ReservationRepository.UpdateAsync(item);
-                    await _unitOfWork.CompleteAsync(cancellationToken);
+                    var bill = await _unitOfWork.BillingRepository.GetAsync(e => e.ReservationId == item.Id);
+                    if (bill is null)
+                    {
+                        item.Status = ReservationStatus.Cancelled;
+                        item.ReasonForCancel = "Reservation is have not Paid 15 minutes before create";
+                        await _unitOfWork.ReservationRepository.UpdateAsync(item);
+                        await _unitOfWork.CompleteAsync(cancellationToken);
+                    }
                 }
             }
             
