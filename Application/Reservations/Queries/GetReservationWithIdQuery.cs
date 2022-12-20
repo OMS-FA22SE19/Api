@@ -24,12 +24,14 @@ namespace Application.Reservations.Queries
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IDateTime _dateTime;
 
-        public GetReservationWithIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
+        public GetReservationWithIdQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService, IDateTime dateTime)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _currentUserService = currentUserService;
+            _dateTime = dateTime;
         }
 
         public async Task<Response<ReservationDto>> Handle(GetReservationWithIdQuery request, CancellationToken cancellationToken)
@@ -39,6 +41,20 @@ namespace Application.Reservations.Queries
             {
                 throw new NotFoundException(nameof(Reservation), $"with {request.Id}");
             }
+
+
+            if (result.Created < _dateTime.Now.AddMinutes(-15) && result.Status == ReservationStatus.Available)
+            {
+                var bill = await _unitOfWork.BillingRepository.GetAsync(e => e.ReservationId == result.Id);
+                if (bill is null)
+                {
+                    result.Status = ReservationStatus.Cancelled;
+                    result.ReasonForCancel = "Reservation is have not Paid 15 minutes before create";
+                    await _unitOfWork.ReservationRepository.UpdateAsync(result);
+                    await _unitOfWork.CompleteAsync(cancellationToken);
+                }
+            }
+
             if (_currentUserService.UserId is null)
             {
                 throw new BadRequestException("You have to log in");
@@ -53,7 +69,7 @@ namespace Application.Reservations.Queries
                     }
                 }
             }
-            
+
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == result.TableTypeId);
             if (tableType is null)
             {
@@ -87,7 +103,7 @@ namespace Application.Reservations.Queries
                             Quantity = 1,
                             Price = detail.Price,
                             Amount = detail.Price,
-                            Note= detail.Note,
+                            Note = detail.Note,
                         });
                     }
                     else

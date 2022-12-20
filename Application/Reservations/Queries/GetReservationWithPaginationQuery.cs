@@ -3,12 +3,14 @@ using Application.Common.Interfaces;
 using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Reservations.Response;
+using Application.Users.Response;
 using AutoMapper;
 using Core.Common;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
+using System;
 using System.Linq.Expressions;
 
 namespace Application.Reservations.Queries
@@ -24,19 +26,21 @@ namespace Application.Reservations.Queries
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IDateTime _dateTime;
 
-        public GetReservationWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
+        public GetReservationWithPaginationQueryHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService, IDateTime dateTime)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _currentUserService = currentUserService;
+            _dateTime = dateTime;
         }
 
         public async Task<Response<PaginatedList<ReservationDto>>> Handle(GetReservationWithPaginationQuery request, CancellationToken cancellationToken)
         {
             List<Expression<Func<Reservation, bool>>> filters = new();
             Func<IQueryable<Reservation>, IOrderedQueryable<Reservation>> orderBy = null;
-            string includeProperties = $"{nameof(Reservation.User)},{nameof(Reservation.ReservationTables)}.{nameof(ReservationTable.Table)}.{nameof(Table.TableType)}";
+            string includeProperties = $"{nameof(Reservation.ReservationTables)}.{nameof(ReservationTable.Table)}.{nameof(Table.TableType)}";
 
             if (_currentUserService.Role.Equals("Customer"))
             {
@@ -93,6 +97,23 @@ namespace Application.Reservations.Queries
             }
 
             var result = await _unitOfWork.ReservationRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, request.PageIndex, request.PageSize);
+
+            foreach (var item in result)
+            {
+                if (item.Created < _dateTime.Now.AddMinutes(-15) && item.Status == ReservationStatus.Available)
+                {
+                    var bill = await _unitOfWork.BillingRepository.GetAsync(e => e.ReservationId == item.Id);
+                    if (bill is null)
+                    {
+                        item.Status = ReservationStatus.Cancelled;
+                        item.ReasonForCancel = "Reservation is have not Paid 15 minutes before create";
+                        await _unitOfWork.ReservationRepository.UpdateAsync(item);
+                        await _unitOfWork.CompleteAsync(cancellationToken);
+                    }
+                }
+            }
+            
+
             var mappedResult = _mapper.Map<PaginatedList<Reservation>, PaginatedList<ReservationDto>>(result);
             foreach (var item in mappedResult)
             {
@@ -140,6 +161,15 @@ namespace Application.Reservations.Queries
                 item.OrderDetails = orderDetails;
                 item.PrePaid = item.NumOfSeats * tableType.ChargePerSeat * item.Quantity;
                 item.TableType = tableType.Name;
+                var user = await _unitOfWork.UserRepository.GetAsync(u=>u.Id.Equals(item.UserId));
+                if (user is not null)
+                {
+                    item.User = _mapper.Map<ApplicationUser, UserDto>(user);
+                }
+                if (item.ReservationTables.Any())
+                {
+                    item.tableId = tableType.Name + " - " + item.ReservationTables.OrderBy(e => e.TableId).First().TableId;
+                }
             }
             return new Response<PaginatedList<ReservationDto>>(mappedResult);
         }

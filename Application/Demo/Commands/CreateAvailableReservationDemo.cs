@@ -1,4 +1,4 @@
-﻿using Application.Common.Exceptions;
+﻿using Application.Common.Interfaces;
 using Application.Demo.Responses;
 using Application.Helpers;
 using Application.Models;
@@ -11,10 +11,11 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Application.Demo.Commands
 {
-    public class CreateAvailableReservationDemo: IRequest<Response<ReservationDemoDto>>
+    public class CreateAvailableReservationDemo : IRequest<Response<ReservationDemoDto>>
     {
         public string? StartTime { get; set; }
-        public int? numOfAvailableReservation { get; set; }
+        public int? TableTypeId { get; set; }
+        public int? NumOfAvailableReservation { get; set; } = 30;
     }
 
     public class CreateAvailableReservationDemoHandler : IRequestHandler<CreateAvailableReservationDemo, Response<ReservationDemoDto>>
@@ -23,12 +24,14 @@ namespace Application.Demo.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IDateTime _dateTime;
 
-        public CreateAvailableReservationDemoHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager)
+        public CreateAvailableReservationDemoHandler(IUnitOfWork unitOfWork, IMapper mapper, UserManager<ApplicationUser> userManager, IDateTime dateTime)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
+            _dateTime = dateTime;
         }
 
         public async Task<Response<ReservationDemoDto>> Handle(CreateAvailableReservationDemo request, CancellationToken cancellationToken)
@@ -41,12 +44,11 @@ namespace Application.Demo.Commands
             else
             {
                 var time = rnd.Next(7, 23);
-                startTime = DateTime.UtcNow.Date.AddHours(time);
+                startTime = _dateTime.Now.Date.AddHours(time);
             }
 
             var users = _userManager.Users.Where(u => !u.UserName.Equals("administrator@localhost") && !u.UserName.Equals("woodiequan")).ToList();
             var tables = await _unitOfWork.TableRepository.GetAllAsync();
-            var tableTypes = await _unitOfWork.TableTypeRepository.GetAllAsync();
 
             var ReservationDemoDTO = new ReservationDemoDto()
             {
@@ -55,11 +57,11 @@ namespace Application.Demo.Commands
             };
 
             var tableForAvailable = tables.ToList();
-            for (int i = 0; i < request.numOfAvailableReservation; i++)
+            for (int i = 0; i < request.NumOfAvailableReservation; i++)
             {
                 if (tableForAvailable.Count == 0)
                 {
-                    ReservationDemoDTO.Error.Add($"Can not add {request.numOfAvailableReservation - i} check in Reservation because there are not enough available table");
+                    ReservationDemoDTO.Error.Add($"Can not add {request.NumOfAvailableReservation - i} check in Reservation because there are not enough available table");
                     break;
                 }
 
@@ -89,13 +91,12 @@ namespace Application.Demo.Commands
                 var reservations = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(startTime.Date, reservation.TableTypeId, reservation.NumOfSeats);
                 var tablesTypes = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(reservation.NumOfSeats, reservation.TableTypeId);
                 (isValid, errorMessage) = DateTimeHelpers.ValidateStartEndTime(startTime, startTime.AddHours(1), reservation.Quantity, reservations, tablesTypes.Count, adminSettings);
-                //bool isValid = await validateStartEndTime(reservation);
+
                 if (!isValid)
                 {
                     i--;
                     tableForAvailable.Remove(table);
                 }
-
                 else
                 {
                     var result = await _unitOfWork.ReservationRepository.InsertAsync(reservation);
