@@ -40,6 +40,7 @@ namespace Application.UnitTests.Reservations.Queries
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
         private ICurrentUserService _currentUserService;
+        private IDateTime _dateTime;
 
         [OneTimeSetUp]
         public void SetUp()
@@ -129,6 +130,7 @@ namespace Application.UnitTests.Reservations.Queries
             _unitOfWork = unitOfWork.Object;
             _mapper = SetUpMapper();
             _currentUserService = SetCurrentUserService();
+            _dateTime = SetUpDatetime();
         }
 
         [TearDown]
@@ -182,7 +184,7 @@ namespace Application.UnitTests.Reservations.Queries
                 PageSize = pageSize,
                 Status= status
             };
-            var handler = new GetReservationWithPaginationQueryHandler(_unitOfWork, _mapper, _currentUserService);
+            var handler = new GetReservationWithPaginationQueryHandler(_unitOfWork, _mapper, _currentUserService, _dateTime);
             var conditionedList = _Reservations;
 
             if (request.Status is not null)
@@ -421,6 +423,13 @@ namespace Application.UnitTests.Reservations.Queries
         {
             var currentUserMock = new Mock<ICurrentUserService>();
             return currentUserMock.Object;
+        }
+
+        private IDateTime SetUpDatetime()
+        {
+            var dateTimeMock = new Mock<IDateTime>();
+            dateTimeMock.Setup(d => d.Now).Returns(DateTime.UtcNow.AddHours(7));
+            return dateTimeMock.Object;
         }
         #endregion
     }
