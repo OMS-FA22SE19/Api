@@ -58,7 +58,7 @@ namespace Api.Controllers.V1
         ///     GET /Dashboard/Food
         ///     
         /// </remarks>
-        [HttpGet("Food")]
+        [HttpGet("Foods")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

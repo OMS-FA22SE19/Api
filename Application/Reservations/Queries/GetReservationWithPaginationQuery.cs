@@ -10,7 +10,6 @@ using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
-using System;
 using System.Linq.Expressions;
 
 namespace Application.Reservations.Queries
@@ -112,7 +111,7 @@ namespace Application.Reservations.Queries
                     }
                 }
             }
-            
+
 
             var mappedResult = _mapper.Map<PaginatedList<Reservation>, PaginatedList<ReservationDto>>(result);
             foreach (var item in mappedResult)
@@ -161,14 +160,14 @@ namespace Application.Reservations.Queries
                 item.OrderDetails = orderDetails;
                 item.PrePaid = item.NumOfSeats * tableType.ChargePerSeat * item.Quantity;
                 item.TableType = tableType.Name;
-                var user = await _unitOfWork.UserRepository.GetAsync(u=>u.Id.Equals(item.UserId));
+                var user = await _unitOfWork.UserRepository.GetAsync(u => u.Id.Equals(item.UserId));
                 if (user is not null)
                 {
                     item.User = _mapper.Map<ApplicationUser, UserDto>(user);
                 }
-                if (item.ReservationTables.Any())
+                if (item.ReservationTables?.Any() == true)
                 {
-                    item.tableId = tableType.Name + " - " + item.ReservationTables.OrderBy(e => e.TableId).First().TableId;
+                    item.TableId = $"{tableType.Name}-{item.ReservationTables.Min(e => e.TableId)}";
                 }
             }
             return new Response<PaginatedList<ReservationDto>>(mappedResult);

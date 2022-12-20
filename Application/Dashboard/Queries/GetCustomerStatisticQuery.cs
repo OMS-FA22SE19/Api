@@ -29,7 +29,7 @@ namespace Application.Dashboard.Queries
             var customer = (await _userManager.GetUsersInRoleAsync(customerRole)).Where(e => !e.IsDeleted).ToList();
             var dateOfLastMonth = new DateTime(_dateTime.Now.Year, _dateTime.Now.Month - 1, DateTime.DaysInMonth(_dateTime.Now.Year, _dateTime.Now.Month - 1));
             var lastMonthCustomers = customer.Where(e => e.Created <= dateOfLastMonth).ToList();
-            var increase = ((customer.Count - lastMonthCustomers.Count) / (lastMonthCustomers.Any() ? lastMonthCustomers.Count : 1)).ToString("0.00%");
+            var increase = (lastMonthCustomers.Count / ((customer.Count - lastMonthCustomers.Count) > 0 ? (customer.Count - lastMonthCustomers.Count) : 1)).ToString("0.00%");
             var response = new CustomerStatistic { Customers = customer.Count, Increase = increase };
 
             return await Task.FromResult(new Response<CustomerStatistic>(response));
