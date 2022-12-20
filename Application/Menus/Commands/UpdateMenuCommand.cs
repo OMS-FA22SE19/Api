@@ -7,6 +7,7 @@ using Core.Entities;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Expressions;
 
 namespace Application.Menus.Commands
 {
@@ -47,7 +48,19 @@ namespace Application.Menus.Commands
             }
 
             MapToEntity(request, entity);
-
+            if (request.Available)
+            {
+                var filter = new List<Expression<Func<Menu, bool>>>
+                {
+                    e => e.Available && !e.IsDeleted
+                };
+                var availableMenus = await _unitOfWork.MenuRepository.GetAllAsync(filter);
+                foreach (var menu in availableMenus)
+                {
+                    menu.Available = false;
+                    await _unitOfWork.MenuRepository.UpdateAsync(menu);
+                }
+            }
             var result = await _unitOfWork.MenuRepository.UpdateAsync(entity);
             await _unitOfWork.CompleteAsync(cancellationToken);
             if (result is null)

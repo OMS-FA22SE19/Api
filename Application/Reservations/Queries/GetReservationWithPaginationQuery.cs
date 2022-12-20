@@ -102,7 +102,7 @@ namespace Application.Reservations.Queries
                 if (item.Created < _dateTime.Now.AddMinutes(-15) && item.Status == ReservationStatus.Available)
                 {
                     var bill = await _unitOfWork.BillingRepository.GetAsync(e => e.ReservationId == item.Id);
-                    if (bill is null)
+                    if (bill is null || bill.ReservationAmount == 0)
                     {
                         item.Status = ReservationStatus.Cancelled;
                         item.ReasonForCancel = "Reservation is have not Paid 15 minutes before create";

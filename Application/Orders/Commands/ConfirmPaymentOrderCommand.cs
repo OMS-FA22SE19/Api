@@ -127,19 +127,22 @@ namespace Application.Orders.Commands
             }
             total -= entity.PrePaid;
 
-            if (!"Customer".Equals(_currentUserService.Role))
+            if(_currentUserService.Role is not null)
             {
-                var billing = await _unitOfWork.BillingRepository.GetAsync(e => e.ReservationId == entity.ReservationId);
-                if (billing is not null)
+                if (!"Customer".Equals(_currentUserService.Role))
                 {
-                    billing.OrderEBillingId = $"{entity.Id}-{_dateTime.Now:yyyyMMddHHmmss}";
-                    billing.OrderId = entity.Id;
-                    billing.OrderAmount = total;
-                    await _unitOfWork.BillingRepository.UpdateAsync(billing);
-                    await _unitOfWork.CompleteAsync(cancellationToken);
+                    var billing = await _unitOfWork.BillingRepository.GetAsync(e => e.ReservationId == entity.ReservationId);
+                    if (billing is not null)
+                    {
+                        billing.OrderEBillingId = $"{entity.Id}-{_dateTime.Now:yyyyMMddHHmmss}";
+                        billing.OrderId = entity.Id;
+                        billing.OrderAmount = total;
+                        await _unitOfWork.BillingRepository.UpdateAsync(billing);
+                        await _unitOfWork.CompleteAsync(cancellationToken);
+                    }
                 }
             }
-
+            
             var bill = new OrderDto()
             {
                 Id = entity.Id,
