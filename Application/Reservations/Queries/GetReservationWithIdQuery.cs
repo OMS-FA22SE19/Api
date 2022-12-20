@@ -4,7 +4,6 @@ using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Reservations.Response;
 using AutoMapper;
-using Core.Common;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
@@ -118,9 +117,9 @@ namespace Application.Reservations.Queries
             mappedResult.OrderDetails = orderDetails;
             mappedResult.PrePaid = result.NumOfSeats * tableType.ChargePerSeat * result.Quantity;
             mappedResult.TableType = tableType.Name;
-            if (result.ReservationTables.Any())
+            if (mappedResult.ReservationTables?.Any() == true)
             {
-                mappedResult.tableId = tableType.Name + " - " + result.ReservationTables.OrderBy(e => e.TableId).First().TableId;
+                mappedResult.TableId = $"{tableType.Name}-{mappedResult.ReservationTables.Min(e => e.TableId)}";
             }
             return new Response<ReservationDto>(mappedResult);
         }

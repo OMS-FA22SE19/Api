@@ -149,7 +149,7 @@ namespace Application.Reservations.Queries
             mappedResult.TableType = tableType.Name;
             if (result.ReservationTables.Any())
             {
-                mappedResult.tableId = tableType.Name + " - " + result.ReservationTables.OrderBy(e => e.TableId).First().TableId;
+                mappedResult.TableId = $"{tableType.Name}-{tableIds.Min()}";
             }
             return new Response<ReservationDto>(mappedResult);
         }

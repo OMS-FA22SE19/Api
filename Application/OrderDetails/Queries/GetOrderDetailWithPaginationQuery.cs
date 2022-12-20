@@ -45,7 +45,7 @@ namespace Application.OrderDetails.Queries
                     case OrderDetailProperty.TableId:
                         if (int.TryParse(request.SearchValue, out int tableId))
                         {
-                            filters.Add(e => e.Order.Reservation.ReservationTables.OrderBy(x => x.TableId).First().TableId == tableId);
+                            filters.Add(e => e.Order.Reservation.ReservationTables.Min(e => e.TableId) == tableId);
                         }
                         else
                         {

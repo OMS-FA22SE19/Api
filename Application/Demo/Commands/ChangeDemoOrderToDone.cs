@@ -1,18 +1,9 @@
-﻿using Application.Common.Exceptions;
-using Application.Common.Mappings;
-using Application.Demo.Responses;
+﻿using Application.Demo.Responses;
 using Application.Models;
-using Application.OrderDetails.Events;
-using Application.OrderDetails.Response;
-using Application.Orders.Response;
-using Application.Tables.Response;
 using AutoMapper;
-using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
 using MediatR;
-using System.ComponentModel.DataAnnotations;
-using System.Linq.Expressions;
 
 namespace Application.Demo.Commands
 {
@@ -52,6 +43,9 @@ namespace Application.Demo.Commands
                 {
                     OrderDemoDone.Status = OrderStatus.Paid;
                     await _unitOfWork.OrderRepository.UpdateAsync(OrderDemoDone);
+                    var reservation = await _unitOfWork.ReservationRepository.GetAsync(e => e.Id == OrderDemoDone.ReservationId);
+                    reservation.Status = ReservationStatus.Done;
+                    await _unitOfWork.ReservationRepository.UpdateAsync(reservation);
                     await _unitOfWork.CompleteAsync(cancellationToken);
                     dto.updated.Add(id);
                 }
@@ -61,7 +55,5 @@ namespace Application.Demo.Commands
                 StatusCode = System.Net.HttpStatusCode.Created
             };
         }
-
-        //private void MapToEntity(ChangeDemoOrderToDone request, OrderDetail entity) => entity.Status = request.Status;
     }
 }

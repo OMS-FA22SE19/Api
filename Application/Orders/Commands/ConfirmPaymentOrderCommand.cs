@@ -27,12 +27,14 @@ namespace Application.Orders.Commands
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IDateTime _dateTime;
 
-        public ConfirmPaymentOrderCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
+        public ConfirmPaymentOrderCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService, IDateTime dateTime)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _currentUserService = currentUserService;
+            _dateTime = dateTime;
         }
 
         public async Task<Response<OrderDto>> Handle(ConfirmPaymentOrderCommand request, CancellationToken cancellationToken)
@@ -73,7 +75,7 @@ namespace Application.Orders.Commands
                 table.Status = TableStatus.Available;
                 await _unitOfWork.TableRepository.UpdateAsync(table);
             }
-            
+
 
             MapToEntity(entity);
             var result = await _unitOfWork.OrderRepository.UpdateAsync(entity);
@@ -83,8 +85,10 @@ namespace Application.Orders.Commands
             await _unitOfWork.ReservationRepository.UpdateAsync(entity.Reservation);
             await _unitOfWork.CompleteAsync(cancellationToken);
 
-            List<Expression<Func<OrderDetail, bool>>> filters = new();
-            filters.Add(e => e.OrderId.Equals(result.Id));
+            List<Expression<Func<OrderDetail, bool>>> filters = new()
+            {
+                e => e.OrderId.Equals(result.Id)
+            };
             var detailInDatabase = await _unitOfWork.OrderDetailRepository.GetAllAsync(filters, includeProperties: $"{nameof(OrderDetail.Food)}");
             if (result is null)
             {
@@ -122,6 +126,19 @@ namespace Application.Orders.Commands
                 }
             }
             total -= entity.PrePaid;
+
+            if (!"Customer".Equals(_currentUserService.Role))
+            {
+                var billing = await _unitOfWork.BillingRepository.GetAsync(e => e.ReservationId == entity.ReservationId);
+                if (billing is not null)
+                {
+                    billing.OrderEBillingId = $"{entity.Id}-{_dateTime.Now:yyyyMMddHHmmss}";
+                    billing.OrderId = entity.Id;
+                    billing.OrderAmount = total;
+                    await _unitOfWork.BillingRepository.UpdateAsync(billing);
+                    await _unitOfWork.CompleteAsync(cancellationToken);
+                }
+            }
 
             var bill = new OrderDto()
             {

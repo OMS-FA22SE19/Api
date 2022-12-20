@@ -41,7 +41,7 @@ namespace Application.Dashboard.Queries
                 Quantity = e.OrderDetails.Count
             }).ToList();
 
-            return new Response<List<MonthlyTrendingFood>>(result);
+            return new Response<List<MonthlyTrendingFood>>(result.OrderByDescending(e => e.Quantity).ToList());
         }
     }
 }

@@ -27,7 +27,7 @@ namespace Application.Reservations.Response
         public string ReasonForCancel { get; set; }
         public string FullName { get; set; }
         public string PhoneNumber { get; set; }
-        public string tableId { get; set; }
+        public string TableId { get; set; }
         public IList<ReservationTableDto> ReservationTables { get; set; }
         public IList<OrderDetailDto> OrderDetails { get; set; }
         public UserDto User { get; set; }
