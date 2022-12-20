@@ -100,10 +100,10 @@ namespace Application.Reservations.Queries
 
             foreach (var item in result)
             {
-                if (item.StartTime < _dateTime.Now.AddMinutes(-15) && item.Status == ReservationStatus.Available)
+                if (item.Created < _dateTime.Now.AddMinutes(-15) && item.Status == ReservationStatus.Available)
                 {
                     item.Status = ReservationStatus.Cancelled;
-                    item.ReasonForCancel = "Reservation is have not Paid 15 minutes before start time";
+                    item.ReasonForCancel = "Reservation is have not Paid 15 minutes after create";
                     await _unitOfWork.ReservationRepository.UpdateAsync(item);
                     await _unitOfWork.CompleteAsync(cancellationToken);
                 }

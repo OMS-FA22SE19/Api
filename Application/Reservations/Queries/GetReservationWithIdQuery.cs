@@ -43,10 +43,10 @@ namespace Application.Reservations.Queries
             }
 
 
-            if (result.StartTime < _dateTime.Now.AddMinutes(-15) && result.Status == ReservationStatus.Available)
+            if (result.Created < _dateTime.Now.AddMinutes(-15) && result.Status == ReservationStatus.Available)
             {
                 result.Status = ReservationStatus.Cancelled;
-                result.ReasonForCancel = "Reservation is have not Paid 15 minutes before start time";
+                result.ReasonForCancel = "Reservation is have not Paid 15 minutes before create";
                 await _unitOfWork.ReservationRepository.UpdateAsync(result);
                 await _unitOfWork.CompleteAsync(cancellationToken);
             }
