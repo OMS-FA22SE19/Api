@@ -46,7 +46,7 @@ namespace Application.Orders.Queries
                     case OrderProperty.TableId:
                         if (int.TryParse(request.SearchValue, out int tableId))
                         {
-                            filters.Add(e => e.Reservation.ReservationTables.OrderBy(x => x.TableId).First().TableId == tableId);
+                            filters.Add(e => e.Reservation.ReservationTables.Min(x => x.TableId) == tableId);
                         }
                         else
                         {
@@ -135,7 +135,7 @@ namespace Application.Orders.Queries
                 var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == reservation.TableTypeId);
                 if (reservation.ReservationTables.Any())
                 {
-                    orderDto.TableId = tableType.Name + " - " + reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId;
+                    orderDto.TableId = tableType.Name + " - " + reservation.ReservationTables.Min(e => e.TableId);
                 }
 
 

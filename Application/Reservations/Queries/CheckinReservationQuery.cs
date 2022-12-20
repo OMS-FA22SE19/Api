@@ -147,6 +147,7 @@ namespace Application.Reservations.Queries
                 mappedResult.PrePaid = billing.ReservationAmount;
             }
             mappedResult.TableType = tableType.Name;
+            mappedResult.TableId = $"{tableType.Name}-{tableIds.Min()}";
             return new Response<ReservationDto>(mappedResult);
         }
     }

@@ -4,9 +4,7 @@ using Application.Models;
 using Application.OrderDetails.Response;
 using Application.Reservations.Response;
 using AutoMapper;
-using Core.Common;
 using Core.Entities;
-using Core.Enums;
 using Core.Interfaces;
 using MediatR;
 using System.ComponentModel.DataAnnotations;
@@ -53,7 +51,7 @@ namespace Application.Reservations.Queries
                     }
                 }
             }
-            
+
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == result.TableTypeId);
             if (tableType is null)
             {
@@ -87,7 +85,7 @@ namespace Application.Reservations.Queries
                             Quantity = 1,
                             Price = detail.Price,
                             Amount = detail.Price,
-                            Note= detail.Note,
+                            Note = detail.Note,
                         });
                     }
                     else
@@ -106,6 +104,10 @@ namespace Application.Reservations.Queries
             mappedResult.OrderDetails = orderDetails;
             mappedResult.PrePaid = result.NumOfSeats * tableType.ChargePerSeat * result.Quantity;
             mappedResult.TableType = tableType.Name;
+            if (mappedResult.ReservationTables?.Any() == true)
+            {
+                mappedResult.TableId = $"{tableType.Name}-{mappedResult.ReservationTables.Min(e => e.TableId)}";
+            }
             return new Response<ReservationDto>(mappedResult);
         }
     }

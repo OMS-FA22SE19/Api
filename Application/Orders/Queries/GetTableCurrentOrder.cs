@@ -47,7 +47,7 @@ namespace Application.Orders.Queries
             foreach (var order in result.ToList())
             {
                 var reservation = await _unitOfWork.ReservationRepository.GetAsync(r => r.Id == order.ReservationId, $"{nameof(Reservation.ReservationTables)}");
-                if (reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId == request.TableId)
+                if (reservation.ReservationTables.Min(e => e.TableId) == request.TableId)
                 {
                     tableOrder = order;
                 }

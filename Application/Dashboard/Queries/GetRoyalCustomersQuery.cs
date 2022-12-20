@@ -26,24 +26,38 @@ namespace Application.Dashboard.Queries
 
         public async Task<Response<List<RoyalCustomer>>> Handle(GetRoyalCustomersQuery request, CancellationToken cancellationToken)
         {
-            List<Expression<Func<ApplicationUser, bool>>> filters = new();
-            Func<IQueryable<ApplicationUser>, IOrderedQueryable<ApplicationUser>> orderBy = e => e.OrderByDescending(e => e.Reservations.Where(e => e.Status == ReservationStatus.Done));
-            string includeProperties = "";
+            List<Expression<Func<Reservation, bool>>> filters = new();
+            Func<IQueryable<Reservation>, IOrderedQueryable<Reservation>> orderBy = null;
+            string includeProperties = $"{nameof(Reservation.User)},{nameof(Reservation.Billing)}";
 
             var dateOfFirstMonth = new DateTime(_dateTime.Now.Year, 1, 1);
             filters.Add(e => !e.IsDeleted);
-            //filters.Add(e => e.Reservations.Any(e => e.StartTime >= dateOfFirstMonth && e.Status == ReservationStatus.Done));
+            filters.Add(e => e.StartTime >= dateOfFirstMonth && e.Status == ReservationStatus.Done);
+            var reservations = await _unitOfWork.ReservationRepository.GetAllAsync(filters, orderBy, includeProperties);
 
-            var customers = await _unitOfWork.UserRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, 1, 10);
-            var result = customers.Select(e => new RoyalCustomer
+            var result = new List<RoyalCustomer>();
+
+            foreach (var reservation in reservations)
             {
-                Name = e.FullName,
-                PhoneNumber = e.PhoneNumber,
-                Quantity = e.Reservations.Count,
-                Cost = 0
-            }).ToList();
+                var user = result.FirstOrDefault(e => e.PhoneNumber.Equals(reservation.PhoneNumber));
+                if (user is null)
+                {
+                    result.Add(new RoyalCustomer
+                    {
+                        Name = reservation.FullName,
+                        PhoneNumber = reservation.PhoneNumber,
+                        Cost = reservation.Billing.ReservationAmount + reservation.Billing.OrderAmount,
+                        Quantity = 1
+                    });
+                }
+                else
+                {
+                    user.Cost += reservation.Billing.ReservationAmount + reservation.Billing.OrderAmount;
+                    user.Quantity += 1;
+                }
+            }
 
-            return new Response<List<RoyalCustomer>>(result);
+            return new Response<List<RoyalCustomer>>(result.OrderBy(e => e.Cost).ToList());
         }
     }
 }

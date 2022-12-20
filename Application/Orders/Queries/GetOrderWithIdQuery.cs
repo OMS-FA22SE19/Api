@@ -59,7 +59,7 @@ namespace Application.Orders.Queries
             var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == reservation.TableTypeId);
             if (reservation.ReservationTables.Any())
             {
-                mappedResult.TableId = tableType.Name + " - " + reservation.ReservationTables.OrderBy(e => e.TableId).First().TableId;
+                mappedResult.TableId = tableType.Name + " - " + reservation.ReservationTables.Min(e => e.TableId);
             }
 
             List<OrderDetailDto> orderDetails = new();

@@ -26,14 +26,14 @@ namespace Application.Dashboard.Queries
 
         public async Task<Response<FoodStatistic>> Handle(GetFoodStatisticQuery request, CancellationToken cancellationToken)
         {
-            List<Expression<Func<Food, bool>>> filters = new();
-            filters.Add(e => !e.IsDeleted);
+            List<Expression<Func<Food, bool>>> filters = new()
+            {
+                e => !e.IsDeleted
+            };
             var foods = await _unitOfWork.FoodRepository.GetAllAsync(filters);
-
             var dateOfLastMonth = new DateTime(_dateTime.Now.Year, _dateTime.Now.Month - 1, DateTime.DaysInMonth(_dateTime.Now.Year, _dateTime.Now.Month - 1));
-
             var lastMonthFoods = foods.Where(e => e.Created <= dateOfLastMonth).ToList();
-            var increase = ((foods.Count - lastMonthFoods.Count) / (lastMonthFoods.Any() ? lastMonthFoods.Count : 1)).ToString("0.00%");
+            var increase = (lastMonthFoods.Count / ((foods.Count - lastMonthFoods.Count) > 0 ? (foods.Count - lastMonthFoods.Count) : 1)).ToString("0.00%");
             var response = new FoodStatistic { Food = foods.Count, Increase = increase };
 
             return await Task.FromResult(new Response<FoodStatistic>(response));

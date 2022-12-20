@@ -140,6 +140,10 @@ namespace Application.Reservations.Queries
                 item.OrderDetails = orderDetails;
                 item.PrePaid = item.NumOfSeats * tableType.ChargePerSeat * item.Quantity;
                 item.TableType = tableType.Name;
+                if (item.ReservationTables?.Any() == true)
+                {
+                    item.TableId = $"{tableType.Name}-{item.ReservationTables.Min(e => e.TableId)}";
+                }
             }
             return new Response<PaginatedList<ReservationDto>>(mappedResult);
         }
