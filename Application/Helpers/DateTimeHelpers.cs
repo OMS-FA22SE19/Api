@@ -34,7 +34,7 @@ namespace Application.Helpers
 
         public static (bool isValid, string errorMessage) ValidateStartEndTime(DateTime startTime, DateTime endTime, int quantity, List<Reservation> reservations, int maxTables, List<AdminSetting> settings, bool isDefaultCustomer = true)
         {
-            var busyTimes = GetBusyDateOfTable(quantity, reservations, maxTables, settings);
+            var busyTimes = GetBusyDateOfTable(quantity, reservations, maxTables, settings, isDefaultCustomer);
 
             return busyTimes.All(e => startTime >= e.EndTime || endTime <= e.StartTime) ? (true, string.Empty) : (false, "This reservation is unavailable! Please try again!");
         }
