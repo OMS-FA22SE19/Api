@@ -123,7 +123,7 @@ namespace Application.Reservations.Queries
             mappedResult.TableType = tableType.Name;
             if (mappedResult.ReservationTables?.Any() == true)
             {
-                mappedResult.TableId = $"{tableType.Name}-{mappedResult.ReservationTables.Min(e => e.TableId)}";
+                mappedResult.TableId = $"{tableType.Name} - {mappedResult.ReservationTables.Min(e => e.TableId)}";
             }
             return new Response<ReservationDto>(mappedResult);
         }
