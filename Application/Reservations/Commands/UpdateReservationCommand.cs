@@ -108,8 +108,8 @@ namespace Application.Reservations.Commands
 
             var reservations = await _unitOfWork.ReservationRepository.GetAllReservationWithDate(request.StartTime.Date, request.TableTypeId, request.NumOfSeats);
             var tables = await _unitOfWork.TableRepository.GetTableOnNumOfSeatAndType(request.NumOfSeats, request.TableTypeId);
-
-            (isValid, errorMessage) = DateTimeHelpers.ValidateStartEndTime(request.StartTime, request.EndTime, request.Quantity, reservations, tables.Count, adminSettings);
+            bool isDefaultCustomer = (_currentUserService?.Role?.Equals("Customer") != true) || _currentUserService?.UserName?.Equals("DefaultCustomer") == true;
+            (isValid, errorMessage) = DateTimeHelpers.ValidateStartEndTime(request.StartTime, request.EndTime, request.Quantity, reservations, tables.Count, adminSettings, isDefaultCustomer);
             if (!isValid)
             {
                 return new Response<ReservationDto>(errorMessage)

@@ -36,7 +36,7 @@ namespace Application.Helpers
         {
             var busyTimes = GetBusyDateOfTable(quantity, reservations, maxTables, settings);
 
-            return busyTimes.All(e => startTime > e.EndTime || endTime < e.StartTime) ? (true, string.Empty) : (false, "This reservation is unavailable! Please try again!");
+            return busyTimes.All(e => startTime >= e.EndTime || endTime <= e.StartTime) ? (true, string.Empty) : (false, "This reservation is unavailable! Please try again!");
         }
 
         public static List<BusyTimeDto> GetBusyDateOfTable(int quantity, List<Reservation> reservations, int maxTables, List<AdminSetting> settings, bool isDefaultCustomer = true)
