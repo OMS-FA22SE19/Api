@@ -2,6 +2,7 @@
 using Application.Common.Interfaces;
 using Application.Common.Security;
 using Application.Models;
+using Application.Tables.Response;
 using Application.Users.Commands;
 using Application.Users.Queries;
 using Application.Users.Response;
@@ -344,7 +345,7 @@ namespace Api.Controllers.V1
         ///
         /// </remarks>
         /// <param name="id">The id of updated User</param>
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         [Consumes("application/json")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -399,7 +400,7 @@ namespace Api.Controllers.V1
         ///
         /// </remarks>
         /// <param name="id">The id of deleted User</param>
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -422,6 +423,35 @@ namespace Api.Controllers.V1
             catch (Exception ex)
             {
                 var response = new Response<UserDto>(ex.Message)
+                {
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
+                return StatusCode((int)response.StatusCode, response);
+            }
+        }
+
+        [HttpPut("{id}/Recover")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> RestoreAsync(string id)
+        {
+            try
+            {
+                var command = new RecoverUserCommand
+                {
+                    Id = id
+                };
+                var result = await Mediator.Send(command);
+                if (result.StatusCode == HttpStatusCode.NoContent)
+                {
+                    return NoContent();
+                }
+                return StatusCode((int)result.StatusCode, result);
+            }
+            catch (Exception ex)
+            {
+                var response = new Response<TableDto>(ex.Message)
                 {
                     StatusCode = HttpStatusCode.InternalServerError
                 };

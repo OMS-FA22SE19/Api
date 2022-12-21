@@ -1,4 +1,6 @@
-﻿using Application.Models;
+﻿using Application.Common.Exceptions;
+using Application.Common.Interfaces;
+using Application.Models;
 using Application.Users.Response;
 using AutoMapper;
 using Core.Interfaces;
@@ -17,11 +19,13 @@ namespace Application.Users.Commands
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly ICurrentUserService _currentUserService;
 
-        public DeleteUserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper)
+        public DeleteUserCommandHandler(IUnitOfWork unitOfWork, IMapper mapper, ICurrentUserService currentUserService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _currentUserService = currentUserService;
         }
 
         public async Task<Response<UserDto>> Handle(DeleteUserCommand request, CancellationToken cancellationToken)
@@ -30,6 +34,10 @@ namespace Application.Users.Commands
             if (user is null)
             {
                 throw new NullReferenceException("Not found user");
+            }
+            if (user.Id.Equals(_currentUserService?.UserId))
+            {
+                throw new BadRequestException("You cannot disable yourself");
             }
             var result = await _unitOfWork.UserRepository.DeleteAsync(user);
             await _unitOfWork.CompleteAsync(cancellationToken);

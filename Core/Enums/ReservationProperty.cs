@@ -6,6 +6,7 @@
         PhoneNumber,
         NumOfPeople,
         TableType,
-        NumOfSeats
+        NumOfSeats,
+        Date,
     }
 }

@@ -5,7 +5,6 @@ using Application.OrderDetails.Response;
 using Application.Reservations.Response;
 using Application.Users.Response;
 using AutoMapper;
-using Core.Common;
 using Core.Entities;
 using Core.Enums;
 using Core.Interfaces;
@@ -14,13 +13,14 @@ using System.Linq.Expressions;
 
 namespace Application.Reservations.Queries
 {
-    public class GetReservationWithPaginationQuery : PaginationRequest, IRequest<Response<PaginatedList<ReservationDto>>>
+    public class GetReservationWithPaginationQuery : PaginationRequest, IRequest<Response<List<ReservationDto>>>
     {
         public ReservationProperty SearchBy { get; set; }
         public ReservationStatus? Status { get; init; }
+        public ReservationProperty? OrderBy { get; set; }
     }
 
-    public class GetReservationWithPaginationQueryHandler : IRequestHandler<GetReservationWithPaginationQuery, Response<PaginatedList<ReservationDto>>>
+    public class GetReservationWithPaginationQueryHandler : IRequestHandler<GetReservationWithPaginationQuery, Response<List<ReservationDto>>>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
@@ -35,7 +35,7 @@ namespace Application.Reservations.Queries
             _dateTime = dateTime;
         }
 
-        public async Task<Response<PaginatedList<ReservationDto>>> Handle(GetReservationWithPaginationQuery request, CancellationToken cancellationToken)
+        public async Task<Response<List<ReservationDto>>> Handle(GetReservationWithPaginationQuery request, CancellationToken cancellationToken)
         {
             List<Expression<Func<Reservation, bool>>> filters = new();
             Func<IQueryable<Reservation>, IOrderedQueryable<Reservation>> orderBy = null;
@@ -70,8 +70,10 @@ namespace Application.Reservations.Queries
                         }
                         break;
                     case ReservationProperty.TableType:
-                        List<Expression<Func<TableType, bool>>> tableFilters = new();
-                        tableFilters.Add(e => e.Name.Contains(request.SearchValue) && !e.IsDeleted);
+                        List<Expression<Func<TableType, bool>>> tableFilters = new()
+                        {
+                            e => e.Name.Contains(request.SearchValue) && !e.IsDeleted
+                        };
                         var tableTypes = await _unitOfWork.TableTypeRepository.GetAllAsync(tableFilters, null, null);
                         var tableTypeIds = tableTypes.Select(e => e.Id).ToList();
                         filters.Add(e => tableTypeIds.Contains(e.TableTypeId));
@@ -80,6 +82,16 @@ namespace Application.Reservations.Queries
                         if (int.TryParse(request.SearchValue, out var numOfSeats))
                         {
                             filters.Add(e => e.NumOfSeats == numOfSeats);
+                        }
+                        else
+                        {
+                            filters.Add(e => false);
+                        }
+                        break;
+                    case ReservationProperty.Date:
+                        if (DateTime.TryParse(request.SearchValue, out var dateTime))
+                        {
+                            filters.Add(e => (e.StartTime <= dateTime && e.EndTime >= dateTime) || e.StartTime.Date == dateTime.Date);
                         }
                         else
                         {
@@ -95,7 +107,53 @@ namespace Application.Reservations.Queries
                 filters.Add(e => e.Status == request.Status);
             }
 
-            var result = await _unitOfWork.ReservationRepository.GetPaginatedListAsync(filters, orderBy, includeProperties, request.PageIndex, request.PageSize);
+            switch (request.OrderBy)
+            {
+                case ReservationProperty.FullName:
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.FullName);
+                    }
+                    orderBy = e => e.OrderBy(x => x.FullName);
+                    break;
+                case ReservationProperty.PhoneNumber:
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.PhoneNumber);
+                    }
+                    orderBy = e => e.OrderBy(x => x.PhoneNumber);
+                    break;
+                case ReservationProperty.NumOfPeople:
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.NumOfPeople);
+                    }
+                    orderBy = e => e.OrderBy(x => x.NumOfPeople);
+                    break;
+                case ReservationProperty.TableType:
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.TableTypeId);
+                    }
+                    orderBy = e => e.OrderBy(x => x.TableTypeId);
+                    break;
+                case ReservationProperty.NumOfSeats:
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.NumOfSeats);
+                    }
+                    orderBy = e => e.OrderBy(x => x.NumOfSeats);
+                    break;
+                default:
+                    if (request.IsDescending)
+                    {
+                        orderBy = e => e.OrderByDescending(x => x.StartTime);
+                    }
+                    orderBy = e => e.OrderBy(x => x.StartTime);
+                    break;
+            }
+
+            var result = await _unitOfWork.ReservationRepository.GetAllAsync(filters, orderBy, includeProperties);
 
             foreach (var item in result)
             {
@@ -109,11 +167,14 @@ namespace Application.Reservations.Queries
                         await _unitOfWork.ReservationRepository.UpdateAsync(item);
                         await _unitOfWork.CompleteAsync(cancellationToken);
                     }
+                    if (request.Status == ReservationStatus.Available)
+                    {
+                        result.Remove(item);
+                    }
                 }
             }
 
-
-            var mappedResult = _mapper.Map<PaginatedList<Reservation>, PaginatedList<ReservationDto>>(result);
+            var mappedResult = _mapper.Map<List<Reservation>, List<ReservationDto>>(result);
             foreach (var item in mappedResult)
             {
                 var tableType = await _unitOfWork.TableTypeRepository.GetAsync(e => e.Id == item.TableTypeId);
@@ -170,7 +231,7 @@ namespace Application.Reservations.Queries
                     item.TableId = $"{tableType.Name}-{item.ReservationTables.Min(e => e.TableId)}";
                 }
             }
-            return new Response<PaginatedList<ReservationDto>>(mappedResult);
+            return new Response<List<ReservationDto>>(mappedResult);
         }
     }
 }
