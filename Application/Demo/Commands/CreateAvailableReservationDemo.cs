@@ -47,6 +47,8 @@ namespace Application.Demo.Commands
                 startTime = _dateTime.Now.Date.AddHours(time);
             }
 
+            List<string> names = new List<string> {"An","Bảo","Chi","Diệp","Minh","Huy","Tân","Tài","Quân","Vy","Hiếu","Tín","Nhi","Hoàng","Vũ","Linh"};
+
             var users = await _userManager.GetUsersInRoleAsync("Customer");
 
             var tables = await _unitOfWork.TableRepository.GetAllAsync();
@@ -60,10 +62,19 @@ namespace Application.Demo.Commands
             var tableForAvailable = tables.ToList();
             for (int i = 0; i < request.NumOfAvailableReservation; i++)
             {
+                var nameRandom = rnd.Next(names.Count);
+                var name = names[nameRandom];
                 if (tableForAvailable.Count == 0)
                 {
                     ReservationDemoDTO.Error.Add($"Can not add {request.NumOfAvailableReservation - i} check in Reservation because there are not enough available table");
                     break;
+                }
+
+                var phone = "093";
+                for(int nr = 0; nr < 7; nr++)
+                {
+                    var randomNumber = rnd.Next(10);
+                    phone += randomNumber.ToString();
                 }
 
                 int r = rnd.Next(tableForAvailable.Count());
@@ -79,8 +90,8 @@ namespace Application.Demo.Commands
                     StartTime = startTime,
                     EndTime = startTime.AddHours(1), //add day +1
                     Status = ReservationStatus.Available,
-                    FullName = "Demo",
-                    PhoneNumber = "Demo",
+                    FullName = name,
+                    PhoneNumber = phone,
                     ReservationTables = new List<ReservationTable>()
                 };
 
