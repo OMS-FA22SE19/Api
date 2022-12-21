@@ -228,7 +228,7 @@ namespace Application.Reservations.Queries
                 }
                 if (item.ReservationTables?.Any() == true)
                 {
-                    item.TableId = $"{tableType.Name}-{item.ReservationTables.Min(e => e.TableId)}";
+                    item.TableId = $"{tableType.Name} - {item.ReservationTables.Min(e => e.TableId)}";
                 }
             }
             return new Response<List<ReservationDto>>(mappedResult);

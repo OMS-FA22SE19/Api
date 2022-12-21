@@ -35,14 +35,14 @@ namespace Application.Dashboard.Queries
                 e => e.Status != ReservationStatus.Cancelled
             };
             var reservations = await _unitOfWork.ReservationRepository.GetAllAsync(reservationFilters);
-            var lastMonthReservation = reservations.Count(e => e.Created > dateOfLastMonth);
+            var lastMonthReservation = reservations.Count(e => e.StartTime.Date > dateOfLastMonth);
 
             List<Expression<Func<Order, bool>>> orderFilters = new()
             {
                 e => !e.IsDeleted,
             };
             var orders = await _unitOfWork.OrderRepository.GetAllAsync(orderFilters);
-            var lastMonthOrders = orders.Count(e => e.Created > dateOfLastMonth);
+            var lastMonthOrders = orders.Count(e => e.Date.Date > dateOfLastMonth);
             var increase = (lastMonthOrders / ((orders.Count - lastMonthOrders) > 0 ? (orders.Count - lastMonthOrders) : 1)).ToString("0.00%");
             var response = new ActiveOrdersReservations { Reservations = reservations.Count, Orders = orders.Count, Increase = increase };
 
