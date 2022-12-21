@@ -49,9 +49,9 @@ namespace Application.Demo.Commands
 
             List<string> names = new List<string> {"An","Bảo","Chi","Diệp","Minh","Huy","Tân","Tài","Quân","Vy","Hiếu","Tín","Nhi","Hoàng","Vũ","Linh"};
 
-            var users = await _userManager.GetUsersInRoleAsync("Customer");
-
+            //var users = await _userManager.GetUsersInRoleAsync("Customer");
             var users = _userManager.Users.Where(u => !u.UserName.Equals("administrator@localhost") && !u.UserName.Equals("woodiequan")).ToList();
+
             var tables = await _unitOfWork.TableRepository.GetAllAsync();
 
             var ReservationDemoDTO = new ReservationDemoDto()
